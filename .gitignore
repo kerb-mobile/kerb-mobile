@@ -1,0 +1,39 @@
+# Project-local Node toolchain (download, not committed)
+.toolchain/
+
+node_modules/
+
+# Capacitor build output copied into the native projects
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# Android build output / local SDK paths
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+
+# iOS build output and local signing state
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+ios/DerivedData/
+ios/build/
+*.ipa
+*.xcarchive
+
+# macOS
+.DS_Store
+
+# Freebuff workspace metadata (not part of the project)
+.freebuff/
+
+# Local screenshot captures before they are resized for the stores
+store/shots/

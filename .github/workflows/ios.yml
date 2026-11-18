@@ -1,0 +1,44 @@
+name: iOS build
+
+# Compiles the Kerb iOS app with Xcode 26 on a standard GitHub-hosted macOS
+# runner, unsigned, for the simulator. No Apple Developer account, certificate or
+# secret is needed: this proves the Swift and the Capacitor/SPM graph build.
+# Runs on every branch and every pull request.
+
+on: [push, pull_request, workflow_dispatch]
+
+# Superseded runs on the same ref are cancelled, which keeps the free allowance
+# from being spent twice on the same commit.
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: Compile iOS (Xcode 26, unsigned)
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx cap sync ios
+
+      - run: xcodebuild -version
+
+      - name: Build for simulator
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build

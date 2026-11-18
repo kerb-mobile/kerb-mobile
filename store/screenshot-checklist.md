@@ -1,0 +1,85 @@
+# Kerb — screenshot checklist
+
+Screenshots must be captured from the real app, on a real device or simulator,
+signed in with demo data. Do not use the website in a desktop browser, and do not
+mock up screens.
+
+## Apple App Store
+
+**Required:** at least one screenshot for **iPhone with Dynamic Island (medium
+display)** — the 6.3-inch class (iPhone 16 Pro / 17 / 17 Pro).
+
+| Item | Value |
+|---|---|
+| Portrait size | `1206 × 2622` or `1179 × 2556` px |
+| Landscape size | same numbers reversed |
+| Count | 1–10 per size |
+| Format | `.png` / `.jpg` / `.jpeg`, **no transparency** |
+| Larger (optional) | `1320 × 2868`, `1290 × 2796`, `1260 × 2736` |
+
+**iPad:** the project currently targets iPhone **and** iPad
+(`TARGETED_DEVICE_FAMILY = "1,2"`), so App Store Connect will also require one
+13-inch iPad screenshot (`2064 × 2752` or `2048 × 2732`). Two options:
+
+- Set `TARGETED_DEVICE_FAMILY = 1` in both build configurations (iphoneos-only,
+  which suits a phone-shaped rideshare app), or
+- Add one iPad screenshot set.
+
+Shortcuts are not set on the app, so no shortcut screenshots are needed.
+
+## Google Play
+
+| Item | Value |
+|---|---|
+| Phone screenshots | 2–8 required to publish |
+| Sizes | each side 320–3840 px, long side ≤ 2× short side |
+| Recommended | `1080 × 1920` (9:16) — also qualifies for Play's larger promo layouts with 4+ |
+| Format | JPEG or 24-bit PNG, **no alpha** |
+| Feature graphic | `1024 × 500`, JPEG/24-bit PNG, no alpha — **required** |
+| Listing icon | `512 × 512` 32-bit PNG ≤ 1024 KB — already at `assets/play-store-icon-512.png` |
+
+## Which screens to shoot (in this order)
+
+1. **Fare before you book** — pickup, destination and the full fare breakdown. This is the product's promise; lead with it.
+2. **Live trip** — driver approaching / trip in progress on the map.
+3. **Sign-in and account** — shows it is a real account app, not a brochure.
+4. **Driver: incoming offer** — the driver side that riders never see.
+5. **Driver: trip card with the Navigate sheet open** — Apple Maps / Google Maps / Waze / Kerb map. This is the clearest native feature in the app.
+6. **Driver: earnings** — 75% keep, state-line amounts.
+
+Use a demo rider named something neutral ("Demo Rider"), not a real customer.
+Keep prices plausible but not absurd. If grocery is still a waitlist, do not
+screenshot it as if it were live.
+
+## Capture
+
+**iPhone** (device or simulator):
+- Device: press Side + Volume Up; files land in Photos, AirDrop them to the Mac.
+- Simulator: `xcrun simctl io booted screenshot shot.png` (needs Xcode — not on
+  this Mac, so use the CI Mac or your phone).
+
+**Android** (this machine already has `adb` in the project toolchain):
+```bash
+.toolchain/sdk/platform-tools/adb exec-out screencap -p > store/shots/01-fare.png
+```
+Then resize to 1080×1920 without alpha, e.g.:
+```bash
+node -e "require('sharp')('store/shots/01-fare.png').resize(1080,1920,{fit:'cover'}).flatten({background:'#0B0B0C'}).png().toFile('store/shots/01-fare-play.png')"
+```
+
+## Rules that get submissions rejected
+
+- No other platform's UI or branding in screenshots (no Android status bar in iOS shots, and vice versa).
+- No "download now", "coming soon", price promotions, or App Store/Play badges.
+- No misleading content: everything shown must exist in the build you submit, in the same state.
+- Status bar tidy: full signal and battery, and on iOS 9:41 is conventional.
+- No real personal data, real phone numbers or real card numbers — Apple rejects these and it is a privacy problem.
+- Apple: no transparency in the PNG, and do not include the device frame as part of the required size.
+- Google: feature graphic must not be a screenshot with text over the icon.
+
+## Blocking items before you submit
+
+1. **In-app account deletion.** Apple guideline 5.1.1(v) requires an app that lets people create an account to let them delete it in the app. Confirm `kerbgo.com` has a delete-account route reachable from the app; if not, this must be added (a small addition to the site, or a native request flow).
+2. **Demo accounts** — one rider, one approved driver with a vehicle, both active at review time.
+3. **Driver destination attribute** — `data-kerb-destination` on the driver trip card, otherwise the Navigate button reports that it cannot read the destination (it will not guess).
+4. **iPad decision** — see the Apple section above.
