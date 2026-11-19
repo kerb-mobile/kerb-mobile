@@ -209,7 +209,7 @@ demo account and recapture shots 1 and 2.
 | Google Play | 512×512 listing icon | `assets/play-store-icon-512.png` |
 | Both | Launch splash | `ios/App/App/Assets.xcassets/Splash.imageset/`, `android/app/src/main/res/drawable*/splash.png` |
 | Google Play | 6 phone screenshots (1080 wide, no alpha) | `store/screenshots/01`–`06` (see above) |
-| Google Play | Feature graphic 1024 × 500 | `store/graphics/feature-graphic-1024x500.png` — icon, wordmark and tagline on the brand gradient; 24-bit, no alpha. Regenerate with `.toolchain/feature-graphic.mjs` |
+| Google Play | Feature graphic 1024 × 500 | `store/graphics/feature-graphic-1024x500.png` — icon, wordmark and tagline on the brand gradient; 24-bit, no alpha. Regenerate with `tools/feature-graphic.mjs` |
 
 ## Before you press submit
 
