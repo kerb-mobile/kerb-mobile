@@ -98,7 +98,9 @@ class KerbBridgeViewController: CAPBridgeViewController {
 
         NSLayoutConstraint.activate([
             navigateButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            navigateButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            // The shell patch pins a tab bar along the bottom of the page, so the
+            // pill has to float above it instead of sitting on the Account tab.
+            navigateButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -72)
         ])
     }
 

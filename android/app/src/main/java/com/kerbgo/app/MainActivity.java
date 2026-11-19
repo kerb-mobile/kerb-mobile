@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -150,11 +152,22 @@ public class MainActivity extends BridgeActivity {
         navigateButton.setVisibility(View.GONE);
         navigateButton.setOnClickListener(v -> showNavigationChooser());
 
+        // The shell patch pins a tab bar along the bottom of the page, so the
+        // pill has to float above it instead of sitting on the Account tab.
+        int insetBottom = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsets windowInsets = getWindow().getDecorView().getRootWindowInsets();
+            if (windowInsets != null) {
+                insetBottom = windowInsets.getInsets(WindowInsets.Type.systemBars()).bottom;
+            }
+        }
+        int tabBarClearance = Math.round(56 * density) + insetBottom;
+
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.END | Gravity.BOTTOM);
-        params.setMargins(0, 0, margin, margin);
+        params.setMargins(0, 0, margin, margin + tabBarClearance);
 
         if (root instanceof FrameLayout) {
             root.addView(navigateButton, params);
