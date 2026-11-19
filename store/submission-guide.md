@@ -37,21 +37,44 @@ change to `www/`. A merchant console shipped as a plain wrapper would be the
 worst case of all: a dashboard in a WebView is the weakest possible 4.2 argument,
 and Play scrutinises business-only apps.
 
-**Merchant app — later, with its own listing.** Shops accepting orders and
-marking them ready is alert-driven work, and on iOS a WebView cannot alert while
-suspended without push, so that app is only worth building with native
-APNs/FCM notifications. It is not part of this submission: grocery ordering is
-still a waitlist on the site, and `kerbgo.com/retailer` is what a shop uses in a
-phone browser today. What that portal actually does, checked 19 Nov 2026 with a
-test shopfront: an order simply arrives — there is no accept or decline step — and
-the only action on it is "mark ready for pickup", which the courier sees on
-arrival. The portal also has a Store & items tab (open/closed, prep time, address,
-item form), but both the item and the address writes were returning `503 Upstream
-unavailable`, so the order loop has never been seen end to end — no order was
-placed, and mark-ready is untested against a live order.
+**Merchant app — later, with its own listing.** What a shop needs from an app is
+the loud alert, not the dashboard. A new order has to reach someone on the floor
+the moment it arrives, or the food is not started and the prep clock is already
+running. That is the app's reason to exist, and no phone browser can do it: a tab
+gets no notification once it is closed or the phone is locked, and on iOS a
+suspended WebView cannot alert at all. So this app is built around native
+APNs/FCM rather than wrapped around the portal, and the alert is the part to get
+right first.
+
+The alert to design against:
+
+- Fires on the order landing, within seconds, with the app closed and the phone
+  locked — not just while the Orders tab is open.
+- Audible at full volume with its own loud sound, not the default notification
+  chime, and repeats or escalates until someone deals with it.
+- Gets through Do Not Disturb and silent mode where the platform allows it. On
+  iOS that means Apple's critical-alerts entitlement, which is requested and
+  granted separately — apply early, it is not automatic.
+- Leaves a visible trace either way: lock-screen banner and an unread badge, so a
+  missed sound is still an unread order.
+- Opens straight onto the new order, with its prep time and items, ready to mark
+  ready for pickup.
+
+The portal is what a shop uses in a phone browser today, and it does not fill
+this gap: an order arrives silently in the Orders tab, so it is seen only if
+someone happens to be looking. Checked 19 Nov 2026 with a test shopfront: an order
+simply arrives — there is no accept or decline step — and the only action on it is
+"mark ready for pickup", which the courier sees on arrival. The portal also has a
+Store & items tab (open/closed, prep time, address, item form), but both the item
+and the address writes were returning `503 Upstream unavailable`, so the order loop
+has never been seen end to end — no order was placed, and mark-ready is untested
+against a live order.
+
+It is not part of this submission: grocery ordering is still a waitlist on the
+site, and a merchant app without the alert would only be a wrapper.
 **Trigger for the merchant app:** grocery live in at least one zone with shops
-working the real order loop from the web portal — then submit it with native push
-(new order, with sound), one-tap accept/decline and ready, its own demo merchant
+working the real order loop from the web portal — then submit it with the loud
+new-order alert above, one-tap accept/decline and ready, its own demo merchant
 account and its own review notes, after the rider app is approved.
 
 **Trigger for a separate driver app:** after a first approval, and only if
