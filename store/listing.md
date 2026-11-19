@@ -2,9 +2,13 @@
 
 Copy for both stores. Fields marked **[you]** need your details before submission.
 Character limits are the stores' own; the copy below is inside them.
-Phone screenshots are captured and filed in `store/screenshots/`. The Screenshots
-section at the end lists them, the shots that still need to be taken, and the one
-asset (the Play feature graphic) that does not exist yet.
+Phone screenshots are captured and filed in `store/screenshots/`, and the Play
+feature graphic is in `store/graphics/`. The Screenshots section at the end lists
+them and the shots that still need to be taken.
+
+Submitting is documented separately: `store/submission-guide.md` (console fields,
+build and upload commands), `store/compliance.md` (privacy, data safety, ratings,
+rejection risks) and `store/review-notes.md` (paste-ready reviewer text).
 
 Bundle / package ID: `com.kerbgo.app` · Version 1.0 (build 1) · Platform: iPhone, Android phone.
 
@@ -194,7 +198,7 @@ demo account and recapture shots 1 and 2.
 |---|---|
 | Live trip — driver approaching / trip in progress | Needs a real booking accepted by a driver; no trip was active during capture. |
 | Driver — incoming offer | Needs dispatch to send an offer during the 60-second window; can only be caught by booking a ride while the driver is online in another session. |
-| The full Apple set | Requires an iPhone or an iOS simulator. This Mac has no Xcode, so no iOS screenshot has been taken. Sizes: `1206 × 2622` or `1179 × 2556` (or `1320 × 2868` / `1290 × 2796` / `1260 × 2736`). |
+| The full Apple set | The app now runs and is screenshotted on an iPhone simulator in CI (`.github/workflows/ios-simulator.yml`), but the job cannot sign in, so its only capture is the landing page at 1206 × 2622. The five app screens still need a session: re-run that job with a demo account signed in, or capture on a real iPhone. Sizes: `1206 × 2622` or `1179 × 2556` (or `1320 × 2868` / `1290 × 2796` / `1260 × 2736`). |
 | 13-inch iPad set | Only if `TARGETED_DEVICE_FAMILY` stays `"1,2"`; otherwise set it to `1` (see the checklist). |
 
 ## Assets already generated
@@ -205,15 +209,15 @@ demo account and recapture shots 1 and 2.
 | Google Play | 512×512 listing icon | `assets/play-store-icon-512.png` |
 | Both | Launch splash | `ios/App/App/Assets.xcassets/Splash.imageset/`, `android/app/src/main/res/drawable*/splash.png` |
 | Google Play | 6 phone screenshots (1080 wide, no alpha) | `store/screenshots/01`–`06` (see above) |
-| Google Play | Feature graphic 1024 × 500 | **not created** — required before publishing; must not be a screenshot with text over the icon |
+| Google Play | Feature graphic 1024 × 500 | `store/graphics/feature-graphic-1024x500.png` — icon, wordmark and tagline on the brand gradient; 24-bit, no alpha. Regenerate with `.toolchain/feature-graphic.mjs` |
 
 ## Before you press submit
 
 1. Fill in the **[you]** fields: reviewer accounts (in the consoles, not here),
    support contact name/phone/email.
-2. Capture the Apple screenshot set on an iPhone (the six scenes above are the
-   intended order; the first five map straight onto iOS).
-3. Make the Play feature graphic, 1024 × 500, no alpha.
+2. Capture the Apple screenshot set on an iPhone or a signed-in simulator (the six
+   scenes above are the intended order; the first five map straight onto iOS).
+3. Set `TARGETED_DEVICE_FAMILY = 1` so no iPad set is required.
 4. Close the four blocking items in `store/screenshot-checklist.md`: in-app account
    deletion, live demo accounts, `data-kerb-destination` on the driver trip card,
    and the iPad decision.

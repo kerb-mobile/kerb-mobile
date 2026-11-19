@@ -27,6 +27,11 @@ ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
 ios/DerivedData/
 ios/build/
 *.ipa
+
+# Android upload key: kept out of the repository on purpose
+keystore.properties
+*.jks
+*.keystore
 *.xcarchive
 
 # macOS
