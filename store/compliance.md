@@ -57,10 +57,11 @@ domains. It is bundled in the app target.
    §1; that change closes this risk with no app release.
 2. **4.2 minimum functionality.** A WebView over a website is the classic 4.2
    rejection. What already helps: a native Navigate control with an action sheet,
-   native hand-off to Apple/Google/Waze maps, device location, a native tab bar
-   and a native camera path for driver documents. What would help more, in order
-   of effort: push notifications for offers, background location while online, an
-   offline/reconnect state, and the native review prompt. State the native
+   native hand-off to Apple/Google/Waze maps, device location, a native tab bar,
+   a native camera path for driver documents, and a startup screen that keeps
+   retrying the site on its own instead of parking on "you are offline". What
+   would help more, in order of effort: push notifications for offers, background
+   location while online, and the native review prompt. State the native
    integrations explicitly in review notes — reviewers often miss them.
 3. **The landing page contradicts the app.** The first screen inside the app
    reads "pay by card — no app-store download". A reviewer opening the app to
