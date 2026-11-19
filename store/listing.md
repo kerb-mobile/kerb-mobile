@@ -199,7 +199,7 @@ demo account and recapture shots 1 and 2.
 | Live trip — driver approaching / trip in progress | Needs a real booking accepted by a driver; no trip was active during capture. |
 | Driver — incoming offer | Needs dispatch to send an offer during the 60-second window; can only be caught by booking a ride while the driver is online in another session. |
 | The full Apple set | The app now runs and is screenshotted on an iPhone simulator in CI (`.github/workflows/ios-simulator.yml`), but the job cannot sign in, so its only capture is the landing page at 1206 × 2622. The five app screens still need a session: re-run that job with a demo account signed in, or capture on a real iPhone. Sizes: `1206 × 2622` or `1179 × 2556` (or `1320 × 2868` / `1290 × 2796` / `1260 × 2736`). |
-| 13-inch iPad set | Only if `TARGETED_DEVICE_FAMILY` stays `"1,2"`; otherwise set it to `1` (see the checklist). |
+| 13-inch iPad set | Not required: `TARGETED_DEVICE_FAMILY = 1` in both build configurations. |
 
 ## Assets already generated
 
@@ -217,7 +217,8 @@ demo account and recapture shots 1 and 2.
    support contact name/phone/email.
 2. Capture the Apple screenshot set on an iPhone or a signed-in simulator (the six
    scenes above are the intended order; the first five map straight onto iOS).
-3. Set `TARGETED_DEVICE_FAMILY = 1` so no iPad set is required.
+3. Confirm the iPhone-only setting (`TARGETED_DEVICE_FAMILY = 1`, already in the
+   project) so no iPad set is required.
 4. Close the four blocking items in `store/screenshot-checklist.md`: in-app account
    deletion, live demo accounts, `data-kerb-destination` on the driver trip card,
    and the iPad decision.

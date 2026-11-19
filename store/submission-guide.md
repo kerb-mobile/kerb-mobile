@@ -3,9 +3,10 @@
 Everything needed to create the two app records, build the two uploads and answer
 the review questions. Written to be followed top to bottom on submission day.
 
-**Status tonight:** the Android upload can be produced as soon as an upload key
-exists. The iOS upload needs a Mac with Xcode and the Apple Developer team — this
-machine has neither. Two policy gaps (account deletion, "no app-store download"
+**Status 19 Nov 2026:** the Android upload exists and is signed —
+`android/app/build/outputs/bundle/release/app-release.aab`, signed with the
+upload key created that day. The iOS upload needs a Mac with Xcode and the Apple
+Developer team — this machine has neither. Two policy gaps (account deletion, "no app-store download"
 copy on the landing page) are real rejection risks and are described in
 `compliance.md`.
 
@@ -26,7 +27,7 @@ Those two documents plus this one are the whole submission kit:
 | Feature graphic (Play) | `store/graphics/feature-graphic-1024x500.png` | 1024×500, 24-bit, no alpha — drafted tonight, review the wording |
 | Play phone screenshots | `store/screenshots/01`–`06` | 6 shots from the Android build — ready |
 | Apple 6.3" screenshots | — | **missing.** One real 1206×2622 iOS capture of the landing page exists as `.toolchain/ios-artifacts/artifacts/ios-02-loaded.png`; it is not a store screenshot and the other five scenes have not been captured on iOS |
-| Apple iPad screenshots | — | **missing, and avoidable**: set `TARGETED_DEVICE_FAMILY = 1` and they are not required |
+| Apple iPad screenshots | — | not required: the app is iPhone-only (`TARGETED_DEVICE_FAMILY = 1`) |
 | Privacy policy | https://www.kerbgo.com/privacy | live, dated 16 November 2026 |
 | Support URL | https://www.kerbgo.com/help | live |
 | Marketing URL | https://www.kerbgo.com | live |
@@ -56,9 +57,9 @@ Those two documents plus this one are the whole submission kit:
 5. Export compliance: already declared in `Info.plist`
    (`ITSAppUsesNonExemptEncryption = false`), so the questionnaire pre-answers
    itself. Mention it in review notes anyway.
-6. **Before screenshots:** set `TARGETED_DEVICE_FAMILY = 1` in both build
-   configurations in `ios/App/App.xcodeproj/project.pbxproj` (it is `"1,2"`
-   today, which makes an iPad set mandatory).
+6. **iPad:** already settled — `TARGETED_DEVICE_FAMILY = 1` in both build
+   configurations in `ios/App/App.xcodeproj/project.pbxproj`, so App Store
+   Connect asks for an iPhone set only. Nothing to change here.
 
 ### Build and upload (needs a Mac with Xcode)
 
@@ -97,7 +98,17 @@ Xcode and committed before an archive can be signed.
 5. **Play App Signing:** enrolled by default on a new app — keep the upload key
    you generate below; losing it is the only way to lock yourself out.
 
-### Upload key (do this once)
+### Upload key (already created — do not repeat)
+
+**Created 19 Nov 2026.** `android/kerb-upload.jks` exists (alias `kerb`, RSA
+2048, valid to 6 April 2054) together with `android/keystore.properties`; both
+are git-ignored. Certificate SHA-256:
+`E5:94:EB:90:12:5A:65:13:89:5B:06:44:77:4A:E4:A4:4E:18:E8:16:A7:6B:25:46:89:D5:47:E3:2C:54:46:81`
+
+Back up both files together with the password inside `keystore.properties` —
+Play needs the same key for every future upload. Re-running the command below
+against the existing keystore will fail or overwrite it, so it is kept only as
+the recipe for a fresh checkout:
 
 ```
 cd android
@@ -105,7 +116,7 @@ keytool -genkeypair -v -keystore kerb-upload.jks -alias kerb \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-Then create `android/keystore.properties` (git-ignored — never commit it):
+The properties file `app/build.gradle` reads is (git-ignored — never commit it):
 
 ```
 storeFile=kerb-upload.jks
@@ -125,8 +136,16 @@ JAVA_HOME=".toolchain/jdk/Contents/Home" ANDROID_HOME=".toolchain/sdk" \
 # → android/app/build/outputs/bundle/release/app-release.aab
 ```
 
-Verified tonight: this command succeeds and produces a 3.6 MB AAB. Unsigned
-until `keystore.properties` exists; Play rejects an unsigned bundle.
+Verified 19 Nov 2026: this command produces a 3.7 MB AAB signed with the upload
+key. `jarsigner -verify` reports "jar verified" and the certificate in the
+bundle matches the keystore. `apksigner` cannot read an AAB (it expects a root
+`AndroidManifest.xml`; an AAB keeps it at `base/manifest/`), so verify the bundle
+with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
+
+```
+.toolchain/sdk/build-tools/35.0.0/apksigner verify --print-certs \
+  android/app/build/outputs/apk/release/app-release.apk
+```
 
 ## Pre-submission checks that already pass
 
@@ -140,8 +159,9 @@ until `keystore.properties` exists; Play rejects an unsigned bundle.
 
 ## Order of work on submission day
 
-1. Add the upload key, build the AAB, upload to Play internal testing.
-2. In Xcode: set the team, set `TARGETED_DEVICE_FAMILY = 1`, archive, upload.
+1. Rebuild the AAB if anything changed since 19 Nov, upload it to Play internal
+   testing. The upload key is already in place.
+2. In Xcode: set the signing team, archive, upload.
 3. Create the two demo accounts and put their credentials in both consoles.
 4. Capture the Apple screenshot set on an iPhone (5 scenes from
    `screenshot-checklist.md`; the sign-in scene already exists as

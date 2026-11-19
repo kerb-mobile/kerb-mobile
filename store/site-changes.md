@@ -56,8 +56,8 @@ The shells add no native "delete" item. The Account tab renders the site's own
 pages.
 
 **Rider — `/app`:** add the block as the **last `<details>` child of the container
-that already holds `Your trips`, `Saved places` and the privacy/legal rows**. Give
-it no container of its own:
+that already holds `Your trips`, `Saved places`, `Payment methods` and `Help and
+your account`**. Give it no container of its own:
 
 ```html
 <details>
@@ -77,12 +77,16 @@ inside the shared container it is Account-only:
 |---|---|
 | Home | container hidden — no delete row |
 | Trips | container shown, non-`Your trips` rows hidden — no delete row |
-| Account | container shown, all other rows visible — delete row sits with the privacy rows |
+| Account | container shown, all other rows visible — delete row sits below the existing rows |
 
 The only way to get this wrong is to give the row its own container or a sibling
 block: the shell then shows it on Home, where a destructive entry point has no
 business. If the page renders its rows in more than one container, put the delete
 row in the one holding `Your trips`.
+
+That is measured, not inferred: on the Android debug build with a signed-in rider
+(19 Nov 2026), Home rendered none of the four rows, Account rendered all but
+`Your trips`, and Trips rendered only `Your trips`.
 
 **Driver — `/driver`:** add the same `<details>` block to the list that also
 holds the `Where you are and what Kerb sees` row. The native Account view shows

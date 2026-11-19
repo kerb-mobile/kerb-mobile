@@ -45,6 +45,12 @@ Notes:
 - Support: support@kerbgo.com — https://www.kerbgo.com/help
 ```
 
+The account-deletion line is the 5.1.1(v) answer. The path to describe is
+`Account → Delete account → confirm`, which ships with the site change in
+`site-changes.md` §1 — fill the sentence in once that is deployed, not before.
+The driver walkthrough below expects the trip card's `data-kerb-destination`
+(`site-changes.md` §2) for the Navigate control to read the dropoff.
+
 ## Apple — App Review Information → Contact
 
 Use the account owner's name, a monitored email and a phone number that answers

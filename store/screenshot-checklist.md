@@ -17,13 +17,9 @@ display)** — the 6.3-inch class (iPhone 16 Pro / 17 / 17 Pro).
 | Format | `.png` / `.jpg` / `.jpeg`, **no transparency** |
 | Larger (optional) | `1320 × 2868`, `1290 × 2796`, `1260 × 2736` |
 
-**iPad:** the project currently targets iPhone **and** iPad
-(`TARGETED_DEVICE_FAMILY = "1,2"`), so App Store Connect will also require one
-13-inch iPad screenshot (`2064 × 2752` or `2048 × 2732`). Two options:
-
-- Set `TARGETED_DEVICE_FAMILY = 1` in both build configurations (iphoneos-only,
-  which suits a phone-shaped rideshare app), or
-- Add one iPad screenshot set.
+**iPad:** not needed. The project is already iPhone-only
+(`TARGETED_DEVICE_FAMILY = 1` in both build configurations), so App Store
+Connect accepts an iPhone set on its own.
 
 Shortcuts are not set on the app, so no shortcut screenshots are needed.
 
@@ -82,4 +78,4 @@ node -e "require('sharp')('store/shots/01-fare.png').resize(1080,1920,{fit:'cove
 1. **In-app account deletion.** Apple guideline 5.1.1(v) requires an app that lets people create an account to let them delete it in the app. Confirm `kerbgo.com` has a delete-account route reachable from the app; if not, this must be added (a small addition to the site, or a native request flow).
 2. **Demo accounts** — one rider, one approved driver with a vehicle, both active at review time.
 3. **Driver destination attribute** — `data-kerb-destination` on the driver trip card, otherwise the Navigate button reports that it cannot read the destination (it will not guess).
-4. **iPad decision** — see the Apple section above.
+4. **iPad set** — not required; the app is iPhone-only.

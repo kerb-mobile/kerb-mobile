@@ -5,6 +5,11 @@ Derived from https://www.kerbgo.com/privacy (last updated 16 November 2026),
 Where a fact can only be confirmed by the account owner it is marked
 **[confirm]** — answer those from the live console, not from this file.
 
+**Site-side prerequisites:** three fixes have to land on kerbgo.com before either
+store will approve the shells — in-app account deletion, `data-kerb-destination`
+on the driver trip card, and the landing copy that says there is no app. They are
+specified in `site-changes.md`; items 1, 3 and 4 below depend on them.
+
 ## Apple — App Privacy
 
 Data type, then: collected / linked to identity / used for tracking / purpose.
@@ -46,7 +51,9 @@ domains. It is bundled in the app target.
    - exposing a site endpoint the shell can call from a native confirmation
      dialog.
    The site is deliberately untouched by this repository, so this is the one fix
-   that cannot be made from here.
+   that cannot be made from here. The exact route, deletion semantics and
+   entry-point markup the shell already reads are specified in `site-changes.md`
+   §1; that change closes this risk with no app release.
 2. **4.2 minimum functionality.** A WebView over a website is the classic 4.2
    rejection. What already helps: a native Navigate control with an action sheet,
    native hand-off to Apple/Google/Waze maps, device location, a native tab bar
@@ -58,11 +65,13 @@ domains. It is bundled in the app target.
    reads "pay by card — no app-store download". A reviewer opening the app to
    find a page that says there is no app to download is a bad first impression
    and weakens the 4.2 argument. Recommend adjusting that sentence on the site
-   (and it is now factually wrong, since there will be an app).
+   (and it is now factually wrong, since there will be an app). Both sentences
+   and their replacements are in `site-changes.md` §3.
 4. **2.1 completeness.** Anything a reviewer can tap that shows an error is a
    finding. The Navigate control shows "Destination not available" whenever the
    trip page does not carry `data-kerb-destination`; that needs the site-side
-   attribute (see `screenshot-checklist.md`) or the driver will be told the app
+   attribute (see `screenshot-checklist.md`, and `site-changes.md` §2 for the
+   contract the native reader enforces) or the driver will be told the app
    cannot read their own trip.
 5. **3.1.1 in-app purchase.** Not a risk, but worth knowing: rides are physical
    services, so card payment outside IAP is correct. Do not add IAP.
@@ -105,7 +114,8 @@ younger audience invites extra policy obligations with no benefit.
 ## Google Play — policy items to complete before review
 
 - **Data deletion URL** — the privacy policy paragraph is acceptable but a
-  dedicated page is stronger, and Play now surfaces it in the listing.
+  dedicated page is stronger, and Play now surfaces it in the listing. The page
+  itself is specified in `site-changes.md` §1 and does not exist yet (404).
 - **Account deletion** — Play's policy mirrors Apple's: if users can create an
   account, deletion must be available. Same fix as Apple's item 1.
 - **App access** — every reviewer must be able to sign in. Two demo accounts, per
