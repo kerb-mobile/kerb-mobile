@@ -76,12 +76,19 @@ number instead of colliding with a build App Store Connect already holds. Pass a
 whole number only to re-upload deliberately, and remember that number is then used
 as-is.
 
+**Prove it before uploading anything.** Untick `upload` and run it: the job signs
+with the real distribution certificate, verifies the archive, exports the App Store
+`.ipa` and downloads it as the `kerb-ios-<run>-<attempt>` artifact — but sends
+nothing to Apple. That is the cheapest way to confirm the six secrets are right,
+and it costs one runner run. Tick `upload` for the real submission.
+
 The job runs `npm ci` and `npx cap sync ios` first, so the archive contains the
 web bundle as committed. It sets `DEVELOPMENT_TEAM` and `CURRENT_PROJECT_VERSION`
 as build settings, which means the project file still needs no team filled in. It
 also fails fast on a missing secret, on a build number that is not numeric, and on
 an archive signed by a team other than `APPLE_TEAM_ID` or carrying a build number
-other than the one it asked for.
+other than the one it asked for. Uploading is the only difference between a dry run
+and a real one.
 
 The default build number is `run_number × 100 + run_attempt`, so run 7 attempt 2
 uploads build 702 — above run 7 attempt 1 (701) and below run 8 (801).
