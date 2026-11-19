@@ -219,9 +219,10 @@ demo account and recapture shots 1 and 2.
    scenes above are the intended order; the first five map straight onto iOS).
 3. Confirm the iPhone-only setting (`TARGETED_DEVICE_FAMILY = 1`, already in the
    project) so no iPad set is required.
-4. Close the four blocking items in `store/screenshot-checklist.md`: in-app account
-   deletion, live demo accounts, `data-kerb-destination` on the driver trip card,
-   and the iPad decision.
+4. Close the blocking items in `store/screenshot-checklist.md`: in-app account
+   deletion, the demo state (accounts, saved place, past trip, standing offer,
+   `KERBREVIEW`) and `data-kerb-destination` on the driver trip card. The iPad set
+   is not needed.
 5. Capture the incoming-offer shot once the standing demo offer is live
    (`site-changes.md` §4) — it is the strongest driver-side image and needs no
    second session. The live-trip shot still needs a real booking accepted by a
