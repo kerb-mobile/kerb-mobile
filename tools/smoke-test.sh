@@ -52,10 +52,13 @@ expect() { # label, needle, haystack
 
 step() { STEP=$((STEP + 1)); echo; echo "-- $STEP. $*"; }
 
-attach() {
+attach() { # [quiet] — quiet only reports a status code, for polling loops
   local sock
   sock=$($ADB shell cat /proc/net/unix 2>/dev/null | grep -o 'webview_devtools_remote_[0-9]*' | head -1 | tr -d '\r')
-  [ -n "$sock" ] || { fail "WebView devtools socket" "none"; return 1; }
+  if [ -z "$sock" ]; then
+    [ "${1:-}" = "quiet" ] || fail "WebView devtools socket" "none"
+    return 1
+  fi
   $ADB forward --remove-all >/dev/null 2>&1
   $ADB forward tcp:9222 localabstract:"$sock" >/dev/null
   sleep 1
@@ -89,17 +92,50 @@ settle() { # path, expected marker in JSON
   ev "JSON.stringify({path: location.pathname, tabs: document.querySelectorAll('.kerb-tab').length, patch: !!window.__kerbRiderPatchInstalled})"
 }
 
+# The shell patch is applied from native code after the page renders, so poll for
+# the state rather than sampling it the instant the route settles.
+wait_for() { # expression, needle, seconds
+  local expr=$1 needle=$2 limit=${3:-12} body i
+  for i in $(seq 1 "$limit"); do
+    body=$(ev "$expr")
+    case "$body" in *"$needle"*) echo "$body"; return 0 ;; esac
+    sleep 1
+  done
+  echo "$body"
+}
+
 if [ "${1:-}" != "--no-install" ]; then
   step "Install the debug build"
   $ADB install -r "$APK" 2>&1 | tail -1
 fi
 
-step "Launch and attach"
-$ADB shell am force-stop com.kerbgo.app
+step "Fresh start, as a reviewer would see it"
+# Clearing app data guarantees a signed-out start and resets caches, which is the
+# state the stores review.
+$ADB shell pm clear com.kerbgo.app >/dev/null 2>&1
+# Clearing data also revokes permissions, and the resulting system dialog pauses
+# the activity (which correctly stops the native route timer). Grant up front so
+# the test measures the app, not the permission prompt.
+$ADB shell pm grant com.kerbgo.app android.permission.ACCESS_FINE_LOCATION >/dev/null 2>&1
+$ADB shell pm grant com.kerbgo.app android.permission.ACCESS_COARSE_LOCATION >/dev/null 2>&1
 $ADB shell am start -n com.kerbgo.app/.MainActivity >/dev/null 2>&1
-sleep 14
+LAUNCHED=""
+for i in $(seq 1 30); do
+  sleep 2
+  attach quiet >/dev/null 2>&1 || continue
+  SOCK_PAGE=$(curl -s --max-time 4 http://127.0.0.1:9222/json 2>/dev/null | grep -c 'kerbgo.com' || true)
+  [ "${SOCK_PAGE:-0}" -gt 0 ] && { LAUNCHED="yes"; break; }
+done
 attach || exit 1
-expect "app launched on the site" "kerbgo.com" "$(ev 'location.href')"
+# Capacitor briefly shows its bundled start page before the site loads, so wait
+# for the WebView to actually be on kerbgo.com.
+LAUNCH_URL=""
+for i in $(seq 1 12); do
+  LAUNCH_URL=$(ev 'location.href' 2>/dev/null)
+  case "$LAUNCH_URL" in *kerbgo.com*) break ;; esac
+  sleep 2
+done
+expect "app launched on the site" "kerbgo.com" "$LAUNCH_URL"
 
 step "Sign in as the rider"
 ensure_page /signin 'input[type=password]' || fail "rider sign-in page" "did not load"
@@ -107,6 +143,7 @@ ev "window.__smoke = {}; 'ok'" >/dev/null
 "$NODE" .toolchain/cdp.mjs "$(wsurl)" login "${KERB_RIDER_EMAIL:-}" "${KERB_RIDER_PASSWORD:-}" >/dev/null
 sleep 20
 RIDER=$(settle /app '"path":"/app"')
+RIDER=$(wait_for "JSON.stringify({path: location.pathname, tabs: document.querySelectorAll('.kerb-tab').length, patch: !!window.__kerbRiderPatchInstalled})" '"tabs":3' 15)
 expect "rider lands on /app" '"path":"/app"' "$RIDER"
 expect "shell patch applied" '"patch":true' "$RIDER"
 expect "tab bar has 3 tabs" '"tabs":3' "$RIDER"
@@ -126,6 +163,7 @@ ensure_page /signin 'input[type=password]' || fail "driver sign-in page" "did no
 "$NODE" .toolchain/cdp.mjs "$(wsurl)" login "${KERB_DRIVER_EMAIL:-}" "${KERB_DRIVER_PASSWORD:-}" >/dev/null
 sleep 22
 DRIVER=$(settle /driver '"path":"/driver"')
+DRIVER=$(wait_for "JSON.stringify({path: location.pathname, tabs: document.querySelectorAll('.kerb-tab').length, patch: !!window.__kerbRiderPatchInstalled})" '"tabs":3' 15)
 expect "driver lands on /driver" '"path":"/driver"' "$DRIVER"
 expect "driver shell patch applied" '"patch":true' "$DRIVER"
 expect "driver tab bar has 3 tabs" '"tabs":3' "$DRIVER"

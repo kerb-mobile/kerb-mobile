@@ -72,7 +72,7 @@ public class MainActivity extends BridgeActivity {
     private final Handler routeHandler = new Handler(Looper.getMainLooper());
     private boolean isShowingChooser = false;
     private String riderPatchSource;
-    private long lastRiderPatchAt;
+    private long lastPatchCheckAt;
 
     private final Runnable routeCheck = new Runnable() {
         @Override
@@ -191,9 +191,12 @@ public class MainActivity extends BridgeActivity {
 
     /**
      * Runs the bundled presentation patch (assets/public/shell-tweak.js) while the
-     * WebView is on the rider home or the driver home. The patch is idempotent and
-     * keeps itself applied across in-app route changes, so re-running it on a slow
-     * cadence is cheap and covers full page loads.
+     * WebView is on the rider home or the driver home.
+     *
+     * The patch is idempotent, so the shell asks the page whether it is already
+     * installed and only injects when it is not. Checking every route tick means
+     * the native chrome appears as soon as the page has the markup it needs,
+     * instead of up to a throttle interval later on a cold start.
      */
     private void applyShellPatchIfNeeded(String path) {
         if (path == null || !("/app".equals(path) || "/app/".equals(path)
@@ -201,10 +204,10 @@ public class MainActivity extends BridgeActivity {
             return;
         }
         long now = System.currentTimeMillis();
-        if (now - lastRiderPatchAt < 5000) {
+        if (now - lastPatchCheckAt < 400) {
             return;
         }
-        lastRiderPatchAt = now;
+        lastPatchCheckAt = now;
 
         WebView webView = getBridge() != null ? getBridge().getWebView() : null;
         if (webView == null) {
@@ -216,7 +219,25 @@ public class MainActivity extends BridgeActivity {
         if (riderPatchSource == null || riderPatchSource.isEmpty()) {
             return;
         }
-        webView.evaluateJavascript(riderPatchSource, null);
+        webView.evaluateJavascript("!!window.__kerbRiderPatchInstalled", value -> {
+            if ("true".equals(value)) {
+                return;
+            }
+            String currentPath = getRoutePath();
+            if (currentPath == null || !("/app".equals(currentPath) || "/app/".equals(currentPath)
+                    || "/driver".equals(currentPath) || "/driver/".equals(currentPath))) {
+                return;
+            }
+            webView.evaluateJavascript(riderPatchSource, null);
+        });
+    }
+
+    private String getRoutePath() {
+        WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+        if (webView == null || webView.getUrl() == null) {
+            return null;
+        }
+        return android.net.Uri.parse(webView.getUrl()).getPath();
     }
 
     private String readAsset(String name) {

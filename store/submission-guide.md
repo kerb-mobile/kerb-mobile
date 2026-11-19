@@ -130,7 +130,7 @@ until `keystore.properties` exists; Play rejects an unsigned bundle.
 
 ## Pre-submission checks that already pass
 
-- `./tools/smoke-test.sh` — 17 end-to-end assertions against the Android
+- `./tools/smoke-test.sh` — 16 end-to-end assertions against the Android
   build: launch, rider sign-in, `/app` route, shell patch, tab bar, tab
   switching, driver sign-in, `/driver`, driver patch, Navigate pill, all three
   chooser options, earnings tab, pill hidden on sub-routes. Green tonight.
