@@ -75,7 +75,18 @@ node -e "require('sharp')('store/shots/01-fare.png').resize(1080,1920,{fit:'cove
 
 ## Blocking items before you submit
 
-1. **In-app account deletion.** Apple guideline 5.1.1(v) requires an app that lets people create an account to let them delete it in the app. Confirm `kerbgo.com` has a delete-account route reachable from the app; if not, this must be added (a small addition to the site, or a native request flow).
-2. **Demo accounts** — one rider, one approved driver with a vehicle, both active at review time.
-3. **Driver destination attribute** — `data-kerb-destination` on the driver trip card, otherwise the Navigate button reports that it cannot read the destination (it will not guess).
+1. **In-app account deletion.** Apple guideline 5.1.1(v) requires an app that lets
+   people create an account to let them delete it in the app. The route is
+   `kerbgo.com/delete-account`, reached from the Account tab; it returns 404 today
+   and is specified, with the entry-point markup the shell already reads, in
+   `site-changes.md` §1. There is no native deletion flow — site work only, no app
+   release.
+2. **Demo state, not just two accounts.** A rider with a saved place and a past
+   trip, an approved driver with a vehicle and an offer always waiting on
+   `/driver`, and promo code `KERBREVIEW` so the booking path costs nothing. The
+   full spec is in `review-notes.md`; the standing offer it depends on is
+   `site-changes.md` §4.
+3. **Driver destination attribute** — `data-kerb-destination` on the driver trip
+   card (`site-changes.md` §2), otherwise the Navigate button reports that it
+   cannot read the destination (it will not guess).
 4. **iPad set** — not required; the app is iPhone-only.
