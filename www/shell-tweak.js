@@ -100,7 +100,16 @@
       '.kerb-row:active{opacity:.6;}',
       '.kerb-row-label{flex:1 1 auto;}',
       '.kerb-row-chevron{display:inline-flex;color:#6b6b70;}',
-      '.kerb-row-danger{color:#c43e02;}'
+      '.kerb-row-danger{color:#c43e02;}',
+      '.kerb-tabs{display:flex;flex:0 0 auto;margin-top:auto;',
+      'border-top:1px solid var(--line,rgba(11,11,12,.12));',
+      'background:#fff;padding-bottom:env(safe-area-inset-bottom);}',
+      '.kerb-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;',
+      'gap:3px;min-height:56px;padding:6px 0;background:none;border:0;color:#6b6b70;',
+      'font:600 11px/1 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;}',
+      '.kerb-tab.is-active{color:#fd5204;}',
+      '.kerb-tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;',
+      'stroke-linecap:round;stroke-linejoin:round;}'
     ].join('');
     var style = document.createElement('style');
     style.id = STYLE_ID;
@@ -559,6 +568,216 @@
     list.appendChild(chevronRow('Sign out', function () { signOut.click(); }, true));
   }
 
+  // --- View switching ------------------------------------------------------
+
+  function toggle(el, visible) {
+    if (!el) {
+      return;
+    }
+    if (visible) {
+      if (el.getAttribute('data-kerb-hidden') === 'true') {
+        el.style.removeProperty('display');
+        el.removeAttribute('data-kerb-hidden');
+      }
+    } else if (el.getAttribute('data-kerb-hidden') !== 'true') {
+      el.style.setProperty('display', 'none', 'important');
+      el.setAttribute('data-kerb-hidden', 'true');
+    }
+  }
+
+  var ICONS = {
+    home: '<svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 10v9h12v-9"/></svg>',
+    trips: '<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg>',
+    earnings: '<svg viewBox="0 0 24 24"><path d="M4 18V9m5 9V5m5 13v-7m5 7V8"/></svg>',
+    account: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/></svg>'
+  };
+
+  function ensureTabs(root, items, activeKey) {
+    if (!root) {
+      return;
+    }
+    var nav = root.querySelector('.kerb-tabs');
+    if (!nav) {
+      nav = document.createElement('nav');
+      nav.className = 'kerb-tabs';
+      nav.setAttribute('aria-label', 'Main');
+      items.forEach(function (item) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'kerb-tab';
+        button.setAttribute('data-kerb-tab', item.key);
+        button.innerHTML = (ICONS[item.key] || ICONS.account) + '<span>' + item.label + '</span>';
+        button.addEventListener('click', item.onSelect);
+        nav.appendChild(button);
+      });
+      root.appendChild(nav);
+    }
+    var buttons = nav.querySelectorAll('.kerb-tab');
+    for (var i = 0; i < buttons.length; i++) {
+      var isActive = buttons[i].getAttribute('data-kerb-tab') === activeKey;
+      buttons[i].classList.toggle('is-active', isActive);
+      if (isActive) {
+        buttons[i].setAttribute('aria-current', 'page');
+      } else {
+        buttons[i].removeAttribute('aria-current');
+      }
+    }
+  }
+
+  function riderRows() {
+    var rows = [];
+    var details = document.querySelectorAll('details');
+    var host = null;
+    for (var i = 0; i < details.length; i++) {
+      var summary = details[i].querySelector('summary');
+      var label = textOf(summary);
+      if (!host) {
+        host = details[i].parentElement;
+      }
+      rows.push({ el: details[i], label: label });
+    }
+    return { host: host, rows: rows };
+  }
+
+  function riderViewParts() {
+    var root = document.querySelector('[class*="h-[100dvh]"]');
+    if (!root) {
+      return null;
+    }
+    var rows = riderRows();
+    return {
+      root: root,
+      map: root.querySelector('[class*="min-h-[32vh]"]'),
+      section: root.querySelector('section'),
+      rowsHost: rows.host,
+      rows: rows.rows
+    };
+  }
+
+  function setRiderView(mode, parts) {
+    if (!parts) {
+      return;
+    }
+    var isHome = mode === 'home';
+    toggle(parts.map, isHome);
+
+    // With the menu rows hidden the map would otherwise grow into the space they
+    // freed and push the destination field to the bottom of the screen.
+    if (parts.map) {
+      if (isHome) {
+        parts.map.style.setProperty('flex', '0 0 auto', 'important');
+        parts.map.style.setProperty('height', '34vh', 'important');
+      } else {
+        parts.map.style.removeProperty('flex');
+        parts.map.style.removeProperty('height');
+      }
+    }
+
+    if (parts.section) {
+      // Fill the space between the map and the tab bar, so the bar stays pinned
+      // to the bottom instead of floating under short content.
+      parts.section.style.setProperty('flex', '1 1 auto', 'important');
+      parts.section.style.setProperty('max-height', isHome ? '62dvh' : 'none', 'important');
+    }
+
+    var wrapper = parts.rowsHost ? parts.rowsHost.parentElement : null;
+    if (wrapper) {
+      for (var i = 0; i < wrapper.children.length; i++) {
+        toggle(wrapper.children[i], isHome ? true : wrapper.children[i] === parts.rowsHost);
+      }
+    }
+    toggle(parts.rowsHost, !isHome);
+
+    for (var j = 0; j < parts.rows.length; j++) {
+      var row = parts.rows[j];
+      var isTrips = row.label.indexOf('Your trips') === 0;
+      var visible = mode === 'trips' ? isTrips : mode === 'account' ? !isTrips : true;
+      toggle(row.el, visible);
+      if (visible && mode === 'trips' && isTrips) {
+        row.el.open = true;
+      }
+    }
+  }
+
+  function applyRiderView() {
+    var parts = riderViewParts();
+    if (!parts) {
+      return;
+    }
+    var mode = window.__kerbView || 'home';
+    setRiderView(mode, parts);
+    ensureTabs(parts.root, [
+      { key: 'home', label: 'Home', onSelect: function () { window.__kerbView = 'home'; apply(); } },
+      { key: 'trips', label: 'Trips', onSelect: function () { window.__kerbView = 'trips'; apply(); } },
+      { key: 'account', label: 'Account', onSelect: function () { window.__kerbView = 'account'; apply(); } }
+    ], mode);
+  }
+
+  function driverViewParts() {
+    var root = document.querySelector('[class*="h-[100dvh]"]');
+    if (!root) {
+      return null;
+    }
+    var map = document.querySelector('.mapboxgl-map');
+    var heading = document.getElementById('driver-home-heading');
+    var account = document.querySelector('.kerb-account');
+    return {
+      root: root,
+      map: map ? map.closest('[aria-label="Your map"]') : null,
+      statusBlock: heading ? heading.parentElement : null,
+      account: account,
+      list: account ? account.nextElementSibling : null
+    };
+  }
+
+  function setDriverView(mode, parts) {
+    if (!parts) {
+      return;
+    }
+    var isHome = mode === 'home';
+    toggle(parts.map, isHome);
+
+    // The status, earnings and CTA sit in the same column as the account rows, so
+    // hide individual children rather than the column itself.
+    var host = parts.statusBlock;
+    if (host && (parts.account || isHome)) {
+      for (var i = 0; i < host.children.length; i++) {
+        var child = host.children[i];
+        var isAccountPart = child === parts.account || child === parts.list;
+        toggle(child, isHome ? true : isAccountPart);
+      }
+    }
+  }
+
+  function driverEarningsControl() {
+    return driverControl('Earnings & trips');
+  }
+
+  function applyDriverView() {
+    var parts = driverViewParts();
+    if (!parts) {
+      return;
+    }
+    var mode = window.__kerbView || 'home';
+    setDriverView(mode, parts);
+    ensureTabs(parts.root, [
+      { key: 'home', label: 'Home', onSelect: function () { window.__kerbView = 'home'; apply(); } },
+      {
+        key: 'earnings',
+        label: 'Earnings',
+        onSelect: function () {
+          var control = driverEarningsControl();
+          if (control) {
+            control.click();
+          } else {
+            window.location.assign('/driver/earnings');
+          }
+        }
+      },
+      { key: 'account', label: 'Account', onSelect: function () { window.__kerbView = 'account'; apply(); } }
+    ], mode);
+  }
+
   // --- Run -----------------------------------------------------------------
 
   function applyRider() {
@@ -567,6 +786,7 @@
     liftLocateButton();
     removeMarketing();
     addPlaceChips();
+    applyRiderView();
   }
 
   function applyDriver() {
@@ -574,6 +794,7 @@
     collapseDriverMap();
     fixTripPlural();
     restructureDriverNav();
+    applyDriverView();
   }
 
   function apply() {
