@@ -67,6 +67,8 @@ public class MainActivity extends BridgeActivity {
     private Button navigateButton;
     private final Handler routeHandler = new Handler(Looper.getMainLooper());
     private boolean isShowingChooser = false;
+    private String riderPatchSource;
+    private long lastRiderPatchAt;
 
     private final Runnable routeCheck = new Runnable() {
         @Override
@@ -168,6 +170,59 @@ public class MainActivity extends BridgeActivity {
         navigateButton.setVisibility(isDriverRoute ? View.VISIBLE : View.GONE);
         if (isDriverRoute) {
             navigateButton.bringToFront();
+        }
+        applyRiderPatchIfNeeded(path);
+    }
+
+    /**
+     * Runs the bundled rider-home patch (assets/public/rider-tweak.js) while the
+     * WebView is on the rider home. The patch is idempotent and keeps itself
+     * applied, so re-running it on a slow cadence is cheap and covers reloads.
+     */
+    private void applyRiderPatchIfNeeded(String path) {
+        if (path == null || !("/app".equals(path) || "/app/".equals(path))) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now - lastRiderPatchAt < 5000) {
+            return;
+        }
+        lastRiderPatchAt = now;
+
+        WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+        if (webView == null) {
+            return;
+        }
+        if (riderPatchSource == null) {
+            riderPatchSource = readAsset("public/rider-tweak.js");
+        }
+        if (riderPatchSource == null || riderPatchSource.isEmpty()) {
+            return;
+        }
+        webView.evaluateJavascript(riderPatchSource, null);
+    }
+
+    private String readAsset(String name) {
+        java.io.InputStream in = null;
+        try {
+            in = getAssets().open(name);
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) > 0) {
+                out.write(buffer, 0, read);
+            }
+            return out.toString("UTF-8");
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Exception ignored) {
+                    // nothing to do
+                }
+            }
         }
     }
 

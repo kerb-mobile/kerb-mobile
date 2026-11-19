@@ -23,6 +23,8 @@ class KerbBridgeViewController: CAPBridgeViewController {
     private let navigateButton = UIButton(type: .system)
     private var routeTimer: Timer?
     private var isShowingChooser = false
+    private var riderPatchSource: String?
+    private var lastRiderPatchAt = Date.distantPast
 
     /**
      * Runs inside the site's page when a driver taps Navigate.
@@ -118,6 +120,26 @@ class KerbBridgeViewController: CAPBridgeViewController {
         if isDriverRoute {
             view.bringSubviewToFront(navigateButton)
         }
+        applyRiderPatchIfNeeded(path: path)
+    }
+
+    /**
+     * Runs the bundled rider-home patch (www/rider-tweak.js) while the WebView is
+     * on the rider home. The patch is idempotent and keeps itself applied, so
+     * re-running it on a slow cadence is cheap and covers full page reloads.
+     */
+    private func applyRiderPatchIfNeeded(path: String) {
+        guard path == "/app" || path == "/app/" else { return }
+        guard Date().timeIntervalSince(lastRiderPatchAt) > 5 else { return }
+        lastRiderPatchAt = Date()
+
+        if riderPatchSource == nil {
+            riderPatchSource = Bundle.main
+                .url(forResource: "rider-tweak", withExtension: "js", subdirectory: "public")
+                .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
+        }
+        guard let source = riderPatchSource else { return }
+        webView?.evaluateJavaScript(source)
     }
 
     // MARK: - Navigation chooser
