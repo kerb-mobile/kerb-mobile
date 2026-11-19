@@ -120,22 +120,23 @@ class KerbBridgeViewController: CAPBridgeViewController {
         if isDriverRoute {
             view.bringSubviewToFront(navigateButton)
         }
-        applyRiderPatchIfNeeded(path: path)
+        applyShellPatchIfNeeded(path: path)
     }
 
     /**
-     * Runs the bundled rider-home patch (www/rider-tweak.js) while the WebView is
-     * on the rider home. The patch is idempotent and keeps itself applied, so
-     * re-running it on a slow cadence is cheap and covers full page reloads.
+     * Runs the bundled presentation patch (www/shell-tweak.js) while the WebView is
+     * on the rider home or the driver home. The patch is idempotent and keeps
+     * itself applied across in-app route changes, so re-running it on a slow
+     * cadence is cheap and covers full page loads.
      */
-    private func applyRiderPatchIfNeeded(path: String) {
-        guard path == "/app" || path == "/app/" else { return }
+    private func applyShellPatchIfNeeded(path: String) {
+        guard path == "/app" || path == "/app/" || path == "/driver" || path == "/driver/" else { return }
         guard Date().timeIntervalSince(lastRiderPatchAt) > 5 else { return }
         lastRiderPatchAt = Date()
 
         if riderPatchSource == nil {
             riderPatchSource = Bundle.main
-                .url(forResource: "rider-tweak", withExtension: "js", subdirectory: "public")
+                .url(forResource: "shell-tweak", withExtension: "js", subdirectory: "public")
                 .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
         }
         guard let source = riderPatchSource else { return }

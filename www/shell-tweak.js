@@ -1,12 +1,13 @@
 /**
- * Kerb rider home — native presentation patch.
+ * Kerb native presentation patch.
  *
  * Runs only inside the iOS and Android shells, and only on the rider home
- * ("/app"). The website itself is untouched: this script hides a few blocks the
- * native chrome does not need and adds two small affordances that a phone
- * benefits from.
+ * ("/app") and the driver home ("/driver"). The website itself is untouched:
+ * this script hides a few blocks the native chrome does not need, adds two small
+ * affordances a phone benefits from, and gives the driver home one navigation
+ * pattern instead of two.
  *
- * What it does
+ * Rider home
  *   1. Removes the two text overlays that cover the map (the dispatch-area
  *      explanation and the "this phone can't tell us where you are" box) and
  *      replaces the second one with a compact "Location off" chip that taps
@@ -16,6 +17,14 @@
  *   3. Surfaces recent and saved places as chips under the destination field.
  *      Tapping a chip fills the destination field, so the site's own place
  *      picker proposes the match.
+ *
+ * Driver home
+ *   4. Collapses the map to a 96px status band while the driver is offline, and
+ *      restores it as soon as they are online or on a trip.
+ *   5. Replaces the underlined link row and keeps one row pattern: Earnings &
+ *      trips, Documents and Help become rows beside the existing ones, and Sign
+ *      out moves to the bottom of that same list.
+ *   6. Fixes "1 ALL TIME trips" so the unit agrees with the count.
  *
  * Everything is derived from text and a handful of stable structural hooks
  * (role="combobox", <details> rows, .mapboxgl-map), never from hashed class
@@ -79,7 +88,19 @@
       'border:1px solid rgba(11,11,12,.14);background:#fff;color:#0b0b0c;',
       'font:600 13px/1.2 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;',
       'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-      '.kerb-chip:active{background:#fff0e8;}'
+      '.kerb-chip:active{background:#fff0e8;}',
+      '.kerb-account{margin-top:6px;}',
+      '.kerb-account-heading{margin:0;padding:10px 0 4px;color:#6b6b70;',
+      'font:600 11px/1 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;',
+      'letter-spacing:.08em;text-transform:uppercase;}',
+      '.kerb-row{display:flex;width:100%;min-height:44px;align-items:center;',
+      'justify-content:space-between;gap:12px;padding:12px 0;background:none;border:0;',
+      'border-top:1px solid var(--line,rgba(11,11,12,.12));color:#0b0b0c;',
+      'font:600 16px/1.3 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;text-align:left;}',
+      '.kerb-row:active{opacity:.6;}',
+      '.kerb-row-label{flex:1 1 auto;}',
+      '.kerb-row-chevron{display:inline-flex;color:#6b6b70;}',
+      '.kerb-row-danger{color:#c43e02;}'
     ].join('');
     var style = document.createElement('style');
     style.id = STYLE_ID;
@@ -313,17 +334,254 @@
     holder.appendChild(row);
   }
 
-  // --- Run -----------------------------------------------------------------
+  // --- Driver home ---------------------------------------------------------
 
-  function apply() {
-    if (!isRiderHome()) {
+  function isDriverHome() {
+    var path = window.location.pathname;
+    return path === '/driver' || path === '/driver/';
+  }
+
+  /** The home heading is the site's own statement of state. */
+  function driverIsOffline() {
+    var heading = document.getElementById('driver-home-heading');
+    var label = textOf(heading);
+    if (label) {
+      return /offline/i.test(label);
+    }
+    var nodes = document.querySelectorAll('span, div');
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].children.length === 0 && textOf(nodes[i]) === 'Offline') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Offline there is nowhere to navigate, so a 287px map spends a third of the
+   * screen on a static picture. Collapse it to a band and restore it the moment
+   * the driver is online or on a trip.
+   */
+  function collapseDriverMap() {
+    var map = document.querySelector('.mapboxgl-map');
+    if (!map) {
       return;
     }
+    var section = map.closest('[aria-label="Your map"]');
+    if (!section && map.parentElement) {
+      section = map.parentElement.parentElement;
+    }
+    if (!section) {
+      return;
+    }
+
+    var collapsed = section.getAttribute('data-kerb-collapsed') === 'true';
+    // The map sits inside h-full wrappers, so the whole chain needs a definite
+    // height or Mapbox keeps its old canvas size and clips it to nothing.
+    var chain = [section, map.parentElement, map];
+
+    if (driverIsOffline()) {
+      if (!collapsed) {
+        for (var i = 0; i < chain.length; i++) {
+          if (!chain[i]) {
+            continue;
+          }
+          chain[i].style.setProperty('height', '96px', 'important');
+          chain[i].style.setProperty('min-height', '96px', 'important');
+        }
+        section.style.setProperty('flex', '0 0 auto', 'important');
+        section.setAttribute('data-kerb-collapsed', 'true');
+        window.dispatchEvent(new Event('resize'));
+      }
+      setMapCaption(section, false);
+    } else {
+      if (collapsed) {
+        for (var j = 0; j < chain.length; j++) {
+          if (!chain[j]) {
+            continue;
+          }
+          chain[j].style.removeProperty('height');
+          chain[j].style.removeProperty('min-height');
+        }
+        section.style.removeProperty('flex');
+        section.removeAttribute('data-kerb-collapsed');
+        window.dispatchEvent(new Event('resize'));
+      }
+      setMapCaption(section, true);
+    }
+  }
+
+  /**
+   * The site's "Map of your area" pill is sized for a full map; in a 96px band it
+   * covers almost the whole thing. Hide it while collapsed and bring it back on
+   * expand (the map keeps its own aria-label either way).
+   */
+  function setMapCaption(section, visible) {
+    var nodes = section.querySelectorAll('p, div, span');
+    for (var i = 0; i < nodes.length; i++) {
+      // Leaves only: an ancestor whose only text is the caption would otherwise
+      // match first and take the whole map with it.
+      if (nodes[i].children.length !== 0 || textOf(nodes[i]) !== 'Map of your area') {
+        continue;
+      }
+      if (visible) {
+        if (nodes[i].getAttribute('data-kerb-hidden') === 'true') {
+          nodes[i].style.removeProperty('display');
+          nodes[i].removeAttribute('data-kerb-hidden');
+        }
+      } else if (nodes[i].getAttribute('data-kerb-hidden') !== 'true') {
+        nodes[i].style.setProperty('display', 'none', 'important');
+        nodes[i].setAttribute('data-kerb-hidden', 'true');
+      }
+      return;
+    }
+  }
+
+  /** "1 ALL TIME trips" — the unit does not agree with the count. */
+  function fixTripPlural() {
+    var cells = document.querySelectorAll('dl > div');
+    for (var i = 0; i < cells.length; i++) {
+      var parts = cells[i].querySelectorAll('p');
+      if (parts.length < 3) {
+        continue;
+      }
+      var unit = parts[parts.length - 1];
+      if (!/^trips?$/.test(textOf(unit))) {
+        continue;
+      }
+      var digits = textOf(parts[0]).replace(/[^0-9]/g, '');
+      var wanted = digits === '1' ? 'trip' : 'trips';
+      if (textOf(unit) !== wanted) {
+        unit.textContent = wanted;
+      }
+    }
+  }
+
+  function driverControl(label) {
+    var nodes = document.querySelectorAll('a, button');
+    for (var i = 0; i < nodes.length; i++) {
+      if (textOf(nodes[i]) === label) {
+        return nodes[i];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The home screen mixes two navigation idioms (underlined links and chevron
+   * rows). Hide the link row; its original elements stay in the DOM, hidden, and
+   * are clicked programmatically so the site's own routing and sign-out still
+   * run unchanged.
+   */
+  function hideDriverLinkRow() {
+    var first = driverControl('Earnings & trips');
+    if (!first) {
+      return;
+    }
+    var row = first.parentElement;
+    var depth = 0;
+    while (row && depth < 5) {
+      var nodes = row.querySelectorAll('a, button');
+      for (var i = 0; i < nodes.length; i++) {
+        if (textOf(nodes[i]) === 'Sign out') {
+          hide(row);
+          return;
+        }
+      }
+      row = row.parentElement;
+      depth++;
+    }
+  }
+
+  function chevronRow(label, onActivate, danger) {
+    var row = document.createElement('button');
+    row.type = 'button';
+    row.className = danger ? 'kerb-row kerb-row-danger' : 'kerb-row';
+
+    var text = document.createElement('span');
+    text.className = 'kerb-row-label';
+    text.textContent = label;
+    row.appendChild(text);
+
+    if (!danger) {
+      var glyph = document.createElement('span');
+      glyph.className = 'kerb-row-chevron';
+      glyph.setAttribute('aria-hidden', 'true');
+      glyph.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      row.appendChild(glyph);
+    }
+
+    row.addEventListener('click', onActivate);
+    return row;
+  }
+
+  function restructureDriverNav() {
+    if (document.querySelector('.kerb-account')) {
+      return;
+    }
+
+    var summaries = document.querySelectorAll('details > summary');
+    var list = null;
+    for (var i = 0; i < summaries.length; i++) {
+      if (textOf(summaries[i]).indexOf('Where you are and what Kerb sees') === 0) {
+        list = summaries[i].parentElement.parentElement;
+        break;
+      }
+    }
+    if (!list) {
+      return;
+    }
+
+    var earnings = driverControl('Earnings & trips');
+    var documents = driverControl('Documents');
+    var help = driverControl('Help');
+    var signOut = driverControl('Sign out');
+    if (!earnings || !documents || !help || !signOut) {
+      return;
+    }
+
+    hideDriverLinkRow();
+
+    var section = document.createElement('div');
+    section.className = 'kerb-account';
+    var heading = document.createElement('p');
+    heading.className = 'kerb-account-heading';
+    heading.textContent = 'Account';
+    section.appendChild(heading);
+    section.appendChild(chevronRow('Earnings & trips', function () { earnings.click(); }, false));
+    section.appendChild(chevronRow('Documents', function () { documents.click(); }, false));
+    section.appendChild(chevronRow('Help', function () { help.click(); }, false));
+
+    if (list.parentElement) {
+      list.parentElement.insertBefore(section, list);
+    }
+
+    list.appendChild(chevronRow('Sign out', function () { signOut.click(); }, true));
+  }
+
+  // --- Run -----------------------------------------------------------------
+
+  function applyRider() {
     installStyles();
     cleanMapOverlays();
     liftLocateButton();
     removeMarketing();
     addPlaceChips();
+  }
+
+  function applyDriver() {
+    installStyles();
+    collapseDriverMap();
+    fixTripPlural();
+    restructureDriverNav();
+  }
+
+  function apply() {
+    if (isRiderHome()) {
+      applyRider();
+    } else if (isDriverHome()) {
+      applyDriver();
+    }
   }
 
   var scheduled = false;

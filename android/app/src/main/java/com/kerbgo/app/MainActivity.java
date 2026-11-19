@@ -171,16 +171,18 @@ public class MainActivity extends BridgeActivity {
         if (isDriverRoute) {
             navigateButton.bringToFront();
         }
-        applyRiderPatchIfNeeded(path);
+        applyShellPatchIfNeeded(path);
     }
 
     /**
-     * Runs the bundled rider-home patch (assets/public/rider-tweak.js) while the
-     * WebView is on the rider home. The patch is idempotent and keeps itself
-     * applied, so re-running it on a slow cadence is cheap and covers reloads.
+     * Runs the bundled presentation patch (assets/public/shell-tweak.js) while the
+     * WebView is on the rider home or the driver home. The patch is idempotent and
+     * keeps itself applied across in-app route changes, so re-running it on a slow
+     * cadence is cheap and covers full page loads.
      */
-    private void applyRiderPatchIfNeeded(String path) {
-        if (path == null || !("/app".equals(path) || "/app/".equals(path))) {
+    private void applyShellPatchIfNeeded(String path) {
+        if (path == null || !("/app".equals(path) || "/app/".equals(path)
+                || "/driver".equals(path) || "/driver/".equals(path))) {
             return;
         }
         long now = System.currentTimeMillis();
@@ -194,7 +196,7 @@ public class MainActivity extends BridgeActivity {
             return;
         }
         if (riderPatchSource == null) {
-            riderPatchSource = readAsset("public/rider-tweak.js");
+            riderPatchSource = readAsset("public/shell-tweak.js");
         }
         if (riderPatchSource == null || riderPatchSource.isEmpty()) {
             return;
