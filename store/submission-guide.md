@@ -21,6 +21,39 @@ Those two documents plus this one are the whole submission kit:
 | `store/review-notes.md` | The text to paste into App Review notes and Play App access |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 
+## One app for riders and drivers — decided 19 Nov 2026
+
+The submission is **one binary and one listing per store**, serving rider and
+driver from the same shell. The merchant app is separate work, not a third tab
+(see below).
+
+Why: `/app` and `/driver` are two URLs on the same site behind one session, and
+`www/shell-tweak.js` already splits the tabs by account type, so a second binary
+adds no functionality — only a second wrapper over the same website. Several
+listings wrapping one site is the shape App Review rejects under 4.3 (duplicate
+apps), it multiplies the 4.2 minimum-functionality exposure, and it triples the
+Play 12-tester/14-day gates, the screenshot sets and the rebuilds for every
+change to `www/`. A merchant console shipped as a plain wrapper would be the
+worst case of all: a dashboard in a WebView is the weakest possible 4.2 argument,
+and Play scrutinises business-only apps.
+
+**Merchant app — later, with its own listing.** Shops accepting orders and
+marking them ready is alert-driven work, and on iOS a WebView cannot alert while
+suspended without push, so that app is only worth building with native
+APNs/FCM notifications. It is not part of this submission: grocery ordering is
+still a waitlist on the site, and `kerbgo.com/retailer` already gives a shop an
+orders tab, expected prep time and "mark ready for pickup" in a phone browser.
+**Trigger for the merchant app:** grocery live in at least one zone with shops
+working the real order loop from the web portal — then submit it with native push
+(new order, with sound), one-tap accept/decline and ready, its own demo merchant
+account and its own review notes, after the rider app is approved.
+
+**Trigger for a separate driver app:** after a first approval, and only if
+driver volume justifies driver-only needs the rider app should not carry —
+background location, persistent offer alerts, navigation, earnings. Reuse
+`www/shell-tweak.js` behind a role flag so one codebase still drives both shells.
+Until then driver work ships as the `/driver` route, which needs no app release.
+
 ## Asset inventory
 
 | Asset | Where | State |
