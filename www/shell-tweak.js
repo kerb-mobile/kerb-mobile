@@ -9,9 +9,11 @@
  *
  * Rider home
  *   1. Removes the two text overlays that cover the map (the dispatch-area
- *      explanation and the "this phone can't tell us where you are" box) and
- *      replaces the second one with a compact "Location off" chip that taps
- *      through to the site's own Locate me button.
+ *      explanation and the "this phone can't tell us where you are" box). While
+ *      the phone really has no location it shows a compact "Location off" chip
+ *      in their place that taps through to the site's own Locate me button; the
+ *      chip is driven by a live geolocation read, so it disappears as soon as a
+ *      position is available instead of repeating stale site copy.
  *   2. Hides the pre-booking "Kerb Ride from $x" card, its "No surge pricing"
  *      line and the "Serving the entire United States." line.
  *   3. Surfaces recent and saved places as chips under the destination field.
@@ -143,10 +145,127 @@
       }
     });
 
-    if (removedLocation) {
+    syncLocationChip(wrap, removedLocation);
+    return removedLocation;
+  }
+
+  // --- 1b. Real location state --------------------------------------------
+  //
+  // The site's "can't tell us where you are" copy is a snapshot of one attempt,
+  // not a live reading: it survives after a fix arrives, and the chip built on
+  // top of it inherited that lie. Track the phone's own geolocation state and
+  // only show the chip while there genuinely is no location.
+
+  var locState = 'unknown'; // 'on' | 'off' | 'unknown'
+  var locProbing = false;
+  var locProbedAt = 0;
+  var locDeniedUntil = 0;
+
+  function setLocationState(next) {
+    if (locState === next) {
+      return;
+    }
+    locState = next;
+    if (next === 'on') {
+      removeLocationChip();
+    }
+  }
+
+  function removeLocationChip() {
+    var chips = document.querySelectorAll('.kerb-loc-chip');
+    for (var i = 0; i < chips.length; i++) {
+      if (chips[i].parentNode) {
+        chips[i].parentNode.removeChild(chips[i]);
+      }
+    }
+  }
+
+  /**
+   * One reading, throttled. A timeout or a momentarily missing fix is not the
+   * same as location being off, so only an explicit denial (or a first attempt
+   * that never produced a position) counts as off.
+   */
+  function probeLocation(force) {
+    // While there is no location, ask less often: each ask can surface the
+    // system's own "no location access" dialog, and a chip that nags is worse
+    // than one that takes a few seconds to clear.
+    var minGap = locState === 'off' ? 20000 : 10000;
+    if (locProbing || (!force && (Date.now() - locProbedAt < minGap || Date.now() < locDeniedUntil))) {
+      return;
+    }
+    locProbing = true;
+    locProbedAt = Date.now();
+
+    var settled = false;
+    function done(state) {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      locProbing = false;
+      setLocationState(state);
+    }
+
+    if (!navigator.geolocation) {
+      done('off');
+      return;
+    }
+
+    function ask() {
+      try {
+        navigator.geolocation.getCurrentPosition(
+          function () {
+            done('on');
+          },
+          function (error) {
+            if (error && error.code === 1) {
+              // A denial is a decision, not a missing fix. Re-asking on every
+              // tick would nag the rider with system dialogs; a tap on the chip
+              // asks again immediately.
+              locDeniedUntil = Date.now() + 120000;
+              done('off');
+              return;
+            }
+            done(locState === 'on' ? 'on' : 'off');
+          },
+          // High accuracy on purpose: the site's map asks the same way, and a
+          // low-accuracy request can sit on the network provider and time out
+          // while the phone has a perfectly good GPS fix.
+          { enableHighAccuracy: true, maximumAge: 30000, timeout: 12000 }
+        );
+      } catch (e) {
+        done(locState === 'on' ? 'on' : 'off');
+      }
+    }
+
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(function (status) {
+        if (status && status.state === 'denied') {
+          done('off');
+        } else {
+          ask();
+        }
+      }).catch(ask);
+    } else {
+      ask();
+    }
+  }
+
+  /** The chip exists only while the phone has no location to offer. */
+  function syncLocationChip(wrap, siteSaysOff) {
+    if (!wrap) {
+      return;
+    }
+    var chip = wrap.querySelector('.kerb-loc-chip');
+    if (locState === 'on' || !siteSaysOff) {
+      if (chip && chip.parentNode) {
+        chip.parentNode.removeChild(chip);
+      }
+      return;
+    }
+    if (!chip) {
       addLocationChip(wrap);
     }
-    return removedLocation;
   }
 
   function addLocationChip(wrap) {
@@ -166,6 +285,11 @@
       if (locate) {
         locate.click();
       }
+      // The site reads the fix asynchronously; re-read it rather than trusting
+      // the click to have changed anything.
+      window.setTimeout(function () {
+        probeLocation(true);
+      }, 1500);
     });
     wrap.appendChild(chip);
   }
@@ -784,6 +908,7 @@
 
   function applyRider() {
     installStyles();
+    probeLocation(false);
     cleanMapOverlays();
     liftLocateButton();
     removeMarketing();
@@ -832,6 +957,16 @@
   if (window.MutationObserver && document.body) {
     new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
   }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+      try {
+        probeLocation(false);
+      } catch (e) {
+        // ignore
+      }
+    }
+  });
+
   // Slow safety net for re-renders the observer cannot see.
   window.setInterval(function () {
     try {
