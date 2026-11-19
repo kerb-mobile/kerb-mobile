@@ -744,7 +744,9 @@
       for (var i = 0; i < host.children.length; i++) {
         var child = host.children[i];
         var isAccountPart = child === parts.account || child === parts.list;
-        toggle(child, isHome ? true : isAccountPart);
+        // Home keeps the status/earnings/CTA and drops the menus; Account is the
+        // mirror image.
+        toggle(child, isAccountPart ? !isHome : isHome);
       }
     }
   }
