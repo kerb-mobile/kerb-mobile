@@ -5,10 +5,11 @@ Derived from https://www.kerbgo.com/privacy (last updated 16 November 2026),
 Where a fact can only be confirmed by the account owner it is marked
 **[confirm]** — answer those from the live console, not from this file.
 
-**Site-side prerequisites:** three fixes have to land on kerbgo.com before either
+**Site-side prerequisites:** four fixes have to land on kerbgo.com before either
 store will approve the shells — in-app account deletion, `data-kerb-destination`
-on the driver trip card, and the landing copy that says there is no app. They are
-specified in `site-changes.md`; items 1, 3 and 4 below depend on them.
+on the driver trip card, the landing copy that says there is no app, and a
+standing demo offer so the driver flow can be walked at all. They are specified in
+`site-changes.md` §1–§4; items 1, 3 and 4 below depend on them.
 
 ## Apple — App Privacy
 
@@ -67,12 +68,15 @@ domains. It is bundled in the app target.
    and weakens the 4.2 argument. Recommend adjusting that sentence on the site
    (and it is now factually wrong, since there will be an app). Both sentences
    and their replacements are in `site-changes.md` §3.
-4. **2.1 completeness.** Anything a reviewer can tap that shows an error is a
-   finding. The Navigate control shows "Destination not available" whenever the
-   trip page does not carry `data-kerb-destination`; that needs the site-side
-   attribute (see `screenshot-checklist.md`, and `site-changes.md` §2 for the
-   contract the native reader enforces) or the driver will be told the app
-   cannot read their own trip.
+4. **2.1 completeness.** Anything a reviewer can tap that shows an error, or a
+   flow with nothing in it, is a finding. The Navigate control shows "Destination
+   not available" whenever the trip page does not carry `data-kerb-destination`;
+   that needs the site-side attribute (see `screenshot-checklist.md`, and
+   `site-changes.md` §2 for the contract the native reader enforces) or the driver
+   will be told the app cannot read their own trip. The same applies one step
+   earlier: the driver demo account is told to accept an offer, and offers only
+   exist while dispatch is running, so an idle system presents an empty dashboard.
+   `site-changes.md` §4 specifies the standing demo offer that fixes it.
 5. **3.1.1 in-app purchase.** Not a risk, but worth knowing: rides are physical
    services, so card payment outside IAP is correct. Do not add IAP.
 
@@ -118,8 +122,10 @@ younger audience invites extra policy obligations with no benefit.
   itself is specified in `site-changes.md` §1 and does not exist yet (404).
 - **Account deletion** — Play's policy mirrors Apple's: if users can create an
   account, deletion must be available. Same fix as Apple's item 1.
-- **App access** — every reviewer must be able to sign in. Two demo accounts, per
-  `review-notes.md`.
+- **App access** — every reviewer must be able to sign in, and the account they
+  sign in with must have something to show. Two demo accounts and the demo state
+  they need are in `review-notes.md`; the one piece of it that is site work rather
+  than account setup is the standing driver offer in `site-changes.md` §4.
 - **Location permissions** — Play requires a declaration only for background
   location. The app requests foreground location only, so nothing to declare
   today. Adding background location later triggers the video-review requirement.

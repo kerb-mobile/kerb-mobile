@@ -1,11 +1,11 @@
-# kerbgo.com — the three site changes App Review and Play review need
+# kerbgo.com — the four site changes App Review and Play review need
 
 For whoever owns the kerbgo.com codebase. Nothing here requires a new app
 release: both apps load the live site in a WebView, so these changes take effect
 as soon as they are deployed. The app side is already built and checked in.
 
-Order of work: 1 (blocks both stores), 2 (blocks the driver flow), 3 (one-line
-copy fix).
+Order of work: 1 (blocks both stores), 4 and 2 together (they are what makes the
+driver flow reviewable), 3 (one-line copy fix).
 
 ---
 
@@ -202,6 +202,62 @@ the app" link to the store listing is fine in place of the removed sentence.
 
 ---
 
+## 4. A standing demo offer on `/driver` — so a reviewer can reach the driver flow
+
+Today an offer exists only while dispatch is running. An approved driver who signs
+in to an idle system lands on an empty dashboard, which is why the incoming-offer
+screenshot has never been capturable (`listing.md`) and why the driver half of the
+app is the weakest part of a review: the reviewer is told to accept an offer and
+there is none to accept. The demo driver has to find one waiting every time
+`/driver` opens, without another user booking anything first.
+
+### 4a. What the offer must be
+
+| Item | Requirement |
+|---|---|
+| Presence | A pending offer on `/driver` every time the demo driver opens it, before any other account acts |
+| Lifetime | At least 7 days, or re-seeded by a scheduled job — an offer that quietly expires is the likeliest thing to break between setup and review |
+| Pickup | `118 N College St, Auburn, AL 36830`, geocodable by the site's own place picker |
+| Dropoff | `334 W Magnolia Ave, Auburn, AL 36830`, geocodable — this is the address that has to reach the trip card |
+| Fare | `$14.80`, with the driver's 75% share shown the way a real offer shows it |
+| Scope | The demo driver account only. No real driver sees it and it never enters real dispatch |
+
+### 4b. How to implement it
+
+A per-account demo flag or an admin "re-seed demo offer" action is enough. Take
+whichever fits the existing dispatch code with less surgery:
+
+- **Flag on the account** — when the demo driver loads `/driver`, ensure a pending
+  offer exists for them, creating one if the last was accepted, completed, cancelled
+  or expired.
+- **Re-seed action** — a control in the admin surface that creates the same offer.
+  Less code, but it relies on a person running it after every change, so it belongs
+  next to the pre-submission re-check in `review-notes.md`.
+
+Either way the offer must be a **real offer in the normal dispatch model**, not a
+hard-coded card in the template: accepting it has to go through the product's own
+accept path and open the real trip screen. A convincing-looking card that dead-ends
+at acceptance is worse than the empty dashboard.
+
+### 4c. What it depends on
+
+- **§2's `data-kerb-destination`.** Accepting the offer is what proves the native
+  Navigate control works, so the trip card it opens must carry the dropoff in that
+  attribute. Without both, the offer leads straight to "Destination not available".
+- **No ordering requirement.** The reviewer must not have to book as the rider first,
+  or act on one device to make an offer appear on another.
+
+Pointing a rider booking at the demo driver while they are online is a nice extra —
+the reviewer who does book finds the trip waiting on the driver side — but it is not
+the path to rely on. The standing offer is.
+
+The companion piece of demo state, promo code `KERBREVIEW` (100% off, bypassing the
+saved-card requirement so a booking costs nothing), is specified in
+`review-notes.md`. It needs the same kind of site work if promo codes cannot express
+it today.
+
+---
+
 ## Acceptance checks
 
 Run these against the live site before telling the app side it is ready.
@@ -222,11 +278,16 @@ Run these against the live site before telling the app side it is ready.
    it opens with the dropoff address. Same on iOS with Apple Maps. No
    "Destination not available" during a live trip.
 7. Landing page source contains neither `no app-store download` nor `no app to
-   download`.
+download`.
+8. Signed in as the demo driver, `/driver` shows a pending offer with no other
+   account having acted. Accept it, finish or cancel the trip, reopen `/driver` →
+   an offer is waiting again. A different driver account sees no such offer.
+9. The trip card that offer opens is the same one from check 5: one
+   `[data-kerb-destination]`, carrying the dropoff.
 
 ## What does not change
 
-- No app build or store update is needed for any of these three; they go live
+- No app build or store update is needed for any of these four; they go live
   with the site.
 - The shell never modifies the site's markup in the database or on the server.
   It only hides a few blocks on the two home screens, so `/delete-account` and
