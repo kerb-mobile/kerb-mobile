@@ -1,0 +1,114 @@
+name: iOS simulator run
+
+# Boots a real iOS simulator on a GitHub-hosted macOS runner, installs the debug
+# build and screenshots what the app actually renders. This is the only place the
+# Swift, the Capacitor bridge and the bundled shell patch are ever executed,
+# because the development Mac has no Xcode.
+#
+# The screenshots are build artefacts for review, not store assets: the app opens
+# the live site, so what you see is the site's own first screen inside the app.
+
+on:
+  push:
+    paths:
+      - 'ios/**'
+      - 'www/**'
+      - '.github/workflows/ios-simulator.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-simulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    name: Run on iPhone simulator and screenshot
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx cap sync ios
+
+      - run: xcodebuild -version
+
+      - name: Boot a simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          DEVICE_TYPE=$(xcrun simctl list devicetypes -j | python3 -c "
+          import json, sys
+          types = json.load(sys.stdin)['devicetypes']
+          names = [t['name'] for t in types if t['name'].startswith('iPhone')]
+          def pick():
+              for wanted in ('iPhone 17 Pro', 'iPhone 16 Pro', 'iPhone 17', 'iPhone 16'):
+                  if wanted in names:
+                      return wanted
+              return next((n for n in names if 'Pro' in n), names[0])
+          name = pick()
+          print(next(t['identifier'] for t in types if t['name'] == name))
+          ")
+          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c "
+          import json, sys
+          runtimes = [r for r in json.load(sys.stdin)['runtimes'] if r['platform'] == 'iOS' and r['isAvailable']]
+          runtimes.sort(key=lambda r: r['version'], reverse=True)
+          print(runtimes[0]['identifier'])
+          ")
+          UDID=$(xcrun simctl create KerbScreenshot "$DEVICE_TYPE" "$RUNTIME")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "Simulator: $UDID ($DEVICE_TYPE, $RUNTIME)"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+      - name: Build for that simulator
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Install, launch and screenshot
+        run: |
+          set -euo pipefail
+          UDID="${{ steps.sim.outputs.udid }}"
+          APP="build/DerivedData/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$APP"
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.kerbgo.app
+          # Splash, then the live site over the network.
+          sleep 30
+          mkdir -p artifacts
+          xcrun simctl io "$UDID" screenshot artifacts/ios-01-launch.png
+          sleep 10
+          xcrun simctl io "$UDID" screenshot artifacts/ios-02-loaded.png
+          sips -g pixelWidth -g pixelHeight artifacts/ios-01-launch.png
+          sips -g pixelWidth -g pixelHeight artifacts/ios-02-loaded.png
+
+      - name: App log
+        if: always()
+        run: |
+          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 3m --style compact \
+            --predicate 'process == "App" OR eventMessage CONTAINS "kerb"' \
+            > artifacts-ios-log.txt || true
+          tail -80 artifacts-ios-log.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-simulator-run
+          path: |
+            artifacts/*.png
+            artifacts-ios-log.txt
+          if-no-files-found: warn
