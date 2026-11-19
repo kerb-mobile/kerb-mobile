@@ -8,10 +8,12 @@ import Capacitor
  * in capacitor.config.ts). This class adds the one piece of UI that has to be
  * native: the driver-only navigation chooser.
  *
- * Drivers get a "Navigate" control while they are on a Kerb driver route. Tapping
- * it offers Kerb's own in-app Mapbox map (the default, unchanged), Apple Maps,
- * Google Maps or Waze. Riders never see it: the control only appears when the
- * WebView is on a /app/driver route.
+ * Drivers get a "Navigate" control on the driver dashboard. Tapping it offers
+ * Kerb's own in-app Mapbox map (the default, unchanged), Apple Maps, Google Maps
+ * or Waze. Riders never see it: the control only appears when the WebView is on
+ * /driver, the dashboard that shows the active trip. Sub-pages such as
+ * /driver/earnings and /driver/documents have no trip, so the control stays
+ * hidden there.
  *
  * Destination hand-off: the dropoff address is read from one documented hook —
  * an element carrying `data-kerb-destination`. If the trip page does not expose
@@ -115,7 +117,7 @@ class KerbBridgeViewController: CAPBridgeViewController {
             navigateButton.isHidden = true
             return
         }
-        let isDriverRoute = path.hasPrefix("/app/driver")
+        let isDriverRoute = path == "/driver" || path == "/driver/"
         navigateButton.isHidden = !isDriverRoute
         if isDriverRoute {
             view.bringSubviewToFront(navigateButton)

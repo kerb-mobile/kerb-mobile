@@ -30,9 +30,11 @@ import org.json.JSONArray;
  * in capacitor.config.ts). This activity adds the one piece of UI that has to be
  * native: the driver-only navigation chooser.
  *
- * Drivers get a "Navigate" control while they are on a Kerb driver route. Tapping
- * it offers Kerb's own in-app Mapbox map (the default, unchanged), Google Maps or
- * Waze (Apple Maps does not exist on Android). Riders never see it.
+ * Drivers get a "Navigate" control on the driver dashboard. Tapping it offers
+ * Kerb's own in-app Mapbox map (the default, unchanged), Google Maps or Waze
+ * (Apple Maps does not exist on Android). Riders never see it: the control only
+ * appears on /driver, the dashboard that shows the active trip. Sub-pages such as
+ * /driver/earnings and /driver/documents have no trip, so it stays hidden there.
  *
  * Destination hand-off: the dropoff address is read from one documented hook —
  * an element carrying `data-kerb-destination`. If the trip page does not expose
@@ -41,7 +43,7 @@ import org.json.JSONArray;
  */
 public class MainActivity extends BridgeActivity {
 
-    private static final String DRIVER_ROUTE_PREFIX = "/app/driver";
+    private static final String DRIVER_ROUTE = "/driver";
 
     /** Kerb brand orange (#FD5204). */
     private static final int BRAND_ORANGE = Color.rgb(253, 82, 4);
@@ -166,7 +168,7 @@ public class MainActivity extends BridgeActivity {
             return;
         }
         String path = currentPath();
-        boolean isDriverRoute = path != null && path.startsWith(DRIVER_ROUTE_PREFIX);
+        boolean isDriverRoute = DRIVER_ROUTE.equals(path) || (DRIVER_ROUTE + "/").equals(path);
         navigateButton.setVisibility(isDriverRoute ? View.VISIBLE : View.GONE);
         if (isDriverRoute) {
             navigateButton.bringToFront();
