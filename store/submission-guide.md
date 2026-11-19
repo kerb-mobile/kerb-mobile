@@ -70,12 +70,25 @@ and the address writes were returning `503 Upstream unavailable`, so the order l
 has never been seen end to end — no order was placed, and mark-ready is untested
 against a live order.
 
+**Shops should be able to decline — but that is store-side work, not an app
+feature.** An order is currently auto-accepted: it appears in the portal and the
+only action is mark ready. That leaves a shop no way out of an order it cannot
+fill — closed early, out of the item, already at capacity — so the order sits, a
+courier is dispatched and the customer waits for food nobody is cooking. Every
+order-taking platform lets the merchant reject an order, and this one needs it
+too, with a reason the customer sees and a refund path. It has to exist in the
+store API and in the portal first, on the site; it is not something an app can
+invent, and it is not part of the rider-and-driver submission. So decline is out
+of the merchant app's trigger below: the app is built around the alert and shows
+the actions the portal already has.
+
 It is not part of this submission: grocery ordering is still a waitlist on the
 site, and a merchant app without the alert would only be a wrapper.
 **Trigger for the merchant app:** grocery live in at least one zone with shops
 working the real order loop from the web portal — then submit it with the loud
-new-order alert above, one-tap accept/decline and ready, its own demo merchant
-account and its own review notes, after the rider app is approved.
+new-order alert above and mark-ready, plus decline once the store side has one,
+its own demo merchant account and its own review notes, after the rider app is
+approved.
 
 **Trigger for a separate driver app:** after a first approval, and only if
 driver volume justifies driver-only needs the rider app should not carry —
