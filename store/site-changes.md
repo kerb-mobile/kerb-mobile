@@ -1,0 +1,229 @@
+# kerbgo.com — the three site changes App Review and Play review need
+
+For whoever owns the kerbgo.com codebase. Nothing here requires a new app
+release: both apps load the live site in a WebView, so these changes take effect
+as soon as they are deployed. The app side is already built and checked in.
+
+Order of work: 1 (blocks both stores), 2 (blocks the driver flow), 3 (one-line
+copy fix).
+
+---
+
+## 1. In-app account deletion — blocks Apple 5.1.1(v) and Play's account-deletion policy
+
+Today the only deletion path is "email us" in the privacy policy, and
+`https://www.kerbgo.com/delete-account` returns **404** (checked 19 Nov 2026).
+Both stores require deletion to be **initiated in the app**. Email is not
+acceptable as the only route. A page on the site counts as "in the app", because
+the shells load kerbgo.com itself.
+
+### 1a. Route contract
+
+| Item | Requirement |
+|---|---|
+| URL | `GET https://www.kerbgo.com/delete-account` (also serve on `kerbgo.com`) |
+| Auth | Page must load signed out as well as signed in. Signed in → deletion flow. Signed out → short explanation, a link to sign in (`/signin?next=/delete-account` or the site's equivalent), and the email fallback. |
+| Host | Stay on kerbgo.com. No redirects to another domain, no `target="_blank"`, no `window.open` — the shells only keep kerbgo.com inside the app WebView. |
+| Caching | `Cache-Control: no-store` on the page and on the confirmation response. |
+
+This URL is also the value for **Play Console → App content → Data deletion →
+Data deletion URL**. It has to work for a signed-out visitor.
+
+### 1b. Deletion behaviour
+
+- **Confirmation step required.** Not one tap: re-enter the password, or type
+  `DELETE` into a field, then a final button. Apple rejects a single accidental
+  tap path.
+- **Actually delete**, server-side, for that signed-in user only (never an id
+  from the request body): account row, saved addresses, session tokens, driver
+  vehicle record, uploaded driver-document photos, grocery-waitlist entry for
+  that email. Detach/delete the payment customer or saved card at the payment
+  processor. Completed trip and payment records may be retained only where tax
+  or fraud law requires it — say so on the page and in the privacy policy.
+- **Invalidate every session** for the account and clear the session cookie in
+  the response, then land on a signed-out confirmation state (e.g.
+  `/delete-account?deleted=1`, or a `/delete-account/done` page). Reloading
+  `/app` afterwards must show the signed-out screen; signing in again with the
+  old credentials must fail.
+- **POST only** for the destructive action; a `GET` must never delete. A
+  signed-out POST returns 401 or redirects to sign-in — not a 500.
+- Idempotent: a second POST after success shows the confirmation state.
+
+### 1c. In-app entry points (markup the shell already reads)
+
+The shells add no native "delete" item. The Account tab renders the site's own
+`<details>` rows, so the entry point is markup on the two authenticated home
+pages.
+
+**Rider — `/app`:** add the block as the **last `<details>` child of the container
+that already holds `Your trips`, `Saved places` and the privacy/legal rows**. Give
+it no container of its own:
+
+```html
+<details>
+  <summary>Delete account</summary>
+  <p>Deleting your account removes your profile, saved addresses, trip history and
+     saved payment method. This cannot be undone.</p>
+  <a href="/delete-account">Continue to delete your account</a>
+</details>
+```
+
+Placement is what decides the tab, not the page. The shell hides that one
+container on Home, then splits the rows inside it by label: `Your trips` goes to
+the Trips tab, every other `<details>` row goes to Account. So with the row
+inside the shared container it is Account-only:
+
+| View | Result |
+|---|---|
+| Home | container hidden — no delete row |
+| Trips | container shown, non-`Your trips` rows hidden — no delete row |
+| Account | container shown, all other rows visible — delete row sits with the privacy rows |
+
+The only way to get this wrong is to give the row its own container or a sibling
+block: the shell then shows it on Home, where a destructive entry point has no
+business. If the page renders its rows in more than one container, put the delete
+row in the one holding `Your trips`.
+
+**Driver — `/driver`:** add the same `<details>` block to the list that also
+holds the `Where you are and what Kerb sees` row. The native Account view shows
+that list and hides it on Home, so the row appears on the Account tab next to
+Sign out with no app change.
+
+Constraints the native layout depends on — do not rename or restructure these
+while adding the row:
+
+- `/app` and `/driver` must stay at those exact paths (the shell only patches
+  those two).
+- Rider rows must remain `<details>` elements inside one shared container; that
+  is how the Account/Trips tabs split them, and the delete row relies on it.
+- Driver controls must keep the exact text `Earnings & trips`, `Documents`,
+  `Help`, `Sign out`, and a `<summary>` beginning `Where you are and what Kerb
+  sees`. If any one is missing, the shell skips the whole native Account section.
+- Do not restructure that container into several siblings, and do not move the
+  existing rows into a new element, to make room for the delete row.
+
+### 1d. Policy and listing follow-up
+
+- Privacy policy, "How long we keep it": replace the email-only sentence with
+  "You can delete your account and its data in the app: Account → Delete
+  account, or at https://www.kerbgo.com/delete-account. If you cannot sign in,
+  email …". Keep the email route as a fallback for locked-out users.
+- Play Console Data deletion URL: `https://www.kerbgo.com/delete-account`.
+- App Review notes: fill the placeholder in `store/review-notes.md` with
+  "Account tab → Delete account → confirm".
+
+---
+
+## 2. `data-kerb-destination` on the driver trip card — fixes the Navigate flow
+
+The native Navigate control appears only on `/driver`, and reads the dropoff at
+the moment the driver taps. It uses exactly this script (identical in
+`android/app/src/main/java/com/kerbgo/app/MainActivity.java` and
+`ios/App/App/SceneDelegate.swift`):
+
+```js
+var el = document.querySelector('[data-kerb-destination]');
+if (!el) return '';
+var value = el.getAttribute('data-kerb-destination') || el.textContent || '';
+return value.replace(/\s+/g, ' ').trim();
+```
+
+That gives the rules:
+
+- **Exactly one** element carrying the attribute on `/driver`. `querySelector`
+  takes the first in document order, so a second (a saved place, a past trip, a
+  marketing address) can silently win. Keep it to the active trip card.
+- **The attribute value wins** over the element's text. Put the whole address in
+  the attribute, single line, no label, no HTML: `123 E Magnolia Ave, Auburn, AL
+  36830`. A blank attribute falls back to the element's text content.
+- **Present whenever a trip is active** — from offer accepted through arrive,
+  pickup and complete; the address does not change across those states.
+- **Absent when there is no active trip** (offline, between trips, after
+  complete/cancel). With no element the app says "Destination not available"
+  instead of navigating somewhere stale — which is the correct fallback, but
+  during a live trip it is a visible failure, and a review risk under 2.1.
+- It must exist in the rendered DOM (not inside `<template>`, and not in a
+  closed shadow root). It is read on tap, so no event or observer is needed; it
+  just has to match what is on screen.
+
+Example on the trip card:
+
+```html
+<div class="…">
+  <p>Dropoff</p>
+  <p data-kerb-destination="123 E Magnolia Ave, Auburn, AL 36830">
+    123 E Magnolia Ave<br>Auburn, AL 36830
+  </p>
+</div>
+```
+
+Do not add it to rider pages, `/driver/earnings` or `/driver/documents` — the
+Navigate control does not exist there.
+
+---
+
+## 3. Landing copy — the site currently says there is no app
+
+Both apps open on the marketing landing page, and it tells the user not to
+download an app. That is now false, and it is the first thing a reviewer reads.
+
+Two sentences on `https://www.kerbgo.com`:
+
+1. Hero paragraph, "Local rides" section:
+
+   > Kerb is a local rides service: pick two places, see the fare before you
+   > book, and pay by card — **no app-store download**. Local drivers who live
+   > where you live.
+
+   Replace with:
+
+   > Kerb is a local rides service: pick two places, see the fare before you
+   > book, and pay by card — **in your browser or the Kerb app**. Local drivers
+   > who live where you live.
+
+2. "How it works" intro:
+
+   > Rides are live today. Three steps, in your phone's browser — **no app to
+   > download**.
+
+   Replace with:
+
+   > Rides are live today. Three steps, in your phone's browser or the Kerb app.
+
+Also sweep the page for any other "no app", "browser only" or "download"
+phrasing and remove it. Do **not** add "Download now", store badges, a QR code
+or a countdown: promoting an unreleased app is its own review problem, and store
+screenshots may not contain badges. Once both listings are live, a plain "Get
+the app" link to the store listing is fine in place of the removed sentence.
+
+---
+
+## Acceptance checks
+
+Run these against the live site before telling the app side it is ready.
+
+1. `curl -sI https://www.kerbgo.com/delete-account` → `200`, not `404`.
+2. Signed out, the page loads, explains the flow, links to sign in, and does not
+   crash or 500.
+3. Signed in with a throwaway rider account: the Account tab shows **Delete
+   account**, the Home and Trips tabs do not; the flow asks for confirmation;
+   after confirming, the cookie is cleared, `/app` is signed out, and the old
+   credentials no longer sign in.
+4. The same row appears in the driver Account tab on `/driver`.
+5. On `/driver` with an active trip, in devtools:
+   `document.querySelectorAll('[data-kerb-destination]').length` → `1`, and its
+   value is the full dropoff address. After completing or cancelling:
+   → `0`.
+6. Native check, Android: open the trip, tap **Navigate**, choose Google Maps —
+   it opens with the dropoff address. Same on iOS with Apple Maps. No
+   "Destination not available" during a live trip.
+7. Landing page source contains neither `no app-store download` nor `no app to
+   download`.
+
+## What does not change
+
+- No app build or store update is needed for any of these three; they go live
+  with the site.
+- The shell never modifies the site's markup in the database or on the server.
+  It only hides a few blocks on the two home screens, so `/delete-account` and
+  the `data-kerb-destination` contract must live in the site's own templates.
