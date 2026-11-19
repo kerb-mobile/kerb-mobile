@@ -63,9 +63,9 @@ Questions? Support is at kerbgo.com/help.
 **App Review Information**
 
 - Demo rider account: **[you]** email / password
-- Demo driver account: **[you]** email / password (approved, with a vehicle, so the driver dashboard and the Navigate button are reachable)
+- Demo driver account: **[you]** email / password (approved, with a vehicle, and a **pending offer already waiting** on the dashboard, so the offer, the trip card and the Navigate button are all reachable without booking anything first)
 - Enter both accounts in App Store Connect and the Play Console only. Do not paste the passwords into this file or commit them to the repository.
-- Notes: `Kerb is a native iOS app that presents kerbgo.com with native location, camera and navigation integration. Sign in with the demo rider account to book a ride; sign in with the demo driver account and open the driver dashboard to see the driver view. The "Navigate" control appears only on driver routes and offers Apple Maps, Google Maps, Waze, or Kerb's own map. Payment is by card for a physical transport service, processed on the web backend.`
+- Notes: `Kerb is a native iOS app that presents kerbgo.com with native location, camera and navigation integration. Sign in with the demo rider account to book a ride; sign in with the demo driver account and accept the offer already waiting on the dashboard to reach the trip and the driver view. The "Navigate" control appears only on driver routes and offers Apple Maps, Google Maps, Waze, or Kerb's own map. Payment is by card for a physical transport service, processed on the web backend.`
 - Contact: **[you]** name, phone, email
 
 **App Privacy answers** (must match `ios/App/App/PrivacyInfo.xcprivacy`)
@@ -197,7 +197,7 @@ demo account and recapture shots 1 and 2.
 | Scene | Why it is not here |
 |---|---|
 | Live trip — driver approaching / trip in progress | Needs a real booking accepted by a driver; no trip was active during capture. |
-| Driver — incoming offer | Needs dispatch to send an offer during the 60-second window; can only be caught by booking a ride while the driver is online in another session. |
+| Driver — incoming offer | No longer blocked, just not captured: the demo driver holds a standing offer (`site-changes.md` §4), so any session signed in as that account can photograph the card and accept it. Waiting on that site change being deployed. |
 | The full Apple set | The app now runs and is screenshotted on an iPhone simulator in CI (`.github/workflows/ios-simulator.yml`), but the job cannot sign in, so its only capture is the landing page at 1206 × 2622. The five app screens still need a session: re-run that job with a demo account signed in, or capture on a real iPhone. Sizes: `1206 × 2622` or `1179 × 2556` (or `1320 × 2868` / `1290 × 2796` / `1260 × 2736`). |
 | 13-inch iPad set | Not required: `TARGETED_DEVICE_FAMILY = 1` in both build configurations. |
 
@@ -222,5 +222,7 @@ demo account and recapture shots 1 and 2.
 4. Close the four blocking items in `store/screenshot-checklist.md`: in-app account
    deletion, live demo accounts, `data-kerb-destination` on the driver trip card,
    and the iPad decision.
-5. Capture the live-trip and incoming-offer shots if you want the driver side shown
-   in full; the listing reads well without them, but the checklist asks for them.
+5. Capture the incoming-offer shot once the standing demo offer is live
+   (`site-changes.md` §4) — it is the strongest driver-side image and needs no
+   second session. The live-trip shot still needs a real booking accepted by a
+   driver, so it is optional.
