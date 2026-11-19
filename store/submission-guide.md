@@ -232,7 +232,9 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
    testing. The upload key is already in place.
 2. Run **Actions → iOS release** (all six secrets in place), then wait for the build
    to appear in App Store Connect. Add it to the 1.0 version page.
-3. Create the two demo accounts and put their credentials in both consoles.
+3. Build the demo state from `review-notes.md` — two accounts, the rider's saved
+   place and past trip, the driver's vehicle and standing offer, promo code
+   `KERBREVIEW` — then put the credentials in both consoles.
 4. Capture the Apple screenshot set on an iPhone (5 scenes from
    `screenshot-checklist.md`; the sign-in scene already exists as
    `03-signin.png` and only needs an iOS re-shoot at 1206×2622).
