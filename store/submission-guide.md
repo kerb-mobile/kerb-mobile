@@ -41,8 +41,14 @@ and Play scrutinises business-only apps.
 marking them ready is alert-driven work, and on iOS a WebView cannot alert while
 suspended without push, so that app is only worth building with native
 APNs/FCM notifications. It is not part of this submission: grocery ordering is
-still a waitlist on the site, and `kerbgo.com/retailer` already gives a shop an
-orders tab, expected prep time and "mark ready for pickup" in a phone browser.
+still a waitlist on the site, and `kerbgo.com/retailer` is what a shop uses in a
+phone browser today. What that portal actually does, checked 19 Nov 2026 with a
+test shopfront: an order simply arrives — there is no accept or decline step — and
+the only action on it is "mark ready for pickup", which the courier sees on
+arrival. The portal also has a Store & items tab (open/closed, prep time, address,
+item form), but both the item and the address writes were returning `503 Upstream
+unavailable`, so the order loop has never been seen end to end — no order was
+placed, and mark-ready is untested against a live order.
 **Trigger for the merchant app:** grocery live in at least one zone with shops
 working the real order loop from the web portal — then submit it with native push
 (new order, with sound), one-tap accept/decline and ready, its own demo merchant
