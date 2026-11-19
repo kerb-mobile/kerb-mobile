@@ -7,6 +7,40 @@ as soon as they are deployed. The app side is already built and checked in.
 Order of work: 1 (blocks both stores), 4 and 2 together (they are what makes the
 driver flow reviewable), 3 (one-line copy fix).
 
+## Status — checked against the live site, 19 Nov 2026, 18:23 UTC
+
+**None of the four has landed.** Every item below is still missing from the live
+site, so any part of this document that has been deployed is invisible to a
+reviewer.
+
+| § | Change | Live | Evidence |
+|---|---|---|---|
+| 1 | `/delete-account` route and the entry rows | **not landed** | `GET https://www.kerbgo.com/delete-account` → `404` (host error page, `no-store`). No shipped JavaScript contains `delete-account`, so no row links to it either |
+| 2 | `data-kerb-destination` on the trip card | **not landed** | Signed in as the demo driver on `/driver`: `document.querySelectorAll('[data-kerb-destination]').length` → `0`, and the string appears in none of the 69 deployed JS chunks |
+| 3 | Landing copy | **not landed** | The homepage source still contains both `no app-store download` and `no app to download`; neither replacement sentence is present |
+| 4 | Standing demo offer | **not landed** | Demo driver signed in on `/driver` with no active trip: the dashboard reads `Offline`, `0 trips`, shows no offer card, and only the four settings rows (`Where you are and what Kerb sees`, `Your car`, `Offer alerts on this phone`, `Refer another driver`) |
+| — | Promo code `KERBREVIEW` | **not landed** | No `KERBREVIEW` string in the deployed client |
+
+How that was measured, so a later check can repeat it: the site is a
+client-rendered SPA (`/assets/index-*.js` plus 69 chunks), so served HTML proves
+nothing about `/app` or `/driver`. The bundle and every chunk were swept for the
+four markers, and `/driver` was loaded in a browser signed in as the demo driver
+(no trip accepted, nothing written to the account).
+
+Two things this check cannot decide:
+
+- **Whether an offer appears once the driver is online.** The dashboard carries a
+  *Go online* control and the account is approved, but going online puts a live
+  account into real dispatch, so it was not pressed. §4a already requires an offer
+  "every time the demo driver opens it", which reads as regardless of online
+  state; whoever deploys it should confirm the offer is visible offline, because a
+  reviewer opening a fresh install may never press *Go online*. Acceptance check 8
+  still covers the online case.
+- **Whether the demo driver is still the account described in `review-notes.md`.**
+  It signs in, is admin-approved, and has a vehicle (Kia K4), but its saved state
+  is whatever it was after earlier testing — the rider-side booking, saved place
+  and past trip in the notes were not re-verified here.
+
 ---
 
 ## 1. In-app account deletion — blocks Apple 5.1.1(v) and Play's account-deletion policy
