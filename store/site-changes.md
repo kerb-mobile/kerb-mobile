@@ -5,13 +5,15 @@ release: both apps load the live site in a WebView, so these changes take effect
 as soon as they are deployed. The app side is already built and checked in.
 
 Order of work: 1 (blocks both stores), 4 and 2 together (they are what makes the
-driver flow reviewable), 3 (one-line copy fix).
+driver flow reviewable), 3 (one-line copy fix). §5, the retailer Accept/Decline
+change, is no store's prerequisite — it is here because it is the same owner's
+work.
 
 ## Status — checked against the live site, 19 Nov 2026, 18:23 UTC
 
-**None of the four has landed.** Every item below is still missing from the live
-site, so any part of this document that has been deployed is invisible to a
-reviewer.
+**None of the listed changes has landed.** Every item below is still missing
+from the live site, so any part of this document that has been deployed is
+invisible to a reviewer.
 
 | § | Change | Live | Evidence |
 |---|---|---|---|
@@ -19,6 +21,7 @@ reviewer.
 | 2 | `data-kerb-destination` on the trip card | **not landed** | Signed in as the demo driver on `/driver`: `document.querySelectorAll('[data-kerb-destination]').length` → `0`, and the string appears in none of the 69 deployed JS chunks |
 | 3 | Landing copy | **not landed** | The homepage source still contains both `no app-store download` and `no app to download`; neither replacement sentence is present |
 | 4 | Standing demo offer | **not landed** | Demo driver signed in on `/driver` with no active trip: the dashboard reads `Offline`, `0 trips`, shows no offer card, and only the four settings rows (`Where you are and what Kerb sees`, `Your car`, `Offer alerts on this phone`, `Refer another driver`) |
+| 5 | Retailer Accept/Decline and the new-order alarm | **not landed** | `assets/retailer-*.js` has the seven order statuses and mark-ready only: no `retailer_decision`, no accept or decline control, no alarm, and the card shows neither the items nor the prep time |
 | — | Promo code `KERBREVIEW` | **not landed** | No `KERBREVIEW` string in the deployed client |
 
 How that was measured, so a later check can repeat it: the site is a
@@ -291,6 +294,26 @@ saved-card requirement so a booking costs nothing), is specified in
 it today.
 
 ---
+
+## 5. Retailer Accept/Decline and the new-order alarm — not a store prerequisite
+
+An order lands on `/retailer` with a mark-ready button and nothing else: the shop
+cannot say yes or no, cannot see what to cook, and nothing calls the counter when
+an order arrives. The patch is written against the deployed route and committed
+in `store/merchant-order-response.md`; **none of it is deployed.**
+
+- **Decision.** `retailer_decision` (`pending` | `accepted` | `declined`) on the
+  order, Accept/Decline inside the existing order card, decline with a short
+  reason. Do not reuse `status = "accepted"` — that is the courier accepting the
+  delivery.
+- **Card.** The order's lines and its prep time, so the shop decides from the card
+  rather than opening the customer record.
+- **Alarm.** A loud two-beep tone every four seconds and a flashing tab title
+  while any order is unanswered, armed with one tap, silent once the page is
+  closed or the phone is locked — the limit that justifies the merchant app.
+- **Before it ships:** declining must refund through the same path as a customer
+  cancellation and release the courier, and order writes must be clear of the
+  `503 Upstream unavailable` seen on 19 Nov 2026.
 
 ## Acceptance checks
 
