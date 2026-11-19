@@ -72,7 +72,7 @@
       <div class="tagline">Rides and groceries, right to your curb.</div>
       <div class="card">
         <h1 id="title">Connecting to Kerb</h1>
-        <p id="body">We could not reach kerbgo.com. Check your connection and try again.</p>
+        <p id="body">Kerb could not be reached just now. Your trips and account are unaffected — try again in a moment.</p>
         <button id="retry" type="button">Try again</button>
         <div class="status" id="status"></div>
       </div>
@@ -81,27 +81,129 @@
       // This page is the app's offline / load-failure screen. Capacitor shows it via
       // server.errorPath when the remote site cannot be reached; the app itself always
       // loads the live site from https://www.kerbgo.com.
+      //
+      // A cold start can fail that very first request while the phone is still bringing
+      // its network up (navigator.onLine is often false for a second or two even though
+      // the connection is fine), so the first failure is not a verdict. This screen
+      // probes the site and leaves for it as soon as a real request succeeds; the button
+      // stays for a deliberate retry, and the screen is never left stale.
+      //
+      // Note: this has to live here rather than in shell-tweak.js. That patch is injected
+      // into kerbgo.com documents only (/app and /driver), and this failure happens before
+      // any kerbgo.com document exists.
       var REMOTE = 'https://www.kerbgo.com/';
+      var PROBE_TIMEOUT = 6000;
+      var FIRST_DELAY = 800;
+      var MAX_DELAY = 10000;
 
-      function diagnostic() {
-        var online = navigator.onLine !== false;
-        document.getElementById('title').textContent = online ? 'Connecting to Kerb' : 'You are offline';
-        document.getElementById('body').textContent = online
-          ? 'Kerb could not be reached just now. Your trips and account are unaffected — try again in a moment.'
-          : 'Kerb needs a connection to load rides, fares and navigation. Reconnect and try again.';
+      var titleEl = document.getElementById('title');
+      var bodyEl = document.getElementById('body');
+      var statusEl = document.getElementById('status');
+      var retryButton = document.getElementById('retry');
+
+      var timer = null;
+      var delay = FIRST_DELAY;
+      var probing = false;
+      var leaving = false;
+
+      function setCopy(headline, detail) {
+        titleEl.textContent = headline;
+        bodyEl.textContent = detail;
       }
 
-      function retry() {
-        var status = document.getElementById('status');
-        status.textContent = 'Reconnecting…';
-        // A hard assignment (not location.replace) so history does not keep the error page.
+      function leave() {
+        if (leaving) {
+          return;
+        }
+        leaving = true;
+        window.clearTimeout(timer);
+        statusEl.textContent = 'Connected. Opening Kerb…';
+        // replace() so the error page does not stay in history behind the site.
+        window.location.replace(REMOTE);
+      }
+
+      function waitForConnection() {
+        if (leaving) {
+          return;
+        }
+        window.clearTimeout(timer);
+        timer = window.setTimeout(probe, delay);
+        delay = Math.min(Math.round(delay * 1.6), MAX_DELAY);
+        if (navigator.onLine === false) {
+          setCopy(
+            'Connecting to Kerb',
+            'The phone is not on a network yet. Kerb will open by itself as soon as one is available.'
+          );
+          statusEl.textContent = 'Waiting for a connection…';
+        } else {
+          setCopy(
+            'Connecting to Kerb',
+            'Kerb did not answer the first time. This usually clears on its own within a few seconds.'
+          );
+          statusEl.textContent = 'Reconnecting…';
+        }
+      }
+
+      /**
+       * A real request is the only trustworthy signal here: navigator.onLine reports
+       * false on a cold start while the network stack is still attaching, which is how
+       * a working phone ended up parked on an "offline" screen.
+       */
+      function probe() {
+        if (leaving || probing) {
+          return;
+        }
+        probing = true;
+
+        var controller = typeof AbortController === 'function' ? new AbortController() : null;
+        var cutOff = window.setTimeout(function () {
+          if (controller) {
+            controller.abort();
+          }
+        }, PROBE_TIMEOUT);
+
+        fetch(REMOTE, {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller ? controller.signal : undefined
+        }).then(
+          function () {
+            window.clearTimeout(cutOff);
+            probing = false;
+            leave();
+          },
+          function () {
+            window.clearTimeout(cutOff);
+            probing = false;
+            waitForConnection();
+          }
+        );
+      }
+
+      retryButton.addEventListener('click', function () {
+        statusEl.textContent = 'Reconnecting…';
         window.location.href = REMOTE;
-      }
+      });
 
-      document.getElementById('retry').addEventListener('click', retry);
-      window.addEventListener('online', diagnostic);
-      window.addEventListener('offline', diagnostic);
-      diagnostic();
+      // A connection coming back is the strongest hint there is, so skip the backoff.
+      window.addEventListener('online', function () {
+        delay = FIRST_DELAY;
+        probe();
+      });
+      window.addEventListener('offline', function () {
+        waitForConnection();
+      });
+      // Coming back from the background restarts the page from a restored render.
+      window.addEventListener('pageshow', function () {
+        if (!leaving) {
+          probe();
+        }
+      });
+
+      // First paint: schedule a probe immediately instead of believing what the
+      // browser says about the network right now.
+      waitForConnection();
     </script>
   </body>
 </html>
