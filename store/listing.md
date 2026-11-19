@@ -2,6 +2,9 @@
 
 Copy for both stores. Fields marked **[you]** need your details before submission.
 Character limits are the stores' own; the copy below is inside them.
+Phone screenshots are captured and filed in `store/screenshots/`. The Screenshots
+section at the end lists them, the shots that still need to be taken, and the one
+asset (the Play feature graphic) that does not exist yet.
 
 Bundle / package ID: `com.kerbgo.app` · Version 1.0 (build 1) · Platform: iPhone, Android phone.
 
@@ -57,6 +60,7 @@ Questions? Support is at kerbgo.com/help.
 
 - Demo rider account: **[you]** email / password
 - Demo driver account: **[you]** email / password (approved, with a vehicle, so the driver dashboard and the Navigate button are reachable)
+- Enter both accounts in App Store Connect and the Play Console only. Do not paste the passwords into this file or commit them to the repository.
 - Notes: `Kerb is a native iOS app that presents kerbgo.com with native location, camera and navigation integration. Sign in with the demo rider account to book a ride; sign in with the demo driver account and open the driver dashboard to see the driver view. The "Navigate" control appears only on driver routes and offers Apple Maps, Google Maps, Waze, or Kerb's own map. Payment is by card for a physical transport service, processed on the web backend.`
 - Contact: **[you]** name, phone, email
 
@@ -145,6 +149,54 @@ Provide the same demo rider and driver credentials as for Apple, with the note t
 
 ---
 
+## Screenshots — captured
+
+Six phone screenshots were taken from the Android debug build of `com.kerbgo.app`
+running on the Android emulator, signed in to the rider and driver accounts, then
+flattened to 24-bit PNG and cropped only by scroll position (nothing is mocked or
+recomposed). They are `store/screenshots/`, and they are committed — the raw
+`adb` captures stay in `store/shots/`, which is git-ignored:
+
+| # | Scene | File | Pixels |
+|---|---|---|---|
+| 1 | Fare before you book — ride types and prices for a 1.5 mi trip | `01-fare-types.png` | 1080 × 2160 |
+| 2 | Fare before you book — itemised estimate and the Book ride button | `02-fare-breakdown.png` | 1080 × 2160 |
+| 3 | Sign-in | `03-signin.png` | 1080 × 2160 |
+| 4 | Driver dashboard — approved, offline, week and all-time earnings, Navigate pill, tab bar | `04-driver-home.png` | 1080 × 2160 |
+| 5 | Driver Navigate sheet — Kerb map (in app), Google Maps, Waze | `05-driver-navigate.png` | 1080 × 2160 |
+| 6 | Driver earnings — 75% share, still owed, paid so far | `06-driver-earnings.png` | 1080 × 1320 |
+
+All six are 24-bit PNG with no alpha, which is what Google Play requires. Five of
+them are exactly 9:16; the earnings shot is shorter on purpose, cropped just below
+the earnings card and just above the "Your trips" list so the driver's email
+address and the customer addresses on past trips stay out of the image.
+
+The fare shots use two public streets in Auburn (West Magnolia Avenue as the
+pickup, East Thach Avenue as the destination), not anybody's home address. The
+masked card (`Visa •••• 8209`) is the app's own saved-payment display; if you would
+rather not show a real card's last four digits in public, save a test card to the
+demo account and recapture shots 1 and 2.
+
+**How they were taken** (repeatable, no Xcode needed):
+
+1. Emulator at 1080 × 2160 — `adb shell wm size 1080x2160`, battery level pinned to 100.
+2. Installed `android/app/build/outputs/apk/debug/app-debug.apk`, granted location,
+   `adb emu geo fix -85.4808 32.6099` so the rider home is not showing "Location off".
+3. Signed in as rider, opened Book a ride, chose the two streets, captured with
+   `adb exec-out screencap -p > raw.png`.
+4. Signed in as driver, captured the dashboard, tapped Navigate for the sheet, then
+   the Earnings tab.
+5. Flattened each capture to 24-bit PNG with sharp (`.flatten({background:'#ffffff'})`).
+
+### Still to capture
+
+| Scene | Why it is not here |
+|---|---|
+| Live trip — driver approaching / trip in progress | Needs a real booking accepted by a driver; no trip was active during capture. |
+| Driver — incoming offer | Needs dispatch to send an offer during the 60-second window; can only be caught by booking a ride while the driver is online in another session. |
+| The full Apple set | Requires an iPhone or an iOS simulator. This Mac has no Xcode, so no iOS screenshot has been taken. Sizes: `1206 × 2622` or `1179 × 2556` (or `1320 × 2868` / `1290 × 2796` / `1260 × 2736`). |
+| 13-inch iPad set | Only if `TARGETED_DEVICE_FAMILY` stays `"1,2"`; otherwise set it to `1` (see the checklist). |
+
 ## Assets already generated
 
 | Store | Asset | File |
@@ -152,5 +204,18 @@ Provide the same demo rider and driver credentials as for Apple, with the note t
 | Apple | 1024×1024 app icon (no alpha) | `ios/App/App/Assets.xcassets/AppIcon.appiconset/` |
 | Google Play | 512×512 listing icon | `assets/play-store-icon-512.png` |
 | Both | Launch splash | `ios/App/App/Assets.xcassets/Splash.imageset/`, `android/app/src/main/res/drawable*/splash.png` |
+| Google Play | 6 phone screenshots (1080 wide, no alpha) | `store/screenshots/01`–`06` (see above) |
+| Google Play | Feature graphic 1024 × 500 | **not created** — required before publishing; must not be a screenshot with text over the icon |
 
-Screenshots and the Play feature graphic are covered in `store/screenshot-checklist.md`.
+## Before you press submit
+
+1. Fill in the **[you]** fields: reviewer accounts (in the consoles, not here),
+   support contact name/phone/email.
+2. Capture the Apple screenshot set on an iPhone (the six scenes above are the
+   intended order; the first five map straight onto iOS).
+3. Make the Play feature graphic, 1024 × 500, no alpha.
+4. Close the four blocking items in `store/screenshot-checklist.md`: in-app account
+   deletion, live demo accounts, `data-kerb-destination` on the driver trip card,
+   and the iPad decision.
+5. Capture the live-trip and incoming-offer shots if you want the driver side shown
+   in full; the listing reads well without them, but the checklist asks for them.
