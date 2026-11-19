@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Store Connect: the build for TestFlight and the App Store. The older
+	     name for this value is "app-store"; Xcode 15.3 and later want this one. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+
+	<!-- Export a folder and upload separately. The workflow uploads the .ipa
+	     itself, so a failed upload still leaves the signed package to inspect
+	     and retry without rebuilding. -->
+	<key>destination</key>
+	<string>export</string>
+
+	<!-- Signing team is not set here: it is inherited from the archive, which
+	     the workflow builds with DEVELOPMENT_TEAM set. Add a teamID key with
+	     your 10-character Team ID only if an export ever reports an ambiguous
+	     team. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+
+	<!-- The build number comes from the workflow (CFBundleVersion), so Xcode
+	     must not choose one during export. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+
+	<!-- Ship the dSYMs so App Store Connect can symbolicate crashes, and strip
+	     the Swift symbols we do not need. -->
+	<key>uploadSymbols</key>
+	<true/>
+	<key>stripSwiftSymbols</key>
+	<true/>
+</dict>
+</plist>

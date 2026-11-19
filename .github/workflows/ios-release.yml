@@ -1,0 +1,230 @@
+name: iOS release
+
+# Archives the app with an Apple Distribution certificate, exports an App Store
+# .ipa and uploads it to App Store Connect. Nothing here needs Xcode or an Apple
+# ID on the developer machine: the signing identity comes from a repository
+# secret and the API key authenticates everything Apple-side.
+#
+# Manual only. An upload to App Store Connect cannot be undone, so this never
+# runs on push: Actions -> iOS release -> Run workflow.
+#
+# The six secrets and the portal steps that create them are documented in
+# store/submission-guide.md. Until all six exist the job stops at the first step
+# and names the ones that are missing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'CFBundleVersion to upload (blank = this run''s number)'
+        required: false
+        default: ''
+
+# Never cancel a run that may be mid-upload, and keep two releases from
+# overlapping: the second would upload the same build number.
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Archive, export and upload
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+      APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+      APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the six secrets
+        run: |
+          set -euo pipefail
+          missing=""
+          [ -n "${APPLE_TEAM_ID:-}" ]             || missing="$missing APPLE_TEAM_ID"
+          [ -n "${APPSTORE_KEY_ID:-}" ]           || missing="$missing APPSTORE_KEY_ID"
+          [ -n "${APPSTORE_ISSUER_ID:-}" ]        || missing="$missing APPSTORE_ISSUER_ID"
+          [ -n "${APPSTORE_PRIVATE_KEY:-}" ]      || missing="$missing APPSTORE_PRIVATE_KEY"
+          [ -n "${APPLE_CERTIFICATE_P12:-}" ]     || missing="$missing APPLE_CERTIFICATE_P12"
+          [ -n "${APPLE_CERTIFICATE_PASSWORD:-}" ] || missing="$missing APPLE_CERTIFICATE_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            echo "Create them from store/submission-guide.md, section iOS release."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # The web bundle is what the shell loads, so it has to be copied before the
+      # archive or the upload ships the previous shell state.
+      - run: npx cap sync ios
+
+      - run: xcodebuild -version
+
+      - name: Import the distribution certificate
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/kerb-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+
+          echo -n "$APPLE_CERTIFICATE_P12" | base64 --decode -o "$RUNNER_TEMP/cert.p12"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          # Without this, codesign blocks on an authorization prompt nobody can
+          # answer on a runner.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KEYCHAIN"
+          rm -f "$RUNNER_TEMP/cert.p12"
+
+          security find-identity -v -p codesigning "$KEYCHAIN"
+          security find-identity -v -p codesigning "$KEYCHAIN" | grep -q "Apple Distribution" || {
+            echo "::error::APPLE_CERTIFICATE_P12 is not an Apple Distribution identity with its private key."
+            echo "Export the .p12 from Keychain Access on a Mac, including the private key, not the .cer."
+            exit 1
+          }
+
+      - name: Put the API key where xcodebuild and altool look for it
+        run: |
+          set -euo pipefail
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$KEY_DIR"
+          printf '%s\n' "$APPSTORE_PRIVATE_KEY" > "$KEY_DIR/AuthKey_${APPSTORE_KEY_ID}.p8"
+          chmod 600 "$KEY_DIR/AuthKey_${APPSTORE_KEY_ID}.p8"
+          echo "ASC_KEY_PATH=$KEY_DIR/AuthKey_${APPSTORE_KEY_ID}.p8" >> "$GITHUB_ENV"
+
+      - name: Archive
+        env:
+          BUILD_NUMBER_INPUT: ${{ inputs.build_number }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          # github.run_number is identical when a run is re-run, so a retry would
+          # reuse a build number App Store Connect already holds and the upload
+          # would be rejected. Fold the attempt in: run 7 attempt 2 -> 702, which
+          # still sorts above run 7 attempt 1 (701) and below run 8 (801).
+          BUILD_NUMBER="$BUILD_NUMBER_INPUT"
+          if [ -z "$BUILD_NUMBER" ]; then
+            case "$RUN_ATTEMPT" in
+              ''|*[!0-9]*) RUN_ATTEMPT=1 ;;
+            esac
+            if [ "$RUN_ATTEMPT" -ge 100 ]; then
+              echo "::error::Attempt $RUN_ATTEMPT does not fit the build number scheme; pass build_number explicitly."
+              exit 1
+            fi
+            BUILD_NUMBER=$(( RUN_NUMBER * 100 + RUN_ATTEMPT ))
+          fi
+          case "$BUILD_NUMBER" in
+            ''|*[!0-9]*) echo "::error::build_number must be a whole number, got '$BUILD_NUMBER'"; exit 1 ;;
+          esac
+          echo "Archiving 1.0 ($BUILD_NUMBER) — run $RUN_NUMBER, attempt $RUN_ATTEMPT"
+          echo "UPLOAD_BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Kerb.xcarchive \
+            -derivedDataPath build/DerivedData \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            archive
+
+      - name: Check the archive is signed by the expected team
+        run: |
+          set -euo pipefail
+          APP="build/Kerb.xcarchive/Products/Applications/App.app"
+          test -d "$APP"
+
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")"
+          SHORT_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")"
+          BUILD_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")"
+          echo "Bundle $BUNDLE_ID $SHORT_VERSION ($BUILD_VERSION)"
+          [ "$BUNDLE_ID" = "com.kerbgo.app" ] || { echo "::error::Unexpected bundle id $BUNDLE_ID"; exit 1; }
+          [ "$BUILD_VERSION" = "$UPLOAD_BUILD_NUMBER" ] || {
+            echo "::error::Archive carries build $BUILD_VERSION, expected $UPLOAD_BUILD_NUMBER."
+            exit 1
+          }
+
+          codesign -dv --verbose=2 "$APP" 2>&1 | grep -E "^(Identifier|Authority|TeamIdentifier)=" || true
+          codesign --verify --strict "$APP"
+
+          SIGNED_TEAM="$(codesign -dv --verbose=2 "$APP" 2>&1 | sed -n 's/^TeamIdentifier=//p')"
+          [ "$SIGNED_TEAM" = "$APPLE_TEAM_ID" ] || {
+            echo "::error::The archive is signed by team '$SIGNED_TEAM', not APPLE_TEAM_ID ('$APPLE_TEAM_ID')."
+            exit 1
+          }
+
+      - name: Export the App Store package
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath build/Kerb.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+
+      - name: Find the .ipa
+        id: ipa
+        run: |
+          set -euo pipefail
+          IPA="$(find build/export -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -n "$IPA" || { echo "::error::No .ipa was exported"; exit 1; }
+          ls -l "$IPA"
+          echo "path=$IPA" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to App Store Connect
+        run: |
+          set -euo pipefail
+          # --upload-app is deprecated in favour of --upload-package but still
+          # uploads, and needs no extra identifiers beyond the API key.
+          xcrun altool --upload-app \
+            -f "${{ steps.ipa.outputs.path }}" \
+            -t ios \
+            --apiKey "$APPSTORE_KEY_ID" \
+            --apiIssuer "$APPSTORE_ISSUER_ID" \
+            --output-format json
+
+      - name: Keep the .ipa
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kerb-ios-${{ github.run_number }}
+          path: |
+            build/export/*.ipa
+            build/export/*.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Remove the certificate and the key
+        if: always()
+        run: |
+          [ -n "${KEYCHAIN:-}" ] && security delete-keychain "$KEYCHAIN" 2>/dev/null || true
+          rm -f "$HOME/.appstoreconnect/private_keys/"AuthKey_*.p8 || true

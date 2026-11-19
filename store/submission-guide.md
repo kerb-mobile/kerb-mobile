@@ -5,8 +5,10 @@ the review questions. Written to be followed top to bottom on submission day.
 
 **Status 19 Nov 2026:** the Android upload exists and is signed —
 `android/app/build/outputs/bundle/release/app-release.aab`, signed with the
-upload key created that day. The iOS upload needs a Mac with Xcode and the Apple
-Developer team — this machine has neither. Two policy gaps (account deletion, "no app-store download"
+upload key created that day. The iOS archive and upload run from GitHub Actions
+(`.github/workflows/ios-release.yml`), so no Mac with Xcode is needed — but the
+Apple Developer Program membership, the six repository secrets and the portal
+steps below are still outstanding. Two policy gaps (account deletion, "no app-store download"
 copy on the landing page) are real rejection risks and are described in
 `compliance.md`.
 
@@ -61,23 +63,83 @@ Those two documents plus this one are the whole submission kit:
    configurations in `ios/App/App.xcodeproj/project.pbxproj`, so App Store
    Connect asks for an iPhone set only. Nothing to change here.
 
-### Build and upload (needs a Mac with Xcode)
+### Build and upload — GitHub Actions, no Mac and no Xcode
+
+`.github/workflows/ios-release.yml` archives, exports and uploads in one run, using
+`ios/ExportOptions.plist` (`method: app-store-connect`, automatic signing, build
+number controlled by the workflow). It is manual on purpose — an upload cannot be
+undone — so it never runs on push:
+
+**Actions → iOS release → Run workflow.** Leave `build_number` blank to derive one
+from the run number **and the attempt**: a re-run of the same job gets a new build
+number instead of colliding with a build App Store Connect already holds. Pass a
+whole number only to re-upload deliberately, and remember that number is then used
+as-is.
+
+The job runs `npm ci` and `npx cap sync ios` first, so the archive contains the
+web bundle as committed. It sets `DEVELOPMENT_TEAM` and `CURRENT_PROJECT_VERSION`
+as build settings, which means the project file still needs no team filled in. It
+also fails fast on a missing secret, on a build number that is not numeric, and on
+an archive signed by a team other than `APPLE_TEAM_ID` or carrying a build number
+other than the one it asked for.
+
+The default build number is `run_number × 100 + run_attempt`, so run 7 attempt 2
+uploads build 702 — above run 7 attempt 1 (701) and below run 8 (801).
+
+#### The six repository secrets
+
+Settings → Secrets and variables → Actions → **New repository secret**, then add
+all six. The job names any that are missing instead of failing halfway.
+
+| Secret | Value | Where it comes from |
+|---|---|---|
+| `APPLE_TEAM_ID` | 10 characters, e.g. `A1B2C3D4E5` | developer.apple.com → Membership details → Team ID |
+| `APPSTORE_KEY_ID` | 10 characters | App Store Connect → Users and Access → Integrations → App Store Connect API → Key ID of the key you create |
+| `APPSTORE_ISSUER_ID` | a UUID | Same page, Issuer ID, shown above the key list |
+| `APPSTORE_PRIVATE_KEY` | the **contents** of `AuthKey_<KEYID>.p8`, `BEGIN`/`END` lines included | Downloadable once, when the key is created; Apple never shows it again |
+| `APPLE_CERTIFICATE_P12` | base64 of the `.p12`: `base64 -i cert.p12 -o -` | Exported from Keychain Access on a Mac |
+| `APPLE_CERTIFICATE_PASSWORD` | the password chosen while exporting that `.p12` | You choose it |
+
+#### Portal steps, once (about 30 minutes)
+
+1. **Join the Apple Developer Program** — $99/year, individual or organisation. An
+   organisation needs a D-U-N-S number and the Account Holder to accept the
+   agreement. Nothing below exists until this is done.
+2. **Team ID** — developer.apple.com → Account → Membership details. That 10-character
+   value is `APPLE_TEAM_ID`.
+3. **API key** — App Store Connect → Users and Access → Integrations → App Store
+   Connect API → Team Keys → **+**. Name it `kerb-ci`, role **App Manager** (Admin
+   also works; a Developer-role key cannot upload). Note the Key ID and the Issuer
+   ID and download the `.p8` immediately — it is the only copy.
+4. **App ID** — Certificates, Identifiers & Profiles → Identifiers → **+** → App IDs
+   → App → bundle ID `com.kerbgo.app`, explicit. No extra capabilities are needed.
+5. **Apple Distribution certificate** — this is the one step that wants a Mac, but
+   **not** Xcode: Keychain Access → Certificate Assistant → *Request a Certificate
+   From a Certificate Authority* → save to disk; upload that `.csr` at Certificates
+   → **+** → Apple Distribution; download the `.cer` and double-click it; then in
+   Keychain Access right-click the certificate → **Export** → `.p12` with a
+   password. That file, base64-encoded, is `APPLE_CERTIFICATE_P12`. Export the
+   private key with it: a `.cer` alone cannot sign.
+6. **App record** — App Store Connect → My Apps → **+ New App**, using the bundle ID
+   from step 4 (details in the App record section above).
+
+The App Store provisioning profile is **not** on this list: the workflow passes
+`-allowProvisioningUpdates` with the API key, which creates and downloads it. If
+Apple ever refuses that, download the profile manually and add it to the keychain
+step — the export options already ask for automatic signing.
+
+#### The same commands, by hand (only if you have Xcode)
 
 ```
-open ios/App/App.xcodeproj
-# Signing & Capabilities → Team: <your Apple Developer team>, automatic signing
-xcodebuild -project ios/App/App.xcodeproj -scheme App \
-  -configuration Release \
-  -destination 'generic/platform=iOS' \
-  -archivePath build/Kerb.xcarchive archive
+xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+  -destination 'generic/platform=iOS' -archivePath build/Kerb.xcarchive \
+  DEVELOPMENT_TEAM=<TEAMID> CURRENT_PROJECT_VERSION=<n> archive
 xcodebuild -exportArchive -archivePath build/Kerb.xcarchive \
-  -exportOptionsPlist ExportOptions.plist -exportPath build/export
-xcrun altool --upload-app -f build/export/Kerb.ipa --type ios \
-  -u <apple-id> -p <app-specific-password>
+  -exportPath build/export -exportOptionsPlist ios/ExportOptions.plist
 ```
 
-`DEVELOPMENT_TEAM` is not set in the project, so the team must be selected once in
-Xcode and committed before an archive can be signed.
+Then drag `build/export/*.ipa` into Transporter, or upload it with
+`xcrun altool --upload-app -f <ipa> -t ios --apiKey <KEYID> --apiIssuer <ISSUER>`.
 
 ## Google Play Console
 
@@ -161,7 +223,8 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
 
 1. Rebuild the AAB if anything changed since 19 Nov, upload it to Play internal
    testing. The upload key is already in place.
-2. In Xcode: set the signing team, archive, upload.
+2. Run **Actions → iOS release** (all six secrets in place), then wait for the build
+   to appear in App Store Connect. Add it to the 1.0 version page.
 3. Create the two demo accounts and put their credentials in both consoles.
 4. Capture the Apple screenshot set on an iPhone (5 scenes from
    `screenshot-checklist.md`; the sign-in scene already exists as
