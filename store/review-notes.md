@@ -153,6 +153,15 @@ The driver walkthrough expects the trip card's `data-kerb-destination`
 (`site-changes.md` §2) for the Navigate control to read the dropoff, and the
 standing offer above to make that step reachable.
 
+**Support address.** The site hardcodes no address at all: every one it shows is
+interpolated from the `supportEmail` value in **`/admin/branding`**, which as of
+20 Nov 2026 holds `kerb-221901fc@ctomail.io`, a cto.new disposable mailbox. The
+monitored address is **`support@kerbgo.com`**, on Google Workspace like the rest of
+the domain's mail. Put it in that field before submitting — one admin edit, no
+deploy — so the help page, footer and cancel-trip copy all show it, and use the
+same address in the Play listing. Until the field is changed, a reviewer who
+follows the site's own support link reaches nobody.
+
 ## Apple — App Review Information → Contact
 
 Use the account owner's name, a monitored email and a phone number that answers

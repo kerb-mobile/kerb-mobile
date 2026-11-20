@@ -299,10 +299,15 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
 - `./tools/smoke-test.sh` — 16 end-to-end assertions against the Android
   build: launch, rider sign-in, `/app` route, shell patch, tab bar, tab
   switching, driver sign-in, `/driver`, driver patch, Navigate pill, all three
-  chooser options, earnings tab, pill hidden on sub-routes. Green tonight.
-- `gh run list` → "iOS build" and "iOS simulator run" both green; the simulator
-  job installs and launches the app on iPhone and screenshots it, which is the
-  only place the iOS presentation layer is ever executed.
+  chooser options, earnings tab, pill hidden on sub-routes. Green when last run
+  (19 Nov 2026).
+- `gh run list` → "iOS build" and "iOS simulator run" both green **as of 19 Nov
+  2026**; the simulator job installs and launches the app on iPhone and
+  screenshots it, which is the only place the iOS presentation layer is ever
+  executed. That is a dated observation, not a standing fact: the GitHub CLI is
+  not installed on the machine this kit was last reviewed from (20 Nov 2026), so
+  it could not be re-confirmed, and the workflows are cheap to re-run. Check both
+  jobs yourself on submission day.
 
 ## Order of work on submission day
 

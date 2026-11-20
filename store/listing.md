@@ -98,9 +98,16 @@ Purpose for every row: **App Functionality**. No data is used for tracking, so n
 | Short description | 80 | `Book local rides across the US with upfront fares. No surge pricing, ever.` (74) |
 | Category | — | Maps & Navigation |
 | Tags | — | rideshare, taxi, travel |
-| Contact email | — | `kerb-221901fc@ctomail.io` |
+| Contact email | — | `support@kerbgo.com` |
 | Website | — | `https://www.kerbgo.com` |
 | Privacy policy | — | `https://www.kerbgo.com/privacy` |
+
+**The contact email.** `support@kerbgo.com` is the domain's support mailbox, on
+Google Workspace. The site does not render it yet: the help page, footer and
+cancel-trip copy all read the `supportEmail` field in `/admin/branding`, which
+still holds `kerb-221901fc@ctomail.io`, a cto.new disposable address. Change that
+field to `support@kerbgo.com` before submitting — one admin edit, no deploy — so
+this row, `store/review-notes.md` and every address on the site agree.
 
 **Full description**
 
