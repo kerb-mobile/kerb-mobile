@@ -1,0 +1,120 @@
+# Store submission — open blockers
+
+**Status page, 20 Nov 2026, 18:09 UTC.** Every blocker still open, who owns it,
+and what "done" looks like. Evidence for anything dated lives in
+`site-changes.md`; this page is only the index. When an item closes, update the
+row here rather than adding a new section.
+
+| Owner | Means |
+|---|---|
+| **Me** | Only you can do it — accounts, payments, consoles, passwords, pushes. |
+| **cto.new** | The site/build team. **Currently out of weekly quota** — resets about 06:47 UTC on 21 Nov, so none of its rows can move before then. |
+| **Unstarted** | Required, and nobody has begun it. |
+
+**If you only do three things today:** enrol in the Apple Developer Program (longest
+lead time, gates every iOS step), start Play closed testing with 12 testers (14-day
+clock), and decide the cto.new quota — wait or pay — because the demo state that
+both reviews depend on is stuck behind it.
+
+---
+
+## Both stores — the demo state and the live site
+
+| # | Blocker | Owner | Done when |
+|---|---|---|---|
+| B1 | Demo Rider login refused on the live site (20 Nov, 17:47 and 17:51 UTC) | cto.new | `demo.rider@kerbgo.com` signs in at `www.kerbgo.com/signin` with the recorded password; account has no card on file |
+| B2 | `KERBREVIEW` never proven on production | cto.new | On kerbgo.com: total `$0.00`, "Promo KERBREVIEW applied", no card field, booking completes and reaches the driver; a wrong code gives a plain message with the card step unchanged |
+| B3 | Demo Rider has no saved place and no past trip | cto.new | "Home — 118 N College St, Auburn, AL 36830" saved; one completed trip about two weeks old, ~`$12.40`, receipt reachable from *Your trips* |
+| B4 | Offer countdown prints raw seconds (`604798s`) | cto.new | Humanised — days and hours, or `mm:ss` — and counting |
+| B5 | Turn label still `NEXT TURN — TO PICKUP` after *Start trip* | cto.new | Points at the drop-off once the trip has started |
+| B6 | `I've arrived` unusable without a position fix | cto.new | Fixed, or documented as a location requirement in the review notes |
+| B7 | Standing-offer seeder can create two identical offers 91 ms apart | cto.new | Exactly one pending offer per driver, every time |
+| B8 | cto.new is out of weekly quota | Me | Decide: wait for ~06:47 UTC 21 Nov, or pay the `$30.52` reset |
+| B9 | Store work is local only — `main` is 40 commits ahead of `origin/main`, never through CI | Me | Pushed, once you decide to |
+| B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail |
+| B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
+| B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
+| B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
+| B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
+
+## Apple App Store
+
+| # | Blocker | Owner | Done when |
+|---|---|---|---|
+| A1 | Apple Developer Program not enrolled | Me | Membership active and a Team ID exists |
+| A2 | All six repository secrets absent | Me | `APPLE_TEAM_ID`, `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD` set, and a dry run of *iOS release* with upload unticked produces a signed `.ipa` |
+| A3 | App Store Connect app record not created | Me | App record for `com.kerbgo.app`, free, US only, age rating 4+ |
+| A4 | No screenshots at a valid Apple size | Unstarted | Six scenes captured on an iPhone 17/16 Pro simulator at `1206 × 2622`, no transparency; the Play set at `1080 × 2160` cannot be reused |
+| A5 | iOS workflows not both green (newest *iOS build* was cancelled; *iOS simulator run* stale) | Me | Both re-dispatched and green |
+| A6 | Review notes still carry placeholders — the deletion path sentence and both demo logins | Me | Pasted from `review-notes.md` once B1 works |
+| A7 | Review contact details not chosen | Me | Name, monitored email and a phone that answers during US business hours |
+| A8 | App Privacy answers not entered in App Store Connect | Me | All nine data types entered as in `compliance.md` — collected, linked to identity, not tracked, purpose App Functionality — and the payment processor confirmed as Stripe so the Payment Info row is right. Usage Data and Diagnostics stay "No" |
+
+## Google Play
+
+| # | Blocker | Owner | Done when |
+|---|---|---|---|
+| G1 | Play Console app record not created | Me | App created, free, US only |
+| G2 | Closed testing with 12 testers has not started | Unstarted | 12 testers opted in; the 14-day clock running |
+| G3 | AAB not uploaded | Me | Signed AAB uploaded to a testing track (the asset already exists — see below) |
+| G4 | App access instructions not written into the console | Me | Both demo logins pasted, blocked on B1 and the driver password |
+| G5 | Data safety, content rating and target audience answers not submitted | Me | Answers from `compliance.md` entered, including its two `[confirm]` items: the payment processor, and whether riders and drivers can call or message each other (the IARC interaction question) |
+| G6 | Play Data deletion URL not entered | Me | `https://www.kerbgo.com/delete-account` in the field — it answers `200` now, so the older "leave it empty until it stops 404ing" advice no longer applies |
+
+---
+
+## Open but not blocking
+
+- **Play 9:16 promo set** (optional): the six `1080 × 2160` shots are legal but miss Play's
+  recommendation layouts; a re-capture at `1080 × 1920` would qualify. Not needed to publish.
+- **Incoming-offer screenshot** (recommended, unblocked): the standing offer is live, so the
+  card can be photographed in one session — it is the strongest driver-side image.
+- **Live-trip screenshot** (optional): needs a real booking accepted by a driver.
+- **Keystore backup**: `android/kerb-upload.jks` and its password exist in this working copy
+  only; confirm the backup lives outside the repo before you rely on it.
+- **Stripe Connect payments phase** (`site-handover.md` P1–P4): explicitly not a review item
+  and must not start while either app is in review.
+- **Site migration off cto.new** (`site-migration.md`): not needed for submission.
+
+## Already done — do not redo
+
+- **In-app account deletion, end to end** (§1): `/delete-account` returns `200` with
+  `cache-control: no-store`, the flow demands `DELETE` typed in, then clears the
+  session, redirects `/app` to sign-in and refuses the old credentials.
+- **`data-kerb-destination`** (§2): `1` from accept through arrive and start,
+  carrying `334 W Magnolia Ave, Auburn, AL 36830`, and `0` after completion.
+- **Standing demo offer** (§4): waiting on `/driver` with nothing else acting,
+  accept → arrive → start → complete, and a fresh `$14.80` offer already there.
+- **Landing copy** (§3): both replacement sentences live; `no app`, `browser only`
+  and `download` gone.
+- **Support address on the site**: `support@kerbgo.com` on `/help` and in every
+  footer, with no `ctomail.io` left. The mailbox behind it is B10.
+- **Android upload asset**: signed AAB at
+  `android/app/build/outputs/bundle/release/app-release.aab`; upload key created
+  19 Nov (its backup is the one open question in *Open but not blocking*).
+- **Play creative**: 512 icon with alpha, 1024×500 feature graphic, six 1080×2160
+  screenshots (legal, though not the 9:16 recommendation).
+- **Legal pages**: privacy policy (16 Nov 2026), support URL and marketing URL all live.
+- **iOS build settings**: `ITSAppUsesNonExemptEncryption = false`, iPhone-only so
+  no iPad screenshots are needed.
+
+## Evidence and detail
+
+| File | What it holds |
+|---|---|
+| `site-changes.md` | The five site changes, dated live evidence, the two open driver defects and the fix-status log |
+| `review-notes.md` | Paste-ready review text; the rider row is still marked **UNVERIFIED** |
+| `submission-guide.md` | Console fields, the six secrets, build commands, submission-day order |
+| `screenshot-checklist.md` | Exact sizes and why the Android set cannot be reused |
+| `compliance.md` | Privacy, data safety, ratings, rejection risks |
+| `listing.md` | Store copy, keywords, asset inventory |
+
+### Older docs — stale claims corrected 20 Nov 2026
+
+The contradictions this page used to list are fixed in `submission-guide.md`,
+`site-handover.md`, `listing.md`, `compliance.md`, `review-notes.md`,
+`screenshot-checklist.md` and `site-migration.md`: the five site changes now read as
+landed and verified, the support address as served from `/admin/branding`, and
+`/delete-account` as `200` rather than a 404. Where a document still describes the
+19 Nov state it is dated as history — `site-changes.md` keeps its superseded table
+deliberately. The rider login stays marked **UNVERIFIED** wherever it appears.

@@ -14,8 +14,14 @@ Two accounts, both active at review time, both pre-verified.
 
 | Account | Sign-in | Must be able to |
 |---|---|---|
-| Rider | `[paste rider email]` / `[paste password]` | See a saved place and a past trip; book a ride to $0.00 without a card |
+| Rider | **UNVERIFIED — this login does not work.** `demo.rider@kerbgo.com`, password held outside this repository. Sign-in refused at `/signin` on 20 Nov 2026 at 17:47 and 17:51 UTC | See a saved place and a past trip; book a ride to $0.00 without a card. **Not demonstrated** — and the account is new, so it has no saved place and no past trip yet |
 | Driver | `[paste driver email]` / `[paste password]` | Land on an approved dashboard, see a pending offer, accept it, read the dropoff with Navigate |
+
+**Sign in with both rows before submitting.** On 20 Nov 2026 the rider address
+above refused its password at `/signin` — the row is filled in because that is
+the intended account, not because it has been shown to work. That account is
+also new, so the saved place and the past trip it is meant to carry still have
+to be created and checked.
 
 Both sign in with **email and password only**. No SMS code, no email
 confirmation link, no 2FA prompt — a reviewer cannot receive either. Addresses
@@ -131,7 +137,9 @@ How to review the driver flow:
 4. Tap Navigate to see the native action sheet: Kerb's own map, Apple Maps,
    Google Maps or Waze. The dropoff address carries across.
 
-Rider demo account:    [email] / [password]
+Rider demo account:    UNVERIFIED — demo.rider@kerbgo.com was refused by /signin on
+                       20 Nov 2026 (17:47 and 17:51 UTC). Do not publish this line
+                       as a working login. Password: [paste at submission time]
 Driver demo account:   [email] / [password]
 
 Notes:
@@ -154,13 +162,11 @@ The driver walkthrough expects the trip card's `data-kerb-destination`
 standing offer above to make that step reachable.
 
 **Support address.** The site hardcodes no address at all: every one it shows is
-interpolated from the `supportEmail` value in **`/admin/branding`**, which as of
-20 Nov 2026 holds `kerb-221901fc@ctomail.io`, a cto.new disposable mailbox. The
-monitored address is **`support@kerbgo.com`**, on Google Workspace like the rest of
-the domain's mail. Put it in that field before submitting — one admin edit, no
-deploy — so the help page, footer and cancel-trip copy all show it, and use the
-same address in the Play listing. Until the field is changed, a reviewer who
-follows the site's own support link reaches nobody.
+interpolated from the `supportEmail` value in **`/admin/branding`**, and as of
+20 Nov 2026 that field holds **`support@kerbgo.com`**, so the help page, footer and
+cancel-trip copy all show it. The mailbox behind it still has to be created in
+Google Workspace — until it exists, a reviewer who follows the site's own support
+link reaches nobody (`status.md` B10). Use the same address in the Play listing.
 
 ## Apple — App Review Information → Contact
 
@@ -173,8 +179,8 @@ Choose **All or some functionality is restricted**, then add both accounts:
 
 ```
 Rider account — full ride-booking flow
-Username: [email]
-Password: [password]
+Username: UNVERIFIED — demo.rider@kerbgo.com (sign-in refused 20 Nov 2026)
+Password: [paste at submission time — not committed]
 Instructions: Sign in at the Welcome screen (no verification code is sent). Tap
 the saved "Home" place under the destination field, or enter any two US addresses
 to see a fare estimate. At the payment step enter promo code KERBREVIEW: the

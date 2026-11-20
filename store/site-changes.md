@@ -9,11 +9,111 @@ driver flow reviewable), 3 (one-line copy fix), 6 (so a reviewer can finish a
 booking at all). §5, the retailer Accept/Decline change, is no store's
 prerequisite — it is here because it is the same owner's work.
 
-## Status — checked against the live site, 19 Nov 2026, 18:23 UTC
+## Status — checked against the live site, 20 Nov 2026, 16:42–17:05 UTC
 
-**None of the listed changes has landed.** Every item below is still missing
-from the live site, so any part of this document that has been deployed is
-invisible to a reviewer.
+All five store changes (§1, §2, §3, §4, §6) are deployed; §5 is not, and is not
+a store prerequisite. What follows is what a check from this machine could
+confirm on that date, item by item, with the evidence — nothing here is taken
+from the build team's own report.
+
+| § | Change | Live | Evidence, 20 Nov 2026 |
+|---|---|---|---|
+| 1 | `/delete-account` route, entry rows, deletion | **passes end to end** | `GET /delete-account` → `200`, `cache-control: no-store`. Signed in, the page names the account, requires `DELETE` typed into a field, and posts. The confirmation state (`?deleted=1`) reads "Your Kerb account and the data that belonged to it have been deleted … You are signed out". Afterwards `/app` → `307 /signin?redirect=%2Fapp`, no session cookie, and the old email and password at `/signin` → "Email or password is incorrect." `Delete account` rows are in both `app.index-*.js` and `driver-*.js` as `<details>` siblings of the other rows |
+| 2 | `data-kerb-destination` on the trip card | **passes** | signed in as the demo driver on `/driver`: `document.querySelectorAll('[data-kerb-destination]').length` → `0` on the idle board, `1` from the instant the offer was accepted and still `1` after arrive and start, the single element carrying `334 W Magnolia Ave, Auburn, AL 36830`, then `0` again after *Complete trip*. One element, whole address, every state |
+| 3 | Landing copy | **passes** | both replacement sentences are served on `/`, and `no app`, `browser only` and `download` are all gone from it |
+| 4 | Standing demo offer | **passes, with three defects** | `/driver` opened with no other account acting and a `$14.80` offer arrived unaccepted: 118 N College St → 334 W Magnolia Ave, `$10.58` (75%), 10.2 mi, Accept and Decline. Accepted → arrived → started → completed, and a new `$14.80` offer was already waiting on the same board with no reload. Defects below |
+| 5 | Retailer Accept/Decline and the order alarm | **not landed** | `retailer_decision` appears in none of the deployed chunks, unchanged from 19 Nov. Not a store prerequisite |
+| 6 | Promo code `KERBREVIEW` | **not verified — the Demo Rider login is refused** | 20 Nov 2026, refused at 17:47 UTC and again at 17:51 UTC, in a clean tab: `demo.rider@kerbgo.com` with the password the build team published returns "Couldn't sign you in — Email or password is incorrect." at `/signin?redirect=%2Fapp` every time, so the `$0.00` flow could not be run. The client does carry the promo field, the server-side price call with `promoCode`, the "Promo … applied" line and the no-card bypass, and the team says it ran a booking on production — none of that is confirmed here |
+
+Also dated today: `support@kerbgo.com` on `/help` and in every footer, with no
+`ctomail.io` left anywhere.
+
+### Acceptance checks — 20 Nov 2026
+
+| # | Check | Result |
+|---|---|---|
+| 1 | `GET /delete-account` → `200` | **pass** |
+| 2 | signed out, the page explains the flow and links to sign-in | **pass** |
+| 3 | row in Account only; confirmation; cookie cleared; `/app` signed out; old credentials refused | **pass** — run end to end on a throwaway rider, which was then deleted |
+| 4 | the same row on the `/driver` Account tab | **pass** in markup; the native tab split was measured on 19 Nov |
+| 5 | `[data-kerb-destination]` → `1` during a trip, `0` after | **pass** — `1` accepted, on the way, on the trip; `0` after completion, with the full dropoff in the attribute |
+| 6 | native Navigate on Android and iOS | **not run** — needs a device or simulator |
+| 7 | landing page free of both old sentences | **pass** |
+| 8 | offer waiting; accept, finish, offer waiting again | **pass** — offer present on open with nothing else acting, and a fresh identical offer waiting immediately after completion |
+| 9 | the accepted trip carries the check-5 attribute | **pass** — the offer's own trip card carried `334 W Magnolia Ave, Auburn, AL 36830` |
+| 10 | `KERBREVIEW` → `$0.00`, no card, booking reaches the driver | **not run** — the Demo Rider login is refused on production (see §6) |
+
+### Defects the driver run exposed
+
+- **The offer countdown prints raw seconds.** The board reads `604800S`, and
+  `604801S` after the completed trip — seven days expressed in seconds with an
+  `S` where a time belongs. It is the first thing a reviewer sees on `/driver`.
+- **The turn panel still says `NEXT TURN — TO PICKUP` once the trip is running**,
+  when the next turn is to the drop-off.
+- **`I've arrived` stays disabled until the page has a position fix.** With no
+  location in a desktop browser the driver cannot move the trip at all; the run
+  above had to supply a scripted position near the pickup to get past it. A phone
+  with location granted is unaffected, but a reviewer who declines location meets
+  the same dead end.
+- **The seeder races**, found by the build team while re-seeding: two identical
+  demo rides 91 ms apart, each with a pending offer. One was retired by hand and
+  the fix is not published.
+
+### Fix status for the two defects — re-checked live 20 Nov 2026, 18:06 UTC
+
+**Neither fix has shipped. Both defects reproduced live, signed in as the demo
+driver on `/driver`.**
+
+- **Countdown: still bare seconds.** The offer card's timer read `604798s`.
+  After accepting, arriving, starting and completing that trip, the replacement
+  offer's timer read `604796s`. Both are the seconds value with an `s` after it,
+  which is what the deployed `driver-DvjMAkgQ.js` renders: `` `${n}s` ``. A
+  humanised fix — days and hours, or `mm:ss` — is not there.
+- **Turn label: still `NEXT TURN — TO PICKUP` after the trip starts.** Accepted
+  the offer, tapped *I've arrived*, then *Start trip*. With the page in its
+  on-trip state — the primary control reads *Complete trip* and the card reads
+  "On the way to your destination" — the guidance header still said
+  `NEXT TURN — TO PICKUP`. It should point at the drop-off.
+- Supporting evidence, unchanged since 16:55 UTC: the entry chunk is still
+  `/assets/index-Bf5939qW.js`, which embeds the whole chunk manifest, and the
+  driver route still loads `driver-DvjMAkgQ.js`. A rebuilt chunk would take a new
+  content hash and rewrite that manifest, so no deploy has landed since.
+- The tab loaded normally at 18:06 and did not peg. The peg seen between 17:52
+  and 17:59 did not reproduce, so it is not recorded as a product fault.
+
+Re-check trigger: a new entry hash in a fresh `GET /` means something shipped;
+until then these two stay open. The trip used here was completed on production
+and a fresh `$14.80` offer was waiting afterwards, with
+`[data-kerb-destination]` back to `0`.
+
+### What still stands between this and a submission
+
+- **The Demo Rider account cannot sign in.** `demo.rider@kerbgo.com` was created
+  for exactly this purpose and the `KERBREVIEW` scope moved onto it, but on
+  20 Nov 2026 at 17:47 and 17:51 UTC that address with the published password is
+  refused at `/signin`. Either the account was never written to the production database or it
+  holds a different password. Until one of those is fixed, check 10 cannot be run
+  and the rider row in `review-notes.md` would lock a reviewer out.
+- **`KERBREVIEW` is still unproven on production.** The build team says it ran a
+  `$0.00` booking there; its earlier `$0.00` evidence was from a hosted Postgres
+  test branch, and neither run is reproducible from here without a working rider
+  login.
+- **The build team is out of quota.** cto.new reports its weekly limit reached on
+  20 Nov 2026 at 17:47 UTC, usage resuming in about 13 hours, so it cannot create
+  or repair the account until then.
+- **The demo driver login works** — `brian.ritter37@icloud.com`, the only
+  approved driver in production, signs in, lands on `/driver` and takes the
+  standing offer end to end (checks 5, 8 and 9). Trip reference `8C359807`.
+- **The standing-offer seeder races.** The build team caught two identical demo
+  rides created 91 ms apart, each with its own pending offer, and retired the
+  duplicate by hand. Until the fix ships a reviewer can land on a board carrying
+  two offers for the same ride.
+- **The `support@kerbgo.com` mailbox** does not exist yet, and every support link
+  on the site now points at it.
+
+### 19 Nov 2026 check (superseded)
+
+As of that date every item below was still missing from the live site.
 
 | § | Change | Live | Evidence |
 |---|---|---|---|
@@ -48,8 +148,8 @@ Two things this check cannot decide:
 
 ## 1. In-app account deletion — blocks Apple 5.1.1(v) and Play's account-deletion policy
 
-Today the only deletion path is "email us" in the privacy policy, and
-`https://www.kerbgo.com/delete-account` returns **404** (checked 19 Nov 2026).
+**Fixed, verified live 20 Nov 2026.** Until then the only deletion path was "email
+us" in the privacy policy and this route returned **404** (checked 19 Nov 2026).
 Both stores require deletion to be **initiated in the app**. Email is not
 acceptable as the only route. A page on the site counts as "in the app", because
 the shells load kerbgo.com itself.
