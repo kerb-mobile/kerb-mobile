@@ -63,6 +63,55 @@ both reviews depend on is stuck behind it.
 
 ---
 
+## Regulatory and safety gaps — added 20 Nov 2026
+
+Raised by a public review-summary of kerbgo.com that said the site is silent on
+background checks, safety tools and licensing. The site is silent on the last two,
+and on the first it is worse than silent — `/help` states that automated background
+checks are "a later release". Citations and gated copy are in
+`safety-and-licensing.md`. **These are not store blockers; R1 is the one that
+matters.**
+
+Revised the same day: **screening runs by hand at two layers** — UZURV completes the
+statutory checks as the TNC of record, and Kerb reads each driver's licence,
+registration and insurance, enters pass or fail on the account, and revokes within 24
+hours where needed. §32-7C-29(a)(2)–(3) lets the TNC run the checks itself, so this is
+compliant provided the three artefacts exist per driver. That half of the copy is
+publishable now.
+
+**The licensing half resolved on 20 Nov 2026: structure B.** The only permit in
+evidence is **APSC Permit TNC-4, held by UZURV Holdings, Inc. d/b/a UZURV** (Delaware,
+Richmond VA, renewed effective 1 July 2026), and the owner confirmed that Kerbgo is a
+separate company for which **UZURV is the TNC of record** — its screening and insurance
+cover every Kerb trip, Kerb is the storefront. That is lawful if disclosed, so the page
+now carries the disclosure sentence from `safety-and-licensing.md` §2b. It does not
+say Kerb is licensed, because Kerb is not the permittee.
+
+| # | Blocker | Owner | Done when |
+|---|---|---|---|
+| R1 | Licensing disclosure not live: rides on Kerb are provided by UZURV Holdings, Inc. under APSC permit TNC-4 (structure B), and the site names neither UZURV nor the permit | cto.new | `/safety` carries the §2b sentence; `/terms` says who operates Kerb and that rides are provided by UZURV |
+| R2 | Screening records are undocumented. Statutory screening is UZURV's duty as the TNC; Kerb's own manual document review has no per-driver record | Me | Written confirmation that UZURV screens every Kerb driver to §32-7C-29, plus Kerb's own licence/registration/insurance review recorded per driver and kept two years (§32-7C-33) |
+| R3 | Zero-tolerance notice not on the site, and the corrective measure not yet confirmed in writing | Me | `safety-and-licensing.md` §4's "removed from Kerb" line approved or replaced, and the notice live |
+| R4 | Coverage is UZURV's TNC-4 certificate, and it has not been checked for whether it covers trips booked through Kerb | Me | Copy of UZURV's certificate in hand, covering Kerb-booked trips at §32-7C-2(b)/(c) limits; then the coverage paragraph (Gate A) publishes |
+| R5 | No safety page, no 911 guidance, no report route, no zero-tolerance notice | cto.new | `/safety` live from `safety-and-licensing.md` §4 word for word, footer **Safety** link, and `/help` changed off "automated background checks are a later release" — all three in one deploy |
+| R6 | No live trip sharing | cto.new | `live-trip-sharing.md` checks 1–9 pass on a real trip; then `/safety` gains the sharing sentence |
+| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed | cto.new | Both pages name Kerb's operating entity, and that rides are provided by UZURV Holdings, Inc. under TNC-4 |
+| R8 | Site claims service across "the entire United States" with 51 service states and a $25 per-state-line fee; TNC permits are per-state (UZURV holds AL, MA and others, not all) | Me | Claim narrowed to permitted states, or permits obtained. Not a store blocker, but the same exposure as R1 |
+
+`/safety` ships **with** the §2b licensing paragraph — structure B is settled — and
+with the **APSC** complaint channel. The `support@kerbgo.com` line waits for B10,
+because a bounce is worse than no address.
+
+Still true, and still the rule: nothing on the site may say **"fully licensed"**, and
+nothing may say **"we operate under our sister company's licence"** — that is not a
+thing in Chapter 770-X-12. The only licensing sentence available is the one that names
+UZURV as permittee under the structure that is actually true. "Every driver is checked
+before their first trip" is now true, but only while R2's records exist behind it, and
+only as long as UZURV's screening and insurance actually cover Kerb trips — that is
+what R2 and R4 are for.
+
+---
+
 ## Open but not blocking
 
 - **Play 9:16 promo set** (optional): the six `1080 × 2160` shots are legal but miss Play's
@@ -103,6 +152,8 @@ both reviews depend on is stuck behind it.
 | File | What it holds |
 |---|---|
 | `site-changes.md` | The five site changes, dated live evidence, the two open driver defects and the fix-status log |
+| `safety-and-licensing.md` | The `/safety` copy to ship, the screening and licensing evidence, and the gated claims |
+| `live-trip-sharing.md` | Build spec for the share link — data, endpoint, privacy, acceptance checks |
 | `review-notes.md` | Paste-ready review text; the rider row is still marked **UNVERIFIED** |
 | `submission-guide.md` | Console fields, the six secrets, build commands, submission-day order |
 | `screenshot-checklist.md` | Exact sizes and why the Android set cannot be reused |
