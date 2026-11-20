@@ -144,7 +144,10 @@ Provide the same demo rider and driver credentials as for Apple, with the note t
 - Shared with third parties? **No** (payment processing by the payment provider is service-provider processing, not "sharing" under Play's definition — confirm with your payment provider's terms)
 - Processing is ephemeral? **No**
 - Required or optional? Name, email, location and payment are required for the service; phone number is optional
-- Users can request deletion? **Yes** — point to the account deletion route
+- Users can request deletion? **Yes** — by email today, as the policy states.
+  Play's Data deletion URL becomes `https://www.kerbgo.com/delete-account`
+  (`site-changes.md` §1) once it answers 200; it is a 404 today, so leave the
+  field empty until then rather than shipping a dead link
 - Data encrypted in transit? **Yes** (HTTPS only; the app disables cleartext traffic)
 
 **Content rating**: complete the IARC questionnaire. Expect a low rating (no violence, no sexual content, no profanity, no gambling, no user-generated content). Location sharing and card payments are declared separately, not through the rating.

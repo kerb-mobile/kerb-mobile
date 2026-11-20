@@ -47,11 +47,9 @@ domains. It is bundled in the app target.
 1. **5.1.1(v) account deletion — will be rejected as it stands.** The app creates
    accounts and the only deletion path is "email us" in the privacy policy
    (`You can ask us to delete your account ... by emailing`). Apple requires
-   deletion to be *initiated in the app*. Fix by either:
-   - adding a delete-account screen to the site (then the in-app Account tab
-     reaches it, no app change needed), or
-   - exposing a site endpoint the shell can call from a native confirmation
-     dialog.
+   deletion to be *initiated in the app*. The fix is one route, not two: the
+   site's own `/delete-account` page, reached from the Account tab, because the
+   shells add no native deletion item and only render the site's markup.
    The site is deliberately untouched by this repository, so this fix cannot be
    made from here — nor can any of the other site-side items in
    `site-changes.md`. The exact route, deletion semantics and
@@ -100,7 +98,7 @@ violence, no mature themes.
 | Photos → Photos | Collected (driver documents), used for app functionality |
 | App activity → Other user-generated content (trip history, saved addresses) | Collected, used for app functionality |
 | Device or other IDs | Not collected by us; the session cookie is server-side, first-party |
-| Data deletion | Users can request deletion by email — the policy states this. Play accepts a request path; giving a URL is better. |
+| Data deletion | **Yes — by email today**, which the privacy policy states. Play wants a URL: enter `https://www.kerbgo.com/delete-account` (`site-changes.md` §1) only once it answers 200, because today it is a 404 and a dead URL in that field is worse than the policy paragraph. |
 
 **Ads:** No. **News:** No. **COVID-19:** No. **Government:** No.
 **Financial features:** none of the listed categories. **Health:** No.
@@ -120,9 +118,10 @@ younger audience invites extra policy obligations with no benefit.
 
 ## Google Play — policy items to complete before review
 
-- **Data deletion URL** — the privacy policy paragraph is acceptable but a
-  dedicated page is stronger, and Play now surfaces it in the listing. The page
-  itself is specified in `site-changes.md` §1 and does not exist yet (404).
+- **Data deletion URL** — Play now surfaces this field in the listing. The route
+  it should hold is specified in `site-changes.md` §1 and does not exist yet
+  (404), so leave the field empty or point it at `/privacy` until §1 lands, then
+  switch it to `/delete-account`. Do not enter a URL that 404s.
 - **Account deletion** — Play's policy mirrors Apple's: if users can create an
   account, deletion must be available. Same fix as Apple's item 1.
 - **App access** — every reviewer must be able to sign in, and the account they
