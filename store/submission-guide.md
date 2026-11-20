@@ -295,20 +295,27 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
   android/app/build/outputs/apk/release/app-release.apk
 ```
 
-## Pre-submission checks that already pass
+## Pre-submission checks
 
 - `./tools/smoke-test.sh` — 16 end-to-end assertions against the Android
   build: launch, rider sign-in, `/app` route, shell patch, tab bar, tab
   switching, driver sign-in, `/driver`, driver patch, Navigate pill, all three
   chooser options, earnings tab, pill hidden on sub-routes. Green when last run
   (19 Nov 2026).
-- `gh run list` → "iOS build" and "iOS simulator run" both green **as of 19 Nov
-  2026**; the simulator job installs and launches the app on iPhone and
-  screenshots it, which is the only place the iOS presentation layer is ever
-  executed. That is a dated observation, not a standing fact: the GitHub CLI is
-  not installed on the machine this kit was last reviewed from (20 Nov 2026), so
-  it could not be re-confirmed, and the workflows are cheap to re-run. Check both
-  jobs yourself on submission day.
+- **iOS CI is not both green — checked 20 Nov 2026.** The newest `iOS build` run
+  (#13, on `e2017e4`, which is `origin/main`) is red, but the job was **cancelled
+  before any step ran**, so nothing failed to compile. The last build that
+  actually compiled is #12 (`5961320`), green. `iOS simulator run` last passed as
+  #2 (`4cb8c6b`) and has not run since, because its workflow only triggers on
+  `ios/**`, `www/**` or its own file. Local `main` is 31 commits ahead of
+  `origin/main`, so none of the store work here has been through CI at all.
+  The simulator job is the only place the iOS presentation layer is ever executed,
+  so **re-dispatch both before submitting**: `workflow_dispatch` is enabled on
+  each, and `ios.yml` cancels superseded runs on the same ref (`concurrency`),
+  which is the usual reason a build reads red with no failing step. With no CLI
+  installed, and the repository public, read the status from the API:
+  `curl -s "https://api.github.com/repos/kerb-mobile/kerb-mobile/actions/runs?per_page=10"`
+  — the newest run of each of the two workflow names is the one that counts.
 
 ## Order of work on submission day
 
