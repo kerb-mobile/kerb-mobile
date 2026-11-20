@@ -12,7 +12,8 @@ steps below are still outstanding. Two policy gaps (account deletion, "no app-st
 copy on the landing page) are real rejection risks and are described in
 `compliance.md`.
 
-Those two documents plus this one are the whole submission kit:
+Those four documents plus this one are the whole submission kit. The last row
+is the move itself, and no store needs it:
 
 | File | Use |
 |---|---|
