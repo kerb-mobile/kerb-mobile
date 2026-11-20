@@ -42,3 +42,9 @@ keystore.properties
 
 # Local screenshot captures before they are resized for the stores
 store/shots/
+
+# Local env files hold the Surge key; only the example is committed
+.env
+.env.local
+.env.*.local
+!.env.example
