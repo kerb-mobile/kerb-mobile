@@ -1,13 +1,13 @@
-# kerbgo.com — the four site changes App Review and Play review need
+# kerbgo.com — the five site changes App Review and Play review need
 
 For whoever owns the kerbgo.com codebase. Nothing here requires a new app
 release: both apps load the live site in a WebView, so these changes take effect
 as soon as they are deployed. The app side is already built and checked in.
 
 Order of work: 1 (blocks both stores), 4 and 2 together (they are what makes the
-driver flow reviewable), 3 (one-line copy fix). §5, the retailer Accept/Decline
-change, is no store's prerequisite — it is here because it is the same owner's
-work.
+driver flow reviewable), 3 (one-line copy fix), 6 (so a reviewer can finish a
+booking at all). §5, the retailer Accept/Decline change, is no store's
+prerequisite — it is here because it is the same owner's work.
 
 ## Status — checked against the live site, 19 Nov 2026, 18:23 UTC
 
@@ -22,12 +22,12 @@ invisible to a reviewer.
 | 3 | Landing copy | **not landed** | The homepage source still contains both `no app-store download` and `no app to download`; neither replacement sentence is present |
 | 4 | Standing demo offer | **not landed** | Demo driver signed in on `/driver` with no active trip: the dashboard reads `Offline`, `0 trips`, shows no offer card, and only the four settings rows (`Where you are and what Kerb sees`, `Your car`, `Offer alerts on this phone`, `Refer another driver`) |
 | 5 | Retailer Accept/Decline and the new-order alarm | **not landed** | `assets/retailer-*.js` has the seven order statuses and mark-ready only: no `retailer_decision`, no accept or decline control, no alarm, and the card shows neither the items nor the prep time |
-| — | Promo code `KERBREVIEW` | **not landed** | No `KERBREVIEW` string in the deployed client |
+| 6 | Promo code `KERBREVIEW` | **not landed** | No `KERBREVIEW` string, and no `promo` identifier of any kind, in the deployed client — the payment step has no promo input |
 
 How that was measured, so a later check can repeat it: the site is a
 client-rendered SPA (`/assets/index-*.js` plus 69 chunks), so served HTML proves
 nothing about `/app` or `/driver`. The bundle and every chunk were swept for the
-four markers, and `/driver` was loaded in a browser signed in as the demo driver
+five markers, and `/driver` was loaded in a browser signed in as the demo driver
 (no trip accepted, nothing written to the account).
 
 Two things this check cannot decide:
@@ -288,10 +288,10 @@ Pointing a rider booking at the demo driver while they are online is a nice extr
 the reviewer who does book finds the trip waiting on the driver side — but it is not
 the path to rely on. The standing offer is.
 
-The companion piece of demo state, promo code `KERBREVIEW` (100% off, bypassing the
-saved-card requirement so a booking costs nothing), is specified in
-`review-notes.md`. It needs the same kind of site work if promo codes cannot express
-it today.
+The companion piece of demo state, promo code `KERBREVIEW` (100% off, bypassing
+the saved-card requirement so a booking costs nothing), is specified in §6. It is
+new work rather than configuration: the deployed client has no promo concept at
+all, so "if promo codes cannot express it today" resolves to — they cannot.
 
 ---
 
@@ -314,6 +314,56 @@ in `store/merchant-order-response.md`; **none of it is deployed.**
 - **Before it ships:** declining must refund through the same path as a customer
   cancellation and release the courier, and order writes must be clear of the
   `503 Upstream unavailable` seen on 19 Nov 2026.
+
+## 6. Promo code `KERBREVIEW` — so a reviewer can book without a card
+
+A reviewer cannot be asked for a real card. Without a code path the only way to
+finish a booking is to enter payment details, and the walkthrough in
+`review-notes.md` stops at the payment step. The behaviour the demo needs is
+specified there; this is the site work behind it.
+
+The deployed client has **no** promo concept of any kind: `promo` appears in none
+of the 69 chunks, and the payment step has no promo input. This is a new feature,
+not a configuration change.
+
+### 6a. What the code must do
+
+| Item | Requirement |
+|---|---|
+| Code | `KERBREVIEW`, matched case-insensitively and trimmed |
+| Discount | 100% of the total, fare and booking fee |
+| Scope | The demo rider account only — not a public code, not single-use |
+| Effect | Total `$0.00`, a visible `Promo KERBREVIEW applied` line, no payment intent, no charge |
+| Card | **Bypasses the saved-card requirement**: the card field is not shown and none is requested |
+| Ride | Dispatched like any other booking, so the driver side still has a trip to accept |
+
+The demo rider must have **no card on file** when it is used. Working with an
+empty card list, not merely with a card that is never charged, is the whole point
+of the code.
+
+### 6b. Where it goes
+
+Follow the existing booking path rather than a parallel one:
+
+- A promo table (`code`, `percent_off`, `active`, plus whatever scope column the
+  schema already uses) with one row for `KERBREVIEW`, scoped to the demo rider.
+- Validation inside the booking server function, next to the fare calculation, so
+  the discount is applied where the total is computed and the stored booking
+  agrees with what was shown.
+- The input on the payment step, beside the card field, because that is where a
+  reviewer looks for it. When the code applies, the card field and its
+  requirement are skipped for that booking only.
+- A booking without a promo code keeps today's behaviour exactly: card required,
+  payment created, charged on completion.
+
+### 6c. What must not happen
+
+- Do not make it a general discount. It must not appear in any listing, marketing
+  copy or public surface, and it must not work on a real account.
+- Do not drop the booking record, the dispatch or the driver offer because the
+  total is zero — the reviewer's next step is the driver flow.
+- Do not seed the booking by hand: fares, receipts and earnings aggregates are
+  derived, and a hand-edited row will disagree with them.
 
 ## Acceptance checks
 
@@ -341,10 +391,15 @@ download`.
    an offer is waiting again. A different driver account sees no such offer.
 9. The trip card that offer opens is the same one from check 5: one
    `[data-kerb-destination]`, carrying the dropoff.
+10. Signed in as the demo rider **with no card on file**: entering `KERBREVIEW`
+    at the payment step makes the total `$0.00`, shows the promo line, hides the
+    card field, and completes the booking — which then reaches the demo driver as
+    an offer. Without the code the card field is back, and the code is refused on
+    any other account.
 
 ## What does not change
 
-- No app build or store update is needed for any of these four; they go live
+- No app build or store update is needed for any of these five; they go live
   with the site.
 - The shell never modifies the site's markup in the database or on the server.
   It only hides a few blocks on the two home screens, so `/delete-account` and

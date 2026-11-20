@@ -75,6 +75,9 @@ money. Add one promo code:
 | Effect | `$0.00 due`, a visible "Promo KERBREVIEW applied" line, no charge, no receipt amount collected |
 | Requirement | The code path **bypasses the saved-card requirement** — no card is added to the account and none is requested at checkout |
 
+This is new site work rather than a configuration change — the promo code does not
+exist in the deployed client at all. It is specified in `site-changes.md` §6.
+
 If the reviewer does book, the request is dispatched like any other. Pointing it
 at the demo driver (who is online) is the nicest version: the reviewer books as
 the rider, signs in as the driver, and finds the trip waiting. Do not make the

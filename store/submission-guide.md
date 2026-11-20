@@ -20,7 +20,7 @@ is the move itself, and no store needs it:
 | `store/listing.md` | Store copy: names, descriptions, keywords, screenshots inventory |
 | `store/compliance.md` | Privacy answers, data safety, ratings, rejection risks |
 | `store/review-notes.md` | The text to paste into App Review notes and Play App access |
-| `store/site-changes.md` | The site-side prerequisites for review: in-app account deletion, the driver dropoff attribute, the landing copy, a standing demo offer, and the retailer change that is no store's prerequisite. **None of it has landed yet** |
+| `store/site-changes.md` | The site-side prerequisites for review: in-app account deletion, the driver dropoff attribute, the landing copy, a standing demo offer, the `KERBREVIEW` promo code, and the retailer change that is no store's prerequisite. **None of it has landed yet** |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 | `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |
 

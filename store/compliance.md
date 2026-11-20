@@ -5,11 +5,12 @@ Derived from https://www.kerbgo.com/privacy (last updated 16 November 2026),
 Where a fact can only be confirmed by the account owner it is marked
 **[confirm]** — answer those from the live console, not from this file.
 
-**Site-side prerequisites:** four fixes have to land on kerbgo.com before either
+**Site-side prerequisites:** five fixes have to land on kerbgo.com before either
 store will approve the shells — in-app account deletion, `data-kerb-destination`
-on the driver trip card, the landing copy that says there is no app, and a
-standing demo offer so the driver flow can be walked at all. They are specified in
-`site-changes.md` §1–§4; items 1, 3 and 4 below depend on them.
+on the driver trip card, the landing copy that says there is no app, a standing
+demo offer so the driver flow can be walked at all, and the `KERBREVIEW` promo
+code so a booking can be finished without a card. They are specified in
+`site-changes.md` §1–§4 and §6; items 1, 3 and 4 below depend on them.
 
 ## Apple — App Privacy
 
@@ -51,8 +52,9 @@ domains. It is bundled in the app target.
      reaches it, no app change needed), or
    - exposing a site endpoint the shell can call from a native confirmation
      dialog.
-   The site is deliberately untouched by this repository, so this is the one fix
-   that cannot be made from here. The exact route, deletion semantics and
+   The site is deliberately untouched by this repository, so this fix cannot be
+   made from here — nor can any of the other site-side items in
+   `site-changes.md`. The exact route, deletion semantics and
    entry-point markup the shell already reads are specified in `site-changes.md`
    §1; that change closes this risk with no app release.
 2. **4.2 minimum functionality.** A WebView over a website is the classic 4.2
