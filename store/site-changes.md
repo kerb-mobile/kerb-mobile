@@ -322,9 +322,11 @@ finish a booking is to enter payment details, and the walkthrough in
 `review-notes.md` stops at the payment step. The behaviour the demo needs is
 specified there; this is the site work behind it.
 
-The deployed client has **no** promo concept of any kind: `promo` appears in none
-of the 69 chunks, and the payment step has no promo input. This is a new feature,
-not a configuration change.
+The deployed client has no customer-facing discount mechanism of any kind:
+`promo`, `coupon`, `voucher` and `discount` appear in none of the 69 chunks, and
+the payment step has no field for one. The only credit-like surface is
+`/admin/referrals`, which is driver referral payouts — a ledger of money owed, not
+a discount on a fare. This is a new feature, not a configuration change.
 
 ### 6a. What the code must do
 
@@ -333,8 +335,9 @@ not a configuration change.
 | Code | `KERBREVIEW`, matched case-insensitively and trimmed |
 | Discount | 100% of the total, fare and booking fee |
 | Scope | The demo rider account only — not a public code, not single-use |
-| Effect | Total `$0.00`, a visible `Promo KERBREVIEW applied` line, no payment intent, no charge |
+| Effect | Total `$0.00`, a visible `Promo KERBREVIEW applied` line, no payment intent, no charge, no receipt amount |
 | Card | **Bypasses the saved-card requirement**: the card field is not shown and none is requested |
+| Invalid code | A plain message beside the field, with the card requirement left exactly as it is today — a wrong code must never quietly book a full-price ride |
 | Ride | Dispatched like any other booking, so the driver side still has a trip to accept |
 
 The demo rider must have **no card on file** when it is used. Working with an
@@ -353,6 +356,11 @@ Follow the existing booking path rather than a parallel one:
 - The input on the payment step, beside the card field, because that is where a
   reviewer looks for it. When the code applies, the card field and its
   requirement are skipped for that booking only.
+- Reuse the branch the payment step already takes when Stripe is not configured:
+  the booking path already allows a booking with no card (`configured` false ⇒ no
+  card required), so ride on that rather than adding a second no-card path. Do
+  not show that state's "Card payments aren't switched on yet" copy when a code
+  is applied — to a reviewer it reads as a broken payment step.
 - A booking without a promo code keeps today's behaviour exactly: card required,
   payment created, charged on completion.
 

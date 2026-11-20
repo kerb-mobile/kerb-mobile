@@ -93,7 +93,7 @@ review depend on it — the standing offer above is the deterministic path.
 | Driver approval + documents | The existing admin approval step |
 | Driver vehicle | The vehicle form in driver onboarding |
 | Standing offer | The demo flag or admin re-seed action described above |
-| `KERBREVIEW` | Whatever surface already issues promo codes |
+| `KERBREVIEW` | The promo table added in `site-changes.md` §6 — no promo surface exists on the site today |
 
 ## Apple — App Review Information → Notes
 
