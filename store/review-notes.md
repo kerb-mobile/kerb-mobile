@@ -163,8 +163,11 @@ standing offer above to make that step reachable.
 
 **Support address.** The site hardcodes no address at all: every one it shows is
 interpolated from the `supportEmail` value in **`/admin/branding`**, and as of
-20 Nov 2026 that field holds **`support@kerbgo.com`**, so the help page, footer and
-cancel-trip copy all show it. The mailbox behind it still has to be created in
+20 Nov 2026 that field holds **`support@kerbgo.com`**. That is not an inference: the
+live home page serves its branding record in the server payload, and it reads
+`supportEmail:"support@kerbgo.com"`. Every page that shows an address — `/`,
+`/help`, `/privacy`, `/terms`, `/delete-account`, `/signin` — renders it, and none
+contains `ctomail`. The mailbox behind it still has to be created in
 Google Workspace — until it exists, a reviewer who follows the site's own support
 link reaches nobody (`status.md` B10). Use the same address in the Play listing.
 

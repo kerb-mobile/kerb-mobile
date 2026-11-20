@@ -8,11 +8,16 @@ the review questions. Written to be followed top to bottom on submission day.
 upload key created on 19 Nov. The iOS archive and upload run from GitHub Actions
 (`.github/workflows/ios-release.yml`), so no Mac with Xcode is needed — but the
 Apple Developer Program membership, the six repository secrets and the portal
-steps below are still outstanding. **Five site-side gaps** are real rejection risks
-— in-app account deletion, the driver dropoff attribute, the landing copy that says
-there is no app, the standing demo offer, and the `KERBREVIEW` promo code. None has
-landed. They are specified in `site-changes.md` §1–§4 and §6, and summarised in
-`compliance.md`.
+steps below are still outstanding.
+
+The five site-side prerequisites have all landed on kerbgo.com and were verified
+live on 20 Nov 2026 — in-app account deletion, the driver dropoff attribute, the
+landing copy, the standing demo offer and the `KERBREVIEW` promo code. The promo
+is deployed but has never been proven on production, because the Demo Rider login
+it depends on is refused. Two driver-flow defects are still open: the offer
+countdown prints raw seconds, and the turn label still reads *to pickup* after
+the trip starts. Every open item, with its owner, is in `status.md`; the specs are
+`site-changes.md` §1–§4 and §6.
 
 Those five documents plus this one are the whole submission kit. The last row
 is the move itself, and no store needs it:
@@ -22,7 +27,7 @@ is the move itself, and no store needs it:
 | `store/listing.md` | Store copy: names, descriptions, keywords, screenshots inventory |
 | `store/compliance.md` | Privacy answers, data safety, ratings, rejection risks |
 | `store/review-notes.md` | The text to paste into App Review notes and Play App access |
-| `store/site-changes.md` | The site-side prerequisites for review: in-app account deletion, the driver dropoff attribute, the landing copy, a standing demo offer, the `KERBREVIEW` promo code, and the retailer change that is no store's prerequisite. **None of it has landed yet** |
+| `store/site-changes.md` | The site-side prerequisites for review: in-app account deletion, the driver dropoff attribute, the landing copy, a standing demo offer, the `KERBREVIEW` promo code, and the retailer change that is no store's prerequisite. All five landed 20 Nov 2026; the dated evidence and the two open driver defects are here |
 | `store/site-handover.md` | One page for whoever holds the cto.new access: the five site changes and the support-email field, each with the check that proves it landed, then the payments phase that follows review |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 | `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |

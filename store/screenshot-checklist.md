@@ -103,20 +103,21 @@ node -e "require('sharp')('store/shots/01-fare.png').resize(1080,1920,{fit:'cove
 
 ## Blocking items before you submit
 
-1. **In-app account deletion.** Apple guideline 5.1.1(v) requires an app that lets
-   people create an account to let them delete it in the app. The route is
-   `kerbgo.com/delete-account`, reached from the Account tab; it returns 404 today
-   and is specified, with the entry-point markup the shell already reads, in
-   `site-changes.md` §1. There is no native deletion flow — site work only, no app
-   release.
-2. **Demo state, not just two accounts.** A rider with a saved place and a past
-   trip, an approved driver with a vehicle and an offer always waiting on
-   `/driver`, and promo code `KERBREVIEW` so the booking path costs nothing. The
-   full spec is in `review-notes.md`; the standing offer it depends on is
-   `site-changes.md` §4, and the promo code is `site-changes.md` §6.
-3. **Driver destination attribute** — `data-kerb-destination` on the driver trip
-   card (`site-changes.md` §2), otherwise the Navigate button reports that it
-   cannot read the destination (it will not guess).
+**Updated 20 Nov 2026.** Items 1 and 3 are done on the site and verified live. Item
+2 is half done: the standing offer and the promo code are deployed, but the Demo
+Rider login is refused on production so the `$0.00` path is still unproven. Live
+status and owners: `status.md`.
+
+1. **In-app account deletion — done.** `kerbgo.com/delete-account` answers `200`,
+   loads signed out, and the Account tab carries the row. Verified end to end on
+   20 Nov 2026. Spec: `site-changes.md` §1. No native deletion flow, no app release.
+2. **Demo state — open.** A rider with a saved place and a past trip, an approved
+   driver with a vehicle and an offer always waiting on `/driver`, and promo code
+   `KERBREVIEW` so the booking path costs nothing. Standing offer: live. Promo:
+   deployed, unproven. Specs: `review-notes.md`, `site-changes.md` §4 and §6.
+3. **Driver destination attribute — done.** `data-kerb-destination` is on the trip
+   card and reads `1` through accept, arrive and on-trip; verified 20 Nov 2026.
+   Spec: `site-changes.md` §2.
 Not on this list, and recorded only so it is not mistaken for a blocker: the iPad
 set. The app is iPhone-only (`TARGETED_DEVICE_FAMILY = 1`), so App Store Connect
 accepts an iPhone set on its own and nothing needs capturing for iPad.

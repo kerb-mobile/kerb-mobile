@@ -5,12 +5,14 @@ Derived from https://www.kerbgo.com/privacy (last updated 16 November 2026),
 Where a fact can only be confirmed by the account owner it is marked
 **[confirm]** — answer those from the live console, not from this file.
 
-**Site-side prerequisites:** five fixes have to land on kerbgo.com before either
-store will approve the shells — in-app account deletion, `data-kerb-destination`
-on the driver trip card, the landing copy that says there is no app, a standing
-demo offer so the driver flow can be walked at all, and the `KERBREVIEW` promo
-code so a booking can be finished without a card. They are specified in
-`site-changes.md` §1–§4 and §6; items 1, 3 and 4 below depend on them.
+**Site-side prerequisites:** five fixes had to land on kerbgo.com before either
+store would approve the shells — in-app account deletion, `data-kerb-destination`
+on the driver trip card, the landing copy, a standing demo offer so the driver
+flow can be walked at all, and the `KERBREVIEW` promo code so a booking can be
+finished without a card. **All five landed and were verified live on 20 Nov
+2026**, except that the promo code has never been proven on production because
+the Demo Rider login it needs is refused. Open items are in `status.md`; the
+specs are `site-changes.md` §1–§4 and §6.
 
 ## Apple — App Privacy
 
@@ -44,7 +46,13 @@ domains. It is bundled in the app target.
 
 ## Apple — review risk, ranked
 
-1. **5.1.1(v) account deletion — will be rejected as it stands.** The app creates
+**Updated 20 Nov 2026:** risks 1, 3 and 4 are fixed on the site — account
+deletion, the landing copy and the driver destination attribute were all verified
+live, with the standing offer behind risk 4 in place. They stay listed because the
+reasoning still explains what a reviewer looks for. Everything still open is in
+`status.md`.
+
+1. **5.1.1(v) account deletion — was a rejection as it stood.** The app creates
    accounts and the only deletion path is "email us" in the privacy policy
    (`You can ask us to delete your account ... by emailing`). Apple requires
    deletion to be *initiated in the app*. The fix is one route, not two: the
@@ -98,7 +106,7 @@ violence, no mature themes.
 | Photos → Photos | Collected (driver documents), used for app functionality |
 | App activity → Other user-generated content (trip history, saved addresses) | Collected, used for app functionality |
 | Device or other IDs | Not collected by us; the session cookie is server-side, first-party |
-| Data deletion | **Yes — by email today**, which the privacy policy states. Play wants a URL: enter `https://www.kerbgo.com/delete-account` (`site-changes.md` §1) only once it answers 200, because today it is a 404 and a dead URL in that field is worse than the policy paragraph. |
+| Data deletion | **Yes** — in the app at `Account → Delete account`, plus the email fallback the policy keeps for locked-out users. Data deletion URL: `https://www.kerbgo.com/delete-account`, verified `200` with `cache-control: no-store` on 20 Nov 2026. |
 
 **Ads:** No. **News:** No. **COVID-19:** No. **Government:** No.
 **Financial features:** none of the listed categories. **Health:** No.
@@ -118,10 +126,9 @@ younger audience invites extra policy obligations with no benefit.
 
 ## Google Play — policy items to complete before review
 
-- **Data deletion URL** — Play now surfaces this field in the listing. The route
-  it should hold is specified in `site-changes.md` §1 and does not exist yet
-  (404), so leave the field empty or point it at `/privacy` until §1 lands, then
-  switch it to `/delete-account`. Do not enter a URL that 404s.
+- **Data deletion URL** — Play surfaces this field in the listing. Enter
+  `https://www.kerbgo.com/delete-account`: it answers `200`, serves its
+  signed-out state, and carries `cache-control: no-store`.
 - **Account deletion** — Play's policy mirrors Apple's: if users can create an
   account, deletion must be available. Same fix as Apple's item 1.
 - **App access** — every reviewer must be able to sign in, and the account they

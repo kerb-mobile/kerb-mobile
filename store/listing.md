@@ -103,11 +103,12 @@ Purpose for every row: **App Functionality**. No data is used for tracking, so n
 | Privacy policy | — | `https://www.kerbgo.com/privacy` |
 
 **The contact email.** `support@kerbgo.com` is the domain's support mailbox, on
-Google Workspace. The site does not render it yet: the help page, footer and
-cancel-trip copy all read the `supportEmail` field in `/admin/branding`, which
-still holds `kerb-221901fc@ctomail.io`, a cto.new disposable address. Change that
-field to `support@kerbgo.com` before submitting — one admin edit, no deploy — so
-this row, `store/review-notes.md` and every address on the site agree.
+Google Workspace. The site already renders it everywhere it shows an address —
+help page, footer, cancel-trip copy — because `/admin/branding` → `supportEmail`
+is set to it: the live home page's branding payload carried
+`supportEmail:"support@kerbgo.com"` on 20 Nov 2026. The mailbox itself still has
+to be created in Workspace; until it exists, a reviewer who follows any support
+link reaches nobody (`status.md` B10).
 
 **Full description**
 
@@ -151,10 +152,9 @@ Provide the same demo rider and driver credentials as for Apple, with the note t
 - Shared with third parties? **No** (payment processing by the payment provider is service-provider processing, not "sharing" under Play's definition — confirm with your payment provider's terms)
 - Processing is ephemeral? **No**
 - Required or optional? Name, email, location and payment are required for the service; phone number is optional
-- Users can request deletion? **Yes** — by email today, as the policy states.
-  Play's Data deletion URL becomes `https://www.kerbgo.com/delete-account`
-  (`site-changes.md` §1) once it answers 200; it is a 404 today, so leave the
-  field empty until then rather than shipping a dead link
+- Users can request deletion? **Yes** — in the app at `Account → Delete account`,
+  and by the email fallback the policy keeps. Play's Data deletion URL:
+  `https://www.kerbgo.com/delete-account`, verified `200` on 20 Nov 2026
 - Data encrypted in transit? **Yes** (HTTPS only; the app disables cleartext traffic)
 
 **Content rating**: complete the IARC questionnaire. Expect a low rating (no violence, no sexual content, no profanity, no gambling, no user-generated content). Location sharing and card payments are declared separately, not through the rating.
