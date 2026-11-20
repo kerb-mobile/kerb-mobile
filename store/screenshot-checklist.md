@@ -85,8 +85,10 @@ node -e "require('sharp')('store/shots/01-fare.png').resize(1080,1920,{fit:'cove
    trip, an approved driver with a vehicle and an offer always waiting on
    `/driver`, and promo code `KERBREVIEW` so the booking path costs nothing. The
    full spec is in `review-notes.md`; the standing offer it depends on is
-   `site-changes.md` §4.
+   `site-changes.md` §4, and the promo code is `site-changes.md` §6.
 3. **Driver destination attribute** — `data-kerb-destination` on the driver trip
    card (`site-changes.md` §2), otherwise the Navigate button reports that it
    cannot read the destination (it will not guess).
-4. **iPad set** — not required; the app is iPhone-only.
+Not on this list, and recorded only so it is not mistaken for a blocker: the iPad
+set. The app is iPhone-only (`TARGETED_DEVICE_FAMILY = 1`), so App Store Connect
+accepts an iPhone set on its own and nothing needs capturing for iPad.

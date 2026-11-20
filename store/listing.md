@@ -95,7 +95,7 @@ Purpose for every row: **App Functionality**. No data is used for tracking, so n
 | Field | Limit | Copy |
 |---|---|---|
 | App name | 30 | `Kerb: Local Rides` |
-| Short description | 80 | `Book local rides across the US with upfront fares. No surge pricing, ever.` (73) |
+| Short description | 80 | `Book local rides across the US with upfront fares. No surge pricing, ever.` (74) |
 | Category | — | Maps & Navigation |
 | Tags | — | rideshare, taxi, travel |
 | Contact email | — | `kerb-221901fc@ctomail.io` |
@@ -159,7 +159,8 @@ Six phone screenshots were taken from the Android debug build of `com.kerbgo.app
 running on the Android emulator, signed in to the rider and driver accounts, then
 flattened to 24-bit PNG and cropped only by scroll position (nothing is mocked or
 recomposed). They are `store/screenshots/`, and they are committed — the raw
-`adb` captures stay in `store/shots/`, which is git-ignored:
+`adb` captures went to `store/shots/`, which is git-ignored and empty, so the
+committed PNGs are the only copies:
 
 | # | Scene | File | Pixels |
 |---|---|---|---|
