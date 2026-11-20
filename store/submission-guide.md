@@ -3,13 +3,15 @@
 Everything needed to create the two app records, build the two uploads and answer
 the review questions. Written to be followed top to bottom on submission day.
 
-**Status 19 Nov 2026:** the Android upload exists and is signed —
+**Status 20 Nov 2026:** the Android upload exists and is signed —
 `android/app/build/outputs/bundle/release/app-release.aab`, signed with the
-upload key created that day. The iOS archive and upload run from GitHub Actions
+upload key created on 19 Nov. The iOS archive and upload run from GitHub Actions
 (`.github/workflows/ios-release.yml`), so no Mac with Xcode is needed — but the
 Apple Developer Program membership, the six repository secrets and the portal
-steps below are still outstanding. Two policy gaps (account deletion, "no app-store download"
-copy on the landing page) are real rejection risks and are described in
+steps below are still outstanding. **Five site-side gaps** are real rejection risks
+— in-app account deletion, the driver dropoff attribute, the landing copy that says
+there is no app, the standing demo offer, and the `KERBREVIEW` promo code. None has
+landed. They are specified in `site-changes.md` §1–§4 and §6, and summarised in
 `compliance.md`.
 
 Those five documents plus this one are the whole submission kit. The last row
@@ -104,8 +106,8 @@ Until then driver work ships as the `/driver` route, which needs no app release.
 
 | Asset | Where | State |
 |---|---|---|
-| App icon (Play) | `assets/play-store-icon-512.png` | 512×512, 24-bit, no alpha — ready |
-| Feature graphic (Play) | `store/graphics/feature-graphic-1024x500.png` | 1024×500, 24-bit, no alpha — drafted tonight, review the wording |
+| App icon (Play) | `assets/play-store-icon-512.png` | 512×512, 32-bit PNG **with alpha**, ≤ 1024 KB — regenerate with `npm run icon:play`, never by hand |
+| Feature graphic (Play) | `store/graphics/feature-graphic-1024x500.png` | 1024×500, 24-bit, no alpha — checked 20 Nov 2026; review the wording |
 | Play phone screenshots | `store/screenshots/01`–`06` | 6 shots from the Android build — ready |
 | Apple 6.3" screenshots | — | **missing.** One real 1206×2622 iOS capture of the landing page exists as `.toolchain/ios-artifacts/artifacts/ios-02-loaded.png`; it is not a store screenshot and the other five scenes have not been captured on iOS |
 | Apple iPad screenshots | — | not required: the app is iPhone-only (`TARGETED_DEVICE_FAMILY = 1`) |
@@ -307,8 +309,8 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
   before any step ran**, so nothing failed to compile. The last build that
   actually compiled is #12 (`5961320`), green. `iOS simulator run` last passed as
   #2 (`4cb8c6b`) and has not run since, because its workflow only triggers on
-  `ios/**`, `www/**` or its own file. Local `main` is 31 commits ahead of
-  `origin/main`, so none of the store work here has been through CI at all.
+  `ios/**`, `www/**` or its own file. `origin/main` does not include the store
+  work in this repository, so none of it has been through CI at all.
   The simulator job is the only place the iOS presentation layer is ever executed,
   so **re-dispatch both before submitting**. Dispatching is an authenticated call —
   unauthenticated it returns `401 Requires authentication` — so either use

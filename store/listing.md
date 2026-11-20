@@ -217,7 +217,7 @@ demo account and recapture shots 1 and 2.
 | Store | Asset | File |
 |---|---|---|
 | Apple | 1024×1024 app icon (no alpha) | `ios/App/App/Assets.xcassets/AppIcon.appiconset/` |
-| Google Play | 512×512 listing icon | `assets/play-store-icon-512.png` |
+| Google Play | 512×512 listing icon, 32-bit PNG with alpha | `assets/play-store-icon-512.png` — regenerate with `npm run icon:play` |
 | Both | Launch splash | `ios/App/App/Assets.xcassets/Splash.imageset/`, `android/app/src/main/res/drawable*/splash.png` |
 | Google Play | 6 phone screenshots (1080 wide, no alpha) | `store/screenshots/01`–`06` (see above) |
 | Google Play | Feature graphic 1024 × 500 | `store/graphics/feature-graphic-1024x500.png` — icon, wordmark and tagline on the brand gradient; 24-bit, no alpha. Regenerate with `tools/feature-graphic.mjs` |
