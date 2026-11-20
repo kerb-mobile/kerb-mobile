@@ -83,9 +83,11 @@ publishable now.
 evidence is **APSC Permit TNC-4, held by UZURV Holdings, Inc. d/b/a UZURV** (Delaware,
 Richmond VA, renewed effective 1 July 2026), and the owner confirmed that Kerbgo is a
 separate company for which **UZURV is the TNC of record** — its screening and insurance
-cover every Kerb trip, Kerb is the storefront. That is lawful if disclosed, so the page
-now carries the disclosure sentence from `safety-and-licensing.md` §2b. It does not
-say Kerb is licensed, because Kerb is not the permittee.
+cover every Kerb trip, Kerb is the storefront. The **owner confirms sole ownership of
+both companies**, which explains the affiliation; it does not make TNC-4 Kerb's permit.
+That is lawful if disclosed, so the page now carries the disclosure sentence from
+`safety-and-licensing.md` §2b. It does not say Kerb is licensed, because Kerb is not the
+permittee.
 
 | # | Blocker | Owner | Done when |
 |---|---|---|---|

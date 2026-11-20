@@ -51,8 +51,10 @@ What the record actually says, checked 20 Nov 2026:
 - **UZURV Holdings, Inc.** is a **Delaware corporation headquartered in Richmond,
   Virginia** (101 S 15th St, Ste 200), founded 2017, describing itself as an
   assisted-mobility TNC in 20 states. Its site, its APSC filing and its other state
-  permits (Massachusetts `24-TNCDP-06`, for one) name UZURV only. **Nothing in the
-  public record connects it to Kerb or Kerbgo.**
+  permits (Massachusetts `24-TNCDP-06`, for one) name UZURV only. The **owner confirms
+  owning both companies** (20 Nov 2026), which explains the affiliation — but common
+  ownership does not put Kerb on the permit, which is why the page discloses the
+  operating structure instead of claiming a shared licence.
 - **The site names no legal entity at all.** `/terms` says "we" and "us" mean
   **Kerb**; `/privacy` does the same. No LLC, Inc., registered address or state of
   formation appears on either — so nothing on the live site currently ties the
@@ -76,7 +78,7 @@ describing Kerb as the licensee:
 | Structure | Lawful? | What has to happen |
 |---|---|---|
 | **A. Same entity trading as Kerb** — Kerb is a brand of UZURV Holdings, Inc. | Yes, once filed | Register/confirm the Kerb dba and get the Commission to show it against Permit TNC-4; insurance certificate naming the dba. Then the page can say UZURV holds TNC-4 and operates Kerb |
-| **B. Separate company, rides legally UZURV's** — UZURV is the TNC of record, its screening and insurance cover the trip, Kerb is the storefront | Yes, if disclosed — **this is the confirmed structure** | The disclosure must say rides are provided by UZURV, and UZURV's screening and insurance must actually cover every Kerb trip. Kerb's own drivers are not covered unless UZURV screened and insured them |
+| **B. Separate company, rides legally UZURV's** — UZURV is the TNC of record, its screening and insurance cover the trip, Kerb is the storefront | Yes, if disclosed — **this is the confirmed structure, and the owner confirms sole ownership of both companies** | The disclosure must say rides are provided by UZURV, and UZURV's screening and insurance must actually cover every Kerb trip. Kerb's own drivers are not covered unless UZURV screened and insured them. Common ownership makes the arrangement easy to administer; it does not make the permit transferable |
 | **C. Separate company, own drivers, own dispatch** | **No** | Operating a TNC without a permit. Form TNC-1, $700, hearing — the same path the Commission denied Aux Rideshare on 4 Nov 2026 (docket 33732) |
 
 **Structure C stays ruled out.** It is not a paperwork gap: the APSC certificate of
