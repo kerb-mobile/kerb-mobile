@@ -310,10 +310,15 @@ with `jarsigner`, or run `assembleRelease` and point `apksigner` at the APK:
   `ios/**`, `www/**` or its own file. Local `main` is 31 commits ahead of
   `origin/main`, so none of the store work here has been through CI at all.
   The simulator job is the only place the iOS presentation layer is ever executed,
-  so **re-dispatch both before submitting**: `workflow_dispatch` is enabled on
-  each, and `ios.yml` cancels superseded runs on the same ref (`concurrency`),
-  which is the usual reason a build reads red with no failing step. With no CLI
-  installed, and the repository public, read the status from the API:
+  so **re-dispatch both before submitting**. Dispatching is an authenticated call —
+  unauthenticated it returns `401 Requires authentication` — so either use
+  *Actions → the workflow → Run workflow*, or, with a token in your environment:
+  `curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" \`
+  `https://api.github.com/repos/kerb-mobile/kerb-mobile/actions/workflows/ios.yml/dispatches -d '{"ref":"main"}'`
+  (swap `ios.yml` for `ios-simulator.yml`). `ios.yml` cancels superseded runs on the
+  same ref (`concurrency`), which is the usual reason a build reads red with no
+  failing step. Reading the result needs no token, because the repository is
+  public:
   `curl -s "https://api.github.com/repos/kerb-mobile/kerb-mobile/actions/runs?per_page=10"`
   — the newest run of each of the two workflow names is the one that counts.
 

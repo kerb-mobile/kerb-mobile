@@ -29,8 +29,13 @@ them. The set to capture is the one required row above: **`1206 × 2622`**, or
 device frame. The larger sizes are optional extras that App Store Connect scales
 down from this set — they are not a substitute for it, and uploading only a
 `1290 × 2796` set is the mistake older guides still recommend. `ios-simulator.yml`
-already installs, launches and screenshots the app on an iPhone; pick a
-medium-display device for it. As of 20 Nov 2026 there are **zero** captures at a
+already installs, launches and screenshots the app on an iPhone, and the device it
+picks is the right one: it prefers **iPhone 17 Pro**, then iPhone 16 Pro, 17 and 16
+— the first two are the medium-display class whose captures are `1206 × 2622`, and
+the step prints the real dimensions with `sips` before uploading. What its
+artifacts do **not** cover is content: it shoots two states only, launch and the
+loaded home screen. The six-screen set above still needs the rider and driver
+flows walked through by hand. As of 20 Nov 2026 there are **zero** captures at a
 valid Apple size. (Checked against Apple's screenshot specifications on 20 Nov
 2026, when the required slot was the medium Dynamic Island display.)
 
