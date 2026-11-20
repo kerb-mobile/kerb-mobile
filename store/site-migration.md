@@ -144,6 +144,17 @@ an HTTPS transactional-email API becomes a prerequisite together with SPF and
 DKIM on the sending domain — which is also what keeps reset emails out of spam,
 and password reset is the only way back into an account.
 
+**Sign-up address validation — keep it, but not the disposable check.** A validator
+for new addresses (format, domain MX, deliverability) is worth porting, and one was
+sketched against ApyHub's `verify-email-validity-and-deliverability`. Its default
+`disposable_checks` must stay **off** until the demo accounts move off disposable
+domains: the store test shop signs up with an `@euploading.com` address, and the
+site's own `supportEmail` currently points at `@ctomail.io`, so switching that check
+on would refuse the shop and any reviewer account created the same way — while
+looking like a legitimate anti-fraud measure. Turn it on only after those accounts
+are on a real domain. The module belongs in the site source, not in the store kit,
+which is why it was removed from this repository.
+
 ### Images — driver documents
 
 The one upload in the product is driver paperwork, and the client is specific:
