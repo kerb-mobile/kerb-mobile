@@ -59,19 +59,80 @@ Destination charge with `application_fee_amount`, on the store's connected accou
 The fee is everything Kerb keeps: the booking fee, the delivery margin, and any
 commission on goods. In the example that is `$3.00 + $1.75 + $3.00 = $7.75`.
 
-**The trap.** Stripe's processing fee is charged on the *whole* `$40.00` and comes
-out of *Kerb's* balance, so Kerb's take on a store order drops from `$7.75` to
-`$6.29` — Stripe is now paid on the store's goods, money Kerb never touches. Today
-that cost is invisible because Kerb holds all the money first. Decide deliberately:
+That table assumes Option A below — Kerb pays Stripe's card fee. It is the one
+decision in this document that changes what stores and Kerb each keep, so it is set
+out in full.
 
-- **Absorb it** (simplest, and what the example assumes), or
-- **Pass it through** by adding the processing cost to `application_fee_amount` —
-  which changes what stores are charged and needs to be in their terms, not just in
-  the code.
+## Who pays Stripe's card fee
 
-Do not silently do the second. Express accounts also carry Stripe's own monthly and
-payout fees, which the platform pays; confirm current Connect pricing for the US
-before quoting stores a number.
+With destination charges the platform always pays: Stripe debits its fee from
+*Kerb's* balance, on the **whole** charge, before the store's share is transferred.
+On a `$40.00` order that is `$1.46` — Stripe being paid on the store's goods, money
+Kerb never touches. Today the cost is invisible because Kerb holds all the money
+first and settles by hand.
+
+Raising `application_fee_amount` does **not** change Stripe's fee: it is charged on
+the total, whatever the split. So pass-through needs no gross-up formula — add the
+fee to Kerb's share and the store's transfer drops by exactly that fee.
+
+US domestic card, 2.9% + 30¢, rates checked 20 Nov 2026. Re-check before quoting.
+
+| Order total | Stripe's fee |
+|---|---|
+| `$12.00` | `$0.65` |
+| `$26.00` | `$1.05` |
+| `$40.00` | `$1.46` |
+| `$80.00` | `$2.62` |
+| `$120.00` | `$3.78` |
+
+### Option A — Kerb absorbs it
+
+| | `$26.00` order | `$40.00` order |
+|---|---|---|
+| Kerb's share before Stripe | `$5.25` | `$7.75` |
+| `application_fee_amount` | `$5.25` | `$7.75` |
+| Transferred to the store | `$20.75` | `$32.25` |
+| Stripe's fee, from Kerb's balance | `$1.05` | `$1.46` |
+| **Kerb keeps** | **`$4.20`** | **`$6.29`** |
+| Store is charged a fee | no | no |
+
+Nothing changes for stores and no terms change is needed. The cost is real and
+proportional: Stripe's fee is 20% of Kerb's `$5.25` take on the `$26.00` order and
+19% of its `$7.75` on the `$40.00` one, and it grows with international cards
+(+1.5%) or manually entered ones. Small orders hurt most, because the 30¢ is fixed.
+
+### Option B — the store pays it
+
+| | `$26.00` order | `$40.00` order |
+|---|---|---|
+| Kerb's share before Stripe | `$5.25` | `$7.75` |
+| Stripe's fee added | `$1.05` | `$1.46` |
+| `application_fee_amount` | `$6.30` | `$9.21` |
+| Transferred to the store | `$19.70` | `$30.79` |
+| Stripe's fee, from Kerb's balance | `$1.05` | `$1.46` |
+| **Kerb keeps** | **`$5.25`** | **`$7.75`** |
+| Cost to the store, vs Option A | `$1.05` (4.0%) | `$1.46` (3.6%) |
+
+Kerb's take is whole, and every store now carries a card cost it never had when it
+was settled by hand — 4% of a small order. That has to be in their terms and it shows
+up on their Stripe statement as a bigger platform fee, so it is a conversation, not
+just a constant in the code.
+
+B can be softened to the fee on the goods only: at `$40.00` with `$30.00` of goods
+that is `$1.10`, `application_fee_amount` `$8.85`, and Kerb keeps `$7.39`. It leaves
+Stripe's fee on Kerb's own delivery and booking revenue, where it arguably belongs.
+Either way, pick one and write it into the store terms.
+
+### Connect's own fees, which Kerb pays either way
+
+This design is Stripe's *you handle pricing* model, so the platform also pays `$2`
+per month for each account that received a payout and `0.25% + 25¢` per payout,
+billed monthly on payout volume. They land per store, not per order, and they are
+not part of the split above. A store taking 40 orders a month at `$40.00` receives
+about `$1,290`, so with daily payouts (Express's default) that is
+`$2 + $3.23 + 30 × 25¢ ≈ $12.70` a month against `$58.40` of card fees on the same
+orders — about 22% on top. Weekly payouts cut it to roughly `$6.20`. Worth choosing
+a payout schedule with this in mind before onboarding a low-volume store.
 
 ## What to build
 
@@ -134,7 +195,9 @@ idempotent by event id.
   agree who remits what. Do not guess in code.
 - **Store terms.** Stores now need a Stripe account and their own KYC, and take on
   Stripe's terms. Some will refuse; the fallback in §2 covers them.
-- **Whether Kerb absorbs or passes through the processing cost** (§Money flow).
+- **Who pays Stripe's card fee** — the section above sets out Option A and Option B
+  with worked numbers; unpicked as of 20 Nov 2026, and if nobody picks, the code
+  silently becomes A.
 - **Refunds of past orders** — only new orders route to the store.
 
 ## Acceptance checks
