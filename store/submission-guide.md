@@ -20,6 +20,7 @@ Those two documents plus this one are the whole submission kit:
 | `store/compliance.md` | Privacy answers, data safety, ratings, rejection risks |
 | `store/review-notes.md` | The text to paste into App Review notes and Play App access |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
+| `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |
 
 ## One app for riders and drivers — decided 19 Nov 2026
 
