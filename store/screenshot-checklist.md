@@ -23,12 +23,16 @@ Connect accepts an iPhone set on its own.
 
 **The Android PNGs cannot be reused here.** The six images in `store/screenshots/`
 are `1080 × 2160` (and `1080 × 1320`), which App Store Connect does not accept at
-any iPhone size — Apple's slots are fixed sizes, and 1080 × 2160 matches none of
-them. The Apple set has to be captured on the iOS simulator: **`1290 × 2796`**
-(iPhone 15 Pro Max / 16 Plus) or `1320 × 2868` (16/17 Pro Max), no transparency and
-no device frame. `ios-simulator.yml` already installs, launches and screenshots the
-app on an iPhone, so use its artifacts rather than re-shooting on a phone. As of
-20 Nov 2026 there are **zero** captures at a valid Apple size.
+any iPhone size — the slots are fixed pixel sizes and 1080 × 2160 matches none of
+them. The set to capture is the one required row above: **`1206 × 2622`**, or
+`1179 × 2556`, on an iPhone 17 / 17 Pro / 18 Pro simulator, no transparency and no
+device frame. The larger sizes are optional extras that App Store Connect scales
+down from this set — they are not a substitute for it, and uploading only a
+`1290 × 2796` set is the mistake older guides still recommend. `ios-simulator.yml`
+already installs, launches and screenshots the app on an iPhone; pick a
+medium-display device for it. As of 20 Nov 2026 there are **zero** captures at a
+valid Apple size. (Checked against Apple's screenshot specifications on 20 Nov
+2026, when the required slot was the medium Dynamic Island display.)
 
 Shortcuts are not set on the app, so no shortcut screenshots are needed.
 
