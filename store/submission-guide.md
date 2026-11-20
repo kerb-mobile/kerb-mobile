@@ -12,7 +12,7 @@ steps below are still outstanding. Two policy gaps (account deletion, "no app-st
 copy on the landing page) are real rejection risks and are described in
 `compliance.md`.
 
-Those four documents plus this one are the whole submission kit. The last row
+Those five documents plus this one are the whole submission kit. The last row
 is the move itself, and no store needs it:
 
 | File | Use |
@@ -21,6 +21,7 @@ is the move itself, and no store needs it:
 | `store/compliance.md` | Privacy answers, data safety, ratings, rejection risks |
 | `store/review-notes.md` | The text to paste into App Review notes and Play App access |
 | `store/site-changes.md` | The site-side prerequisites for review: in-app account deletion, the driver dropoff attribute, the landing copy, a standing demo offer, the `KERBREVIEW` promo code, and the retailer change that is no store's prerequisite. **None of it has landed yet** |
+| `store/site-handover.md` | One page for whoever holds the cto.new access: the five site changes and the support-email field, each with the check that proves it landed |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 | `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |
 

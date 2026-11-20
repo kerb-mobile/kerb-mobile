@@ -21,6 +21,15 @@ display)** — the 6.3-inch class (iPhone 16 Pro / 17 / 17 Pro).
 (`TARGETED_DEVICE_FAMILY = 1` in both build configurations), so App Store
 Connect accepts an iPhone set on its own.
 
+**The Android PNGs cannot be reused here.** The six images in `store/screenshots/`
+are `1080 × 2160` (and `1080 × 1320`), which App Store Connect does not accept at
+any iPhone size — Apple's slots are fixed sizes, and 1080 × 2160 matches none of
+them. The Apple set has to be captured on the iOS simulator: **`1290 × 2796`**
+(iPhone 15 Pro Max / 16 Plus) or `1320 × 2868` (16/17 Pro Max), no transparency and
+no device frame. `ios-simulator.yml` already installs, launches and screenshots the
+app on an iPhone, so use its artifacts rather than re-shooting on a phone. As of
+20 Nov 2026 there are **zero** captures at a valid Apple size.
+
 Shortcuts are not set on the app, so no shortcut screenshots are needed.
 
 ## Google Play
