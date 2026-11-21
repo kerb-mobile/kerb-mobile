@@ -564,9 +564,11 @@ not implement `HEAD`, which says nothing about the page.
 | #5 | `8b6bfa6` | green, still the raw page — the promise bug |
 | #6 | `bbc2f9d` | **failed to compile** — `callAsyncJavaScript` |
 | #7 | `6ba89ee` | **green**, both frames show the branded card: "Kerb is temporarily unavailable", body copy, **Try again**, "The Kerb service is not answering." |
+| #8 | `6654194` | **green**, same card, produced by the simplified native-`HEAD` check with no JavaScript in the detection path |
 
-Run #7's two frames are `1206 × 2622` and still carry an alpha channel, so they remain
-unusable as App Store screenshots (A4) — they are evidence for this fix, not listings.
+Run #8 is the evidence for the code that is on `main`. Its two frames are
+`1206 × 2622` and still carry an alpha channel, so they remain unusable as App Store
+screenshots (A4) — they are evidence for this fix, not listings.
 
 ### Not verified
 
