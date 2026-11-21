@@ -81,12 +81,13 @@ Both workflows are now green on the same newest commit — build #15 and simulat
 opened afterwards and does not help A4: both frames photograph the live 404 (B15), not
 the app. See the A4 note below.
 
-**21 Nov 2026, 17:47 UTC — run #8 is the current evidence.** After the shell change
+**21 Nov 2026, 18:03 UTC — run #9 is the current evidence.** After the shell change
 landed, *iOS simulator run* #7 (`6ba89ee`) went green and both frames show the branded
-card; **#8 (`6654194`) repeated it on the simplified single-`HEAD` check that is on
-`main` now**, so that run — not #7 — is the evidence for the shipped code. The two runs
-between were the failures in `site-changes.md` §7: #5 green but still the raw page, #6
-did not compile. A5 stays closed.
+card; #8 (`6654194`) repeated it on the simplified single-`HEAD` check, and **#9
+(`242b324`) then rendered the same screen on the commit that keeps 401 and 403 off it**.
+#9 is the newest green run and matches what is on `main`, so it is the evidence. The two
+runs between #7 and #8 were the failures in `site-changes.md` §7: #5 green but still the
+raw page, #6 did not compile. A5 stays closed.
 
 **A4 checked 21 Nov 2026, 16:20 UTC.** Downloaded artifact `ios-simulator-run` from
 simulator run #4 (90 KB, three files) and inspected both PNGs:
@@ -202,10 +203,12 @@ what R2 and R4 are for.
 - **Landing copy** (§3): both replacement sentences live; `no app`, `browser only`
   and `download` gone.
 - **App shell 4xx screen** (`site-changes.md` §7): a hosting error now shows the
-  branded card with **Try again** instead of the platform's own error text. iOS checks
-  once per finished load with a native `HEAD` and re-checks on foreground; Android
-  relies on Capacitor's `errorPath` swap and only polls for recovery. Verified on iOS
-  in simulator run #7; Android compiles but has not been run.
+  branded card with **Try again** instead of the platform's own error text. Neither
+  platform treats a 401 or 403 as an outage. iOS checks once per finished load with a
+  native `HEAD` and re-checks on foreground; Android uses Capacitor's `errorPath` swap,
+  with a `WebViewClient` subclass that skips it for those two statuses, and only polls
+  for recovery. Verified on iOS in simulator run #9; Android compiles but has not been
+  run.
 - **Support address on the site**: `support@kerbgo.com` on `/help` and in every
   footer, with no `ctomail.io` left. The mailbox behind it is B10.
 - **Android upload asset**: signed AAB at

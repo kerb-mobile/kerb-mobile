@@ -535,7 +535,7 @@ Android showed it but could never leave it.
 
 | | iOS | Android |
 |---|---|---|
-| Detecting the 4xx | One native `HEAD` of the loaded URL, once per finished load and again on foreground | None — Capacitor already swaps the page on a main-frame HTTP error |
+| Detecting the 4xx | One native `HEAD` of the loaded URL, once per finished load and again on foreground | None — Capacitor swaps the page on a main-frame HTTP error, and the shell swaps its `WebViewClient` for a subclass so 401 and 403 do not trigger it |
 | Showing the screen | Loads the bundled `index.html` with `?reason=http` | Capacitor's own `errorPath` load |
 | Leaving it | Polls `https://www.kerbgo.com/` every 5 s while the screen is up; reloads on any status below 400 | Same poll, same 5 s interval, plus an immediate check on `onResume` |
 | Retry button | Reloads the site; if it is still failing the screen comes straight back | Same |
@@ -553,10 +553,18 @@ Two bugs were found by running it, not by reading it, and both are worth remembe
   attempt failed to compile (`extra trailing closure passed in call`).
 
 The final iOS code avoids both: no JavaScript in the detection path at all, just one
-native `HEAD` of the document URL. Three statuses are deliberately not treated as the
-outage: `405`, because it means the server does not implement `HEAD`; and `401` and
-`403`, because those mean the site answered and withheld the document — a session or
-bot-protection matter that a Retry card would misreport as downtime.
+native `HEAD` of the document URL.
+
+Three statuses are deliberately not treated as the outage, on **both** platforms:
+`405`, because it means the server does not implement `HEAD`; and `401` and `403`,
+because those mean the site answered and withheld the document — a session or
+bot-protection matter that a Retry card would misreport as downtime. iOS excludes them
+in its own status check. Android has no check to adjust, so it instead replaces the
+bridge's `WebViewClient` (`Bridge.setWebViewClient` is public) with a `BridgeWebViewClient`
+subclass that returns before calling `super` on a main-frame 401 or 403; every other
+status, and every subresource, still goes through Capacitor unchanged. The cost is that
+Capacitor's `WebViewListener` callbacks are not fired for those two main-frame
+responses — nothing in this app subscribes to them.
 
 ### Evidence
 
@@ -575,8 +583,10 @@ screenshots (A4) — they are evidence for this fix, not listings.
 ### Not verified
 
 Android compiles (`:app:compileDebugJavaWithJavac`, exit 0) but **has never been run**:
-no device or emulator here. Its detection is Capacitor's own, so the untested part is
-narrow — the recovery poll and the `onResume` re-check.
+no device or emulator here, and the repository has no Android workflow to run it in.
+Its detection is Capacitor's own, so the untested parts are the recovery poll, the
+`onResume` re-check and the new 401/403 client swap — the last of which can only be
+confirmed by pointing the app at a page that returns 401 or 403.
 
 ### Acceptance checks, when the site is back
 

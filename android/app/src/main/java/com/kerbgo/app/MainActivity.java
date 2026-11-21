@@ -13,6 +13,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -21,7 +23,9 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 
+import com.getcapacitor.Bridge;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebViewClient;
 
 import org.json.JSONArray;
 
@@ -85,8 +89,45 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        installHttpErrorGuard();
         addNavigateButton();
         handleBackNavigation();
+    }
+
+    /**
+     * Keeps 401 and 403 off the outage screen.
+     *
+     * Capacitor loads the bundled error page for any main-frame HTTP error, which would
+     * report a withheld page as downtime. A 401 or 403 means the site is up and declined
+     * this request — an expired session, a permission rule, or bot protection — so the
+     * app must not offer a Retry card for it. Same rule as iOS.
+     *
+     * Capacitor exposes no hook for this, but it does expose the client itself, so the
+     * bridge's client is swapped for one that skips the swap on those two statuses and
+     * defers to Capacitor for everything else.
+     */
+    private void installHttpErrorGuard() {
+        Bridge bridge = getBridge();
+        if (bridge == null) {
+            return;
+        }
+        bridge.setWebViewClient(new BridgeWebViewClient(bridge) {
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                if (request.isForMainFrame() && isWithheld(errorResponse)) {
+                    return;
+                }
+                super.onReceivedHttpError(view, request, errorResponse);
+            }
+        });
+    }
+
+    private static boolean isWithheld(WebResourceResponse response) {
+        if (response == null) {
+            return false;
+        }
+        int status = response.getStatusCode();
+        return status == 401 || status == 403;
     }
 
     @Override
