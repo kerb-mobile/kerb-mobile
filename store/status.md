@@ -1,6 +1,6 @@
 # Store submission — open blockers
 
-**Status page, 21 Nov 2026, 16:20 UTC.** Every blocker still open, who owns it,
+**Status page, 21 Nov 2026, 16:35 UTC.** Every blocker still open, who owns it,
 and what "done" looks like. Evidence for anything dated lives in
 `site-changes.md`; this page is only the index. When an item closes, update the
 row here rather than adding a new section.
@@ -8,13 +8,21 @@ row here rather than adding a new section.
 | Owner | Means |
 |---|---|
 | **Me** | Only you can do it — accounts, payments, consoles, passwords, pushes. |
-| **cto.new** | The site/build team. **Currently out of weekly quota** — resets about 06:47 UTC on 21 Nov, so none of its rows can move before then. |
+| **cto.new** | The site/build team. Was out of weekly quota until about 06:47 UTC on 21 Nov, so the reset has passed — but its deployment is not serving at all right now (B15), which comes before any of its other rows. |
 | **Unstarted** | Required, and nobody has begun it. |
 
-**If you only do three things today:** enrol in the Apple Developer Program (longest
-lead time, gates every iOS step), start Play closed testing with 12 testers (14-day
-clock), and decide the cto.new quota — wait or pay — because the demo state that
-both reviews depend on is stuck behind it.
+> **The live site is down, 21 Nov 2026, 16:32 UTC.** `https://www.kerbgo.com/` returns
+> Cloudflare's 32-byte `There is no site at this address` with HTTP 404 and
+> `text/plain`, on every route checked — `/`, `/terms`, `/privacy`, `/help`, `/signin`,
+> `/app`. `www.kerbgo.com` is a CNAME to `sites.cto-new.app`, and that host answers 404
+> too, so this is the cto.new deployment not serving rather than a DNS fault. The shell
+> apps load this URL, so **the apps currently show this error too** (B15). Fix this
+> before anything else on this page, including the Apple enrolment.
+
+**If you only do three things today:** get the site back (B15), enrol in the Apple
+Developer Program (longest lead time, gates every iOS step), and decide the cto.new
+quota — the outage makes that decision urgent, because the demo state both reviews
+depend on sits on the same deployment.
 
 ---
 
@@ -35,6 +43,7 @@ both reviews depend on is stuck behind it.
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
+| B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (21 Nov, 16:32 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy` and `/help` answer as they did on 20 Nov |
 
 **B9 closed 20 Nov 2026, 20:48 UTC.** `main` went to `origin/main` as `777157e`
 (`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is
@@ -47,7 +56,7 @@ level with the remote again.
 | A1 | Apple Developer Program not enrolled | Me | Membership active and a Team ID exists |
 | A2 | All six repository secrets absent | Me | `APPLE_TEAM_ID`, `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD` set, and a dry run of *iOS release* with upload unticked produces a signed `.ipa` |
 | A3 | App Store Connect app record not created | Me | App record for `com.kerbgo.app`, free, US only, age rating 4+ |
-| A4 | No screenshots at a valid Apple size | Unstarted | Six scenes captured on an iPhone 17/16 Pro simulator at `1206 × 2622`, no transparency; the Play set at `1080 × 2160` cannot be reused |
+| A4 | No usable screenshots — the simulator artifact has the right size but photographs the live outage, and carries an alpha channel | cto.new | Six scenes captured at `1206 × 2622`, opaque, showing the real app on a working site; the Play set at `1080 × 2160` cannot be reused |
 | A6 | Review notes still carry placeholders — the deletion path sentence and both demo logins | Me | Pasted from `review-notes.md` once B1 works |
 | A7 | Review contact details not chosen | Me | Name, monitored email and a phone that answers during US business hours |
 | A8 | App Privacy answers not entered in App Store Connect | Me | All nine data types entered as in `compliance.md` — collected, linked to identity, not tracked, purpose App Functionality — and the payment processor confirmed as Stripe so the Payment Info row is right. Usage Data and Diagnostics stay "No" |
@@ -68,9 +77,31 @@ simulator was dispatched by hand on `ebeb74b`: *iOS simulator run* #4,
 `ios-simulator-run` (90 KB).
 
 Both workflows are now green on the same newest commit — build #15 and simulator #4 on
-`ebeb74b` — so A5's condition holds on one SHA rather than across two. The artifact is
-the screenshot set that run captured; I have not opened it, so it is not evidence for A4
-until someone checks the sizes and content against `screenshot-checklist.md`.
+`ebeb74b` — so A5's condition holds on one SHA rather than across two. The artifact was
+opened afterwards and does not help A4: both frames photograph the live 404 (B15), not
+the app. See the A4 note below.
+
+**A4 checked 21 Nov 2026, 16:20 UTC.** Downloaded artifact `ios-simulator-run` from
+simulator run #4 (90 KB, three files) and inspected both PNGs:
+
+| Check | Result |
+|---|---|
+| Size | **`1206 × 2622`** on both — the required medium-display size, correct |
+| Format | 8-bit PNG but **RGBA, alpha channel present** — App Store Connect rejects transparency, so these would have to be flattened before upload |
+| Content | Both show WebKit's **"There is no site at this address"**, at 4:18 and 4:19 — the live outage (B15). No splash, no home screen, no rider or driver UI |
+| Scenes | 2 of the 6 required, and neither is one of them |
+
+So A4 gains no usable capture — still **0 of 6** scenes at a valid size with valid
+content. What the run does prove is the pipeline: build, install, launch and screenshot
+all work, and the device choice lands on the right pixel size. The remaining gap is
+content and a working site, not tooling.
+
+One defect it exposes alongside B15: the branded offline screen in `www/index.html`
+did not appear. A 404 is a *successful* HTTP response, so Capacitor's
+`server.errorPath` never fires and the WebView renders the platform's raw error text
+instead. That screen is only shown for a genuine load failure (no network, DNS), which
+is the commoner case on a phone, but it is worth knowing that a hosting outage looks
+like this.
 
 ## Google Play
 

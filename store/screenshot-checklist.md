@@ -35,9 +35,13 @@ picks is the right one: it prefers **iPhone 17 Pro**, then iPhone 16 Pro, 17 and
 the step prints the real dimensions with `sips` before uploading. What its
 artifacts do **not** cover is content: it shoots two states only, launch and the
 loaded home screen. The six-screen set above still needs the rider and driver
-flows walked through by hand. As of 20 Nov 2026 there are **zero** captures at a
-valid Apple size. (Checked against Apple's screenshot specifications on 20 Nov
-2026, when the required slot was the medium Dynamic Island display.)
+flows walked through by hand. As of 21 Nov 2026 there are two captures at a valid
+Apple size — `ios-01-launch.png` and `ios-02-loaded.png` from simulator run #4, both
+`1206 × 2622` — but **zero usable ones**: both photograph the live-site outage rather
+than the app, and both carry an alpha channel that would have to be flattened. Sizes
+were checked against Apple's screenshot specifications on 20 Nov 2026, when the
+required slot was the medium Dynamic Island display; content was checked on 21 Nov
+(`status.md`, A4).
 
 Shortcuts are not set on the app, so no shortcut screenshots are needed.
 
