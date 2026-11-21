@@ -154,18 +154,6 @@ class KerbBridgeViewController: CAPBridgeViewController {
 
     private static let remoteURL = URL(string: "https://www.kerbgo.com/")!
 
-    /// `evaluateJavaScript` hands back the promise object rather than its value, so a
-    /// `.then` chain can only ever be read as 0. Park the status on the page instead
-    /// and read the property back.
-    private static let statusProbeScript = """
-    (function () {
-      window.__kerbHttpStatus = 0;
-      fetch(location.href, { method: 'HEAD', cache: 'no-store' })
-        .then(function (r) { window.__kerbHttpStatus = r.status; })
-        .catch(function () { window.__kerbHttpStatus = -1; });
-    })();
-    """
-
     /// A check with no answer by then is treated as lost, not as still running.
     /// Without this, one dropped callback would wedge the watcher until relaunch.
     private static let healthCheckTimeout: TimeInterval = 10
@@ -210,38 +198,12 @@ class KerbBridgeViewController: CAPBridgeViewController {
         wasLoading = webView.isLoading
     }
 
+    /// One native HEAD of the document's own URL per finished load. WKWebView calls a
+    /// 4xx a successful load, so this is the only place the status is visible — and
+    /// since a loaded document cannot change status underneath itself, once is enough.
     private func checkLoadedDocumentStatus() {
         guard !healthCheckInFlight else { return }
         guard let url = webView?.url, let host = url.host, host.hasSuffix("kerbgo.com") else { return }
-        healthCheckStartedAt = Date()
-        webView?.evaluateJavaScript(Self.statusProbeScript) { [weak self] _, _ in
-            guard let self = self else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                self.readParkedStatus(fallbackURL: url)
-            }
-        }
-    }
-
-    private func readParkedStatus(fallbackURL: URL) {
-        webView?.evaluateJavaScript("String(window.__kerbHttpStatus || 0)") { [weak self] result, _ in
-            guard let self = self else { return }
-            self.healthCheckStartedAt = nil
-            let status = Int((result as? String) ?? "") ?? 0
-            if (400...499).contains(status) {
-                self.showHttpErrorScreen()
-                return
-            }
-            if status <= 0 {
-                // Either the probe never resolved (a document that is not HTML is the
-                // usual reason) or the fetch was refused. Ask the network instead, and
-                // trust only the two codes a missing deployment returns: a
-                // bot-protection 403 must never park the app behind the error screen.
-                self.probeDocumentURL(fallbackURL)
-            }
-        }
-    }
-
-    private func probeDocumentURL(_ url: URL) {
         healthCheckStartedAt = Date()
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
@@ -251,7 +213,9 @@ class KerbBridgeViewController: CAPBridgeViewController {
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             DispatchQueue.main.async {
                 self?.healthCheckStartedAt = nil
-                if status == 404 || status == 410 {
+                // 405 means the server does not implement HEAD, which says nothing
+                // about whether the page itself would have served.
+                if status != 405 && (400...499).contains(status) {
                     self?.showHttpErrorScreen()
                 }
             }

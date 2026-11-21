@@ -36,9 +36,11 @@ the step prints the real dimensions with `sips` before uploading. What its
 artifacts do **not** cover is content: it shoots two states only, launch and the
 loaded home screen. The six-screen set above still needs the rider and driver
 flows walked through by hand. As of 21 Nov 2026 there are two captures at a valid
-Apple size — `ios-01-launch.png` and `ios-02-loaded.png` from simulator run #4, both
-`1206 × 2622` — but **zero usable ones**: both photograph the live-site outage rather
-than the app, and both carry an alpha channel that would have to be flattened. Sizes
+Apple size — `ios-01-launch.png` and `ios-02-loaded.png` from simulator run #7, both
+`1206 × 2622` — but **zero usable ones**: both photograph the app's branded
+"Kerb is temporarily unavailable" screen rather than any product surface, and both
+carry an alpha channel that would have to be flattened. (Run #4's pair, before the
+shell fix, showed the platform's own error text instead.) Sizes
 were checked against Apple's screenshot specifications on 20 Nov 2026, when the
 required slot was the medium Dynamic Island display; content was checked on 21 Nov
 (`status.md`, A4).

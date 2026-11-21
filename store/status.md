@@ -81,6 +81,11 @@ Both workflows are now green on the same newest commit — build #15 and simulat
 opened afterwards and does not help A4: both frames photograph the live 404 (B15), not
 the app. See the A4 note below.
 
+**21 Nov 2026, 17:35 UTC — run #7.** After the shell change landed, *iOS simulator run*
+#7 (`6ba89ee`) went green and both frames show the branded card. The two runs between
+were the failures in `site-changes.md` §7: #5 green but still the raw page, #6 did not
+compile. A5 stays closed; #7 is the current evidence.
+
 **A4 checked 21 Nov 2026, 16:20 UTC.** Downloaded artifact `ios-simulator-run` from
 simulator run #4 (90 KB, three files) and inspected both PNGs:
 
@@ -95,6 +100,9 @@ So A4 gains no usable capture — still **0 of 6** scenes at a valid size with v
 content. What the run does prove is the pipeline: build, install, launch and screenshot
 all work, and the device choice lands on the right pixel size. The remaining gap is
 content and a working site, not tooling.
+
+The later run #7 artifact shows the branded screen instead, which confirms the shell fix
+in `site-changes.md` §7 — it is still not app UI, so A4 is unchanged.
 
 One defect it exposes alongside B15: the branded offline screen in `www/index.html`
 did not appear. A 404 is a *successful* HTTP response, so Capacitor's
@@ -191,6 +199,11 @@ what R2 and R4 are for.
   accept → arrive → start → complete, and a fresh `$14.80` offer already there.
 - **Landing copy** (§3): both replacement sentences live; `no app`, `browser only`
   and `download` gone.
+- **App shell 4xx screen** (`site-changes.md` §7): a hosting error now shows the
+  branded card with **Try again** instead of the platform's own error text. iOS checks
+  once per finished load with a native `HEAD` and re-checks on foreground; Android
+  relies on Capacitor's `errorPath` swap and only polls for recovery. Verified on iOS
+  in simulator run #7; Android compiles but has not been run.
 - **Support address on the site**: `support@kerbgo.com` on `/help` and in every
   footer, with no `ctomail.io` left. The mailbox behind it is B10.
 - **Android upload asset**: signed AAB at

@@ -512,3 +512,77 @@ download`.
 - The shell never modifies the site's markup in the database or on the server.
   It only hides a few blocks on the two home screens, so `/delete-account` and
   the `data-kerb-destination` contract must live in the site's own templates.
+
+---
+
+## 7. App shell — a 4xx shows the branded screen, not the platform page
+
+**Added 21 Nov 2026, verified in simulator run #7.** This is the only change here that
+lives in the shells rather than the site. The outage (B15) exposed it: when
+kerbgo.com answered 404, the app painted WebKit's own `There is no site at this
+address` text instead of the branded screen `www/index.html` that was built for exactly
+this moment.
+
+### Why it happened
+
+Capacitor's `server.errorPath` fires on a *failed load*. A 4xx is a successful load of
+an error document, so on iOS `errorPath` never ran at all. Android is different: its
+`BridgeWebViewClient.onReceivedHttpError` already swaps in `errorPath` for a main-frame
+HTTP error. So the two platforms had opposite problems — iOS showed nothing branded,
+Android showed it but could never leave it.
+
+### What each shell does now
+
+| | iOS | Android |
+|---|---|---|
+| Detecting the 4xx | One native `HEAD` of the loaded URL, once per finished load and again on foreground | None — Capacitor already swaps the page on a main-frame HTTP error |
+| Showing the screen | Loads the bundled `index.html` with `?reason=http` | Capacitor's own `errorPath` load |
+| Leaving it | Polls `https://www.kerbgo.com/` every 5 s while the screen is up; reloads on any status below 400 | Same poll, same 5 s interval, plus an immediate check on `onResume` |
+| Retry button | Reloads the site; if it is still failing the screen comes straight back | Same |
+
+The error page suppresses its own auto-retry when `?reason=http` is present. Without
+that, a 404 resolves a `no-cors` fetch, so "connected" was indistinguishable from
+"still broken" and the screen would leave and return in a loop. The probe is now a
+CORS request that only accepts a status below 400.
+
+Two bugs were found by running it, not by reading it, and both are worth remembering:
+
+- `evaluateJavaScript` returns the *promise object*, not its resolved value, so a
+  `.then` chain always read as `0` and the first shipped probe never fired.
+- `callAsyncJavaScript` has no completion-handler form in this SDK, so the second
+  attempt failed to compile (`extra trailing closure passed in call`).
+
+The final iOS code avoids both: no JavaScript in the detection path at all, just one
+native `HEAD` of the document URL. `405` is ignored because it means the server does
+not implement `HEAD`, which says nothing about the page.
+
+### Evidence
+
+| Run | Commit | Result |
+|---|---|---|
+| *iOS simulator run* #4 | `ebeb74b` | green, screenshots show the raw platform page |
+| #5 | `8b6bfa6` | green, still the raw page — the promise bug |
+| #6 | `bbc2f9d` | **failed to compile** — `callAsyncJavaScript` |
+| #7 | `6ba89ee` | **green**, both frames show the branded card: "Kerb is temporarily unavailable", body copy, **Try again**, "The Kerb service is not answering." |
+
+Run #7's two frames are `1206 × 2622` and still carry an alpha channel, so they remain
+unusable as App Store screenshots (A4) — they are evidence for this fix, not listings.
+
+### Not verified
+
+Android compiles (`:app:compileDebugJavaWithJavac`, exit 0) but **has never been run**:
+no device or emulator here. Its detection is Capacitor's own, so the untested part is
+narrow — the recovery poll and the `onResume` re-check.
+
+### Acceptance checks, when the site is back
+
+1. With the site healthy, both apps open the site normally and no `HEAD` polling is
+   visible in a proxy after the page settles.
+2. Point the app at a 404 (the current outage does this for free): the branded card
+   appears within a second or two, with **Try again**.
+3. Tap **Try again** while still failing: the card returns rather than parking on the
+   platform text.
+4. Republish the site, then wait without touching the phone: the app leaves the card
+   and loads the site on its own within ~5 s.
+5. Background and foreground the app while the site is failing: the card is still
+   there, and the check runs once per foreground rather than on a timer.
