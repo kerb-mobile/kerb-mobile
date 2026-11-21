@@ -64,6 +64,18 @@ class KerbBridgeViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigateButton()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    /// Returning from the background is the other moment the last status may be
+    /// stale, whatever the document said when it loaded.
+    @objc private func appWillEnterForeground() {
+        statusCheckPending = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -125,6 +137,123 @@ class KerbBridgeViewController: CAPBridgeViewController {
             view.bringSubviewToFront(navigateButton)
         }
         applyShellPatchIfNeeded(path: path)
+        watchServerHealth()
+    }
+
+    // MARK: - Server health
+    //
+    // WKWebView treats a 4xx as a successful load, so Capacitor's errorPath never
+    // fires for one: a hosting outage paints the platform's raw error page inside
+    // the app. The status is read once when a load finishes, and again when the app
+    // returns to the foreground — a document that has already loaded cannot change
+    // status underneath itself, so there is nothing to poll meanwhile.
+    //
+    // The branded screen is loaded with ?reason=http so its own retry loop stays
+    // quiet. While it is up (and only then) this polls the site and leaves for it
+    // once it serves again, which is the one case where waiting is the whole point.
+
+    private static let remoteURL = URL(string: "https://www.kerbgo.com/")!
+    private static let statusProbe = """
+    (function () {
+      if (location.protocol === 'file:') { return 0; }
+      return fetch(location.href, { method: 'HEAD', cache: 'no-store' })
+        .then(function (r) { return r.status; })
+        .catch(function () { return 0; });
+    })();
+    """
+
+    /// A check with no answer by then is treated as lost, not as still running.
+    /// Without this, one dropped callback would wedge the watcher until relaunch.
+    private static let healthCheckTimeout: TimeInterval = 10
+
+    private var healthCheckStartedAt: Date?
+    private var lastRecoveryProbeAt = Date.distantPast
+    private var wasLoading = false
+    private var statusCheckPending = true
+    private var showingHttpError = false
+
+    private var healthCheckInFlight: Bool {
+        guard let started = healthCheckStartedAt else { return false }
+        if Date().timeIntervalSince(started) > Self.healthCheckTimeout {
+            healthCheckStartedAt = nil
+            return false
+        }
+        return true
+    }
+
+    /// The bundled error screen is the only file:// document this WebView loads.
+    private var isOnErrorScreen: Bool {
+        guard let url = webView?.url else { return showingHttpError }
+        return url.isFileURL
+    }
+
+    private func watchServerHealth() {
+        guard let webView = webView else { return }
+
+        if isOnErrorScreen {
+            recoverFromErrorScreen()
+        } else {
+            showingHttpError = false
+            // A load finishing is the only moment a new status exists.
+            if wasLoading && !webView.isLoading {
+                statusCheckPending = true
+            }
+            if statusCheckPending && !webView.isLoading {
+                statusCheckPending = false
+                checkLoadedDocumentStatus()
+            }
+        }
+        wasLoading = webView.isLoading
+    }
+
+    private func checkLoadedDocumentStatus() {
+        guard !healthCheckInFlight else { return }
+        guard let host = webView?.url?.host, host.hasSuffix("kerbgo.com") else { return }
+        healthCheckStartedAt = Date()
+        webView?.evaluateJavaScript(Self.statusProbe) { [weak self] result, _ in
+            guard let self = self else { return }
+            self.healthCheckStartedAt = nil
+            let status = (result as? NSNumber)?.intValue ?? 0
+            if (400...499).contains(status) {
+                self.showHttpErrorScreen()
+            }
+        }
+    }
+
+    /// Only runs while the branded screen is up, when the app is unusable anyway.
+    private func recoverFromErrorScreen() {
+        guard Date().timeIntervalSince(lastRecoveryProbeAt) >= 5, !healthCheckInFlight else { return }
+        lastRecoveryProbeAt = Date()
+        probeRemote { [weak self] alive in
+            guard let self = self, alive else { return }
+            self.showingHttpError = false
+            self.webView?.load(URLRequest(url: Self.remoteURL))
+        }
+    }
+
+    private func probeRemote(_ completion: @escaping (Bool) -> Void) {
+        healthCheckStartedAt = Date()
+        var request = URLRequest(url: Self.remoteURL)
+        request.httpMethod = "HEAD"
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 8
+        URLSession.shared.dataTask(with: request) { [weak self] _, response, _ in
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            DispatchQueue.main.async {
+                self?.healthCheckStartedAt = nil
+                completion(status > 0 && status < 400)
+            }
+        }.resume()
+    }
+
+    private func showHttpErrorScreen() {
+        guard !showingHttpError, let base = bridge?.config.errorPathURL else { return }
+        showingHttpError = true
+        lastRecoveryProbeAt = Date()
+        var components = URLComponents(url: base, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "reason", value: "http")]
+        guard let url = components?.url else { return }
+        webView?.load(URLRequest(url: url))
     }
 
     /**

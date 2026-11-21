@@ -92,6 +92,9 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onResume() {
         super.onResume();
+        // Coming back from the background is the moment to re-check a dead screen,
+        // so the usual interval is skipped once.
+        lastRecoveryProbeAt = 0;
         routeHandler.removeCallbacks(routeCheck);
         routeHandler.post(routeCheck);
     }
@@ -187,6 +190,90 @@ public class MainActivity extends BridgeActivity {
             navigateButton.bringToFront();
         }
         applyShellPatchIfNeeded(path);
+        watchServerHealth();
+    }
+
+    // --- Server health -------------------------------------------------------
+    //
+    // Capacitor already swaps a main-frame HTTP error for the bundled error screen,
+    // so Android needs no status probe of its own. What Capacitor does not do is
+    // leave that screen once, so this watches only while it is up and reloads the
+    // site when it serves again. Nothing here runs during normal use.
+
+    private static final String REMOTE_URL = "https://www.kerbgo.com/";
+
+    /** Past this age a probe is treated as lost, never as still in flight. */
+    private static final long HEALTH_CHECK_TIMEOUT_MS = 10000;
+
+    private long lastRecoveryProbeAt;
+    private long healthCheckStartedAt;
+
+    private interface HealthCallback {
+        void onResult(boolean alive);
+    }
+
+    private boolean healthCheckInFlight() {
+        if (healthCheckStartedAt == 0) {
+            return false;
+        }
+        if (System.currentTimeMillis() - healthCheckStartedAt > HEALTH_CHECK_TIMEOUT_MS) {
+            healthCheckStartedAt = 0;
+            return false;
+        }
+        return true;
+    }
+
+    private void watchServerHealth() {
+        if (getBridge() == null) {
+            return;
+        }
+        WebView webView = getBridge().getWebView();
+        String errorUrl = getBridge().getErrorUrl();
+        if (webView == null || errorUrl == null) {
+            return;
+        }
+        String url = webView.getUrl();
+        if (url == null || !url.startsWith(errorUrl)) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now - lastRecoveryProbeAt < 5000 || healthCheckInFlight()) {
+            return;
+        }
+        lastRecoveryProbeAt = now;
+        probeRemote(alive -> {
+            if (alive) {
+                webView.loadUrl(REMOTE_URL);
+            }
+        });
+    }
+
+    private void probeRemote(HealthCallback callback) {
+        healthCheckStartedAt = System.currentTimeMillis();
+        new Thread(() -> {
+            boolean alive = false;
+            java.net.HttpURLConnection connection = null;
+            try {
+                connection = (java.net.HttpURLConnection) new java.net.URL(REMOTE_URL).openConnection();
+                connection.setRequestMethod("HEAD");
+                connection.setConnectTimeout(8000);
+                connection.setReadTimeout(8000);
+                connection.setUseCaches(false);
+                int code = connection.getResponseCode();
+                alive = code > 0 && code < 400;
+            } catch (Exception e) {
+                alive = false;
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+            final boolean result = alive;
+            routeHandler.post(() -> {
+                healthCheckStartedAt = 0;
+                callback.onResult(result);
+            });
+        }).start();
     }
 
     /**

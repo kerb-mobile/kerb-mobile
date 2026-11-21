@@ -92,6 +92,13 @@
       // into kerbgo.com documents only (/app and /driver), and this failure happens before
       // any kerbgo.com document exists.
       var REMOTE = 'https://www.kerbgo.com/';
+      // Native shells load this page with ?reason=http when the site itself answered
+      // 4xx (a hosting outage, not a dead network). A 4xx response proves the network
+      // is fine, so the auto-probe below would treat it as success and bounce straight
+      // back to the error page — that loop is what this flag prevents. Recovery in
+      // that case belongs to the shell, which polls the site and reloads it once it
+      // serves again.
+      var HTTP_ERROR = /[?&]reason=http(?:&|$)/.test(window.location.search);
       var PROBE_TIMEOUT = 6000;
       var FIRST_DELAY = 800;
       var MAX_DELAY = 10000;
@@ -162,15 +169,24 @@
           }
         }, PROBE_TIMEOUT);
 
+        // cors, not no-cors: a no-cors response is opaque, so a 404 looks exactly
+        // like a healthy page and this screen would leave for the error and come
+        // straight back. Only a readable status below 400 counts as connected.
+        // When the site sends no CORS header the probe simply fails, which is
+        // correct here — the native shells retry the site themselves.
         fetch(REMOTE, {
           method: 'GET',
-          mode: 'no-cors',
+          mode: 'cors',
           cache: 'no-store',
           signal: controller ? controller.signal : undefined
         }).then(
-          function () {
+          function (response) {
             window.clearTimeout(cutOff);
             probing = false;
+            if (response && response.status >= 400) {
+              waitForConnection();
+              return;
+            }
             leave();
           },
           function () {
@@ -186,24 +202,36 @@
         window.location.href = REMOTE;
       });
 
-      // A connection coming back is the strongest hint there is, so skip the backoff.
-      window.addEventListener('online', function () {
-        delay = FIRST_DELAY;
-        probe();
-      });
-      window.addEventListener('offline', function () {
-        waitForConnection();
-      });
-      // Coming back from the background restarts the page from a restored render.
-      window.addEventListener('pageshow', function () {
-        if (!leaving) {
+      // None of the automatic retries make sense for a server-side error: the network
+      // is up, so they would leave for a page that is still failing.
+      if (!HTTP_ERROR) {
+        // A connection coming back is the strongest hint there is, so skip the backoff.
+        window.addEventListener('online', function () {
+          delay = FIRST_DELAY;
           probe();
-        }
-      });
+        });
+        window.addEventListener('offline', function () {
+          waitForConnection();
+        });
+        // Coming back from the background restarts the page from a restored render.
+        window.addEventListener('pageshow', function () {
+          if (!leaving) {
+            probe();
+          }
+        });
+      }
 
-      // First paint: schedule a probe immediately instead of believing what the
-      // browser says about the network right now.
-      waitForConnection();
+      if (HTTP_ERROR) {
+        setCopy(
+          'Kerb is temporarily unavailable',
+          'Kerb could not load just now. Your trips and account are unaffected — try again in a moment.'
+        );
+        statusEl.textContent = 'The Kerb service is not answering.';
+      } else {
+        // First paint: schedule a probe immediately instead of believing what the
+        // browser says about the network right now.
+        waitForConnection();
+      }
     </script>
   </body>
 </html>
