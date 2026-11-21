@@ -153,13 +153,12 @@ class KerbBridgeViewController: CAPBridgeViewController {
     // once it serves again, which is the one case where waiting is the whole point.
 
     private static let remoteURL = URL(string: "https://www.kerbgo.com/")!
-    private static let statusProbe = """
-    (function () {
-      if (location.protocol === 'file:') { return 0; }
-      return fetch(location.href, { method: 'HEAD', cache: 'no-store' })
-        .then(function (r) { return r.status; })
-        .catch(function () { return 0; });
-    })();
+
+    /// Awaited body, not an expression that evaluates to a promise: `evaluateJavaScript`
+    /// hands back the promise object itself, so a `.then` chain always reads as 0.
+    private static let statusProbeBody = """
+    const response = await fetch(location.href, { method: 'HEAD', cache: 'no-store' });
+    return response.status;
     """
 
     /// A check with no answer by then is treated as lost, not as still running.
@@ -208,16 +207,49 @@ class KerbBridgeViewController: CAPBridgeViewController {
 
     private func checkLoadedDocumentStatus() {
         guard !healthCheckInFlight else { return }
-        guard let host = webView?.url?.host, host.hasSuffix("kerbgo.com") else { return }
+        guard let url = webView?.url, let host = url.host, host.hasSuffix("kerbgo.com") else { return }
         healthCheckStartedAt = Date()
-        webView?.evaluateJavaScript(Self.statusProbe) { [weak self] result, _ in
+        webView?.callAsyncJavaScript(
+            Self.statusProbeBody,
+            arguments: [:],
+            in: nil,
+            contentWorld: .page
+        ) { [weak self] result in
             guard let self = self else { return }
             self.healthCheckStartedAt = nil
-            let status = (result as? NSNumber)?.intValue ?? 0
+            var status = 0
+            if case .success(let value) = result {
+                status = (value as? NSNumber)?.intValue ?? 0
+            }
             if (400...499).contains(status) {
                 self.showHttpErrorScreen()
+                return
+            }
+            if status == 0 {
+                // The page world can refuse the probe — a document that is not HTML is
+                // the usual reason. Ask the network instead, but only trust the two
+                // codes a missing deployment returns: a bot-protection 403 must never
+                // park the app behind the error screen.
+                self.probeDocumentURL(url)
             }
         }
+    }
+
+    private func probeDocumentURL(_ url: URL) {
+        healthCheckStartedAt = Date()
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 8
+        URLSession.shared.dataTask(with: request) { [weak self] _, response, _ in
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            DispatchQueue.main.async {
+                self?.healthCheckStartedAt = nil
+                if status == 404 || status == 410 {
+                    self?.showHttpErrorScreen()
+                }
+            }
+        }.resume()
     }
 
     /// Only runs while the branded screen is up, when the app is unusable anyway.
