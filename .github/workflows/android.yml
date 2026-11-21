@@ -1,0 +1,66 @@
+name: Android build
+
+# Compiles and packages the debug APK on a standard GitHub-hosted Ubuntu runner.
+# This proves the Java, the resource and manifest merge, and the Capacitor Android
+# plugin graph build and package. It does not run the app — there is no emulator
+# here — so anything that only fails at runtime is still caught by hand.
+# Runs on every push and every pull request.
+
+on: [push, pull_request, workflow_dispatch]
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      # AGP 8.13 needs a modern JDK; the wrapper (8.14.3) ships its own Gradle.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+
+      # Regenerates android/app/src/main/assets/public from www/, which the APK
+      # packages, so the build tests the shell as it will actually ship.
+      - run: npx cap sync android
+
+      # compileSdk 36 is newer than the platform the runner image ships with.
+      - name: Install Android platform 36
+        run: |
+          set -euo pipefail
+          printf 'y\n%.0s' {1..40} | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build debug APK
+        run: |
+          set -euo pipefail
+          cd android
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Report APK
+        run: |
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          test -f "$APK"
+          ls -l "$APK"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

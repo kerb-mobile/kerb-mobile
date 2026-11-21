@@ -562,7 +562,14 @@ bot-protection matter that a Retry card would misreport as downtime. iOS exclude
 in its own status check. Android has no check to adjust, so it instead replaces the
 bridge's `WebViewClient` (`Bridge.setWebViewClient` is public) with a `BridgeWebViewClient`
 subclass that returns before calling `super` on a main-frame 401 or 403; every other
-status, and every subresource, still goes through Capacitor unchanged. The cost is that
+status, and every subresource, still goes through Capacitor unchanged.
+
+The swap happens in an override of `BridgeActivity.load()`, not in `onCreate()`. That
+matters: `load()` is what creates the `Bridge`, and the `Bridge` constructor is what
+requests the first navigation, so anything after `super.onCreate()` returns is already
+behind that request. Installing in `load()` immediately after `super.load()` is the
+earliest point Capacitor exposes, and it is still ahead of any callback, because every
+`WebView` callback is dispatched on the UI thread and that method is one turn of it. The cost is that
 Capacitor's `WebViewListener` callbacks are not fired for those two main-frame
 responses — nothing in this app subscribes to them.
 
@@ -583,10 +590,16 @@ screenshots (A4) — they are evidence for this fix, not listings.
 ### Not verified
 
 Android compiles (`:app:compileDebugJavaWithJavac`, exit 0) but **has never been run**:
-no device or emulator here, and the repository has no Android workflow to run it in.
-Its detection is Capacitor's own, so the untested parts are the recovery poll, the
-`onResume` re-check and the new 401/403 client swap — the last of which can only be
+no device or emulator here, and the new workflow builds an APK rather than launching
+one. Its detection is Capacitor's own, so the untested parts are the recovery poll, the
+`onResume` re-check and the 401/403 client swap — the last of which can only be
 confirmed by pointing the app at a page that returns 401 or 403.
+
+What `.github/workflows/android.yml` does cover, on every push and pull request, is
+regression: it runs `npm ci`, `npx cap sync android` and
+`./gradlew :app:assembleDebug`, then uploads `app-debug.apk` as an artifact. A Java or
+manifest break, or a bad `www/` copy, fails the push instead of waiting for a local
+build. It needs no signing key or secret.
 
 ### Acceptance checks, when the site is back
 

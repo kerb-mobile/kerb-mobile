@@ -89,9 +89,25 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        installHttpErrorGuard();
         addNavigateButton();
         handleBackNavigation();
+    }
+
+    /**
+     * Installs the HTTP error guard as early as Capacitor allows.
+     *
+     * BridgeActivity.load() is what creates the Bridge, and the Bridge constructor is
+     * what requests the first navigation, so this override is the earliest point a
+     * client can be installed: doing it in onCreate() afterwards would be too late in
+     * principle, because the first load is already under way by then. It is still
+     * before that load can report anything — every WebView callback is dispatched on
+     * the UI thread, and this whole method is a single turn of it — so no
+     * onReceivedHttpError can arrive between the navigation and the swap.
+     */
+    @Override
+    protected void load() {
+        super.load();
+        installHttpErrorGuard();
     }
 
     /**
