@@ -1,6 +1,6 @@
 # Store submission — open blockers
 
-**Status page, 20 Nov 2026, 18:09 UTC.** Every blocker still open, who owns it,
+**Status page, 20 Nov 2026, 21:10 UTC.** Every blocker still open, who owns it,
 and what "done" looks like. Evidence for anything dated lives in
 `site-changes.md`; this page is only the index. When an item closes, update the
 row here rather than adding a new section.
@@ -30,12 +30,15 @@ both reviews depend on is stuck behind it.
 | B6 | `I've arrived` unusable without a position fix | cto.new | Fixed, or documented as a location requirement in the review notes |
 | B7 | Standing-offer seeder can create two identical offers 91 ms apart | cto.new | Exactly one pending offer per driver, every time |
 | B8 | cto.new is out of weekly quota | Me | Decide: wait for ~06:47 UTC 21 Nov, or pay the `$30.52` reset |
-| B9 | Store work is local only — `main` is 40 commits ahead of `origin/main`, never through CI | Me | Pushed, once you decide to |
 | B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail |
 | B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
+
+**B9 closed 20 Nov 2026, 20:48 UTC.** `main` went to `origin/main` as `777157e`
+(`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is
+level with the remote again.
 
 ## Apple App Store
 
@@ -45,10 +48,15 @@ both reviews depend on is stuck behind it.
 | A2 | All six repository secrets absent | Me | `APPLE_TEAM_ID`, `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD` set, and a dry run of *iOS release* with upload unticked produces a signed `.ipa` |
 | A3 | App Store Connect app record not created | Me | App record for `com.kerbgo.app`, free, US only, age rating 4+ |
 | A4 | No screenshots at a valid Apple size | Unstarted | Six scenes captured on an iPhone 17/16 Pro simulator at `1206 × 2622`, no transparency; the Play set at `1080 × 2160` cannot be reused |
-| A5 | iOS workflows not both green (newest *iOS build* was cancelled; *iOS simulator run* stale) | Me | Both re-dispatched and green |
 | A6 | Review notes still carry placeholders — the deletion path sentence and both demo logins | Me | Pasted from `review-notes.md` once B1 works |
 | A7 | Review contact details not chosen | Me | Name, monitored email and a phone that answers during US business hours |
 | A8 | App Privacy answers not entered in App Store Connect | Me | All nine data types entered as in `compliance.md` — collected, linked to identity, not tracked, purpose App Functionality — and the payment processor confirmed as Stripe so the Payment Info row is right. Usage Data and Diagnostics stay "No" |
+
+**A5 closed 20 Nov 2026, 21:00 UTC.** The B9 push at 20:48:31 ran both workflows on
+`777157e`: *iOS build* #14 `success` in 110 s, and *iOS simulator run* #3 `success` in
+11.6 min (finished 21:00:06). No dispatch was needed — the push did it. The run it
+replaces is *#13* on `e2017e4`, which failed on 19 Nov, so the two green runs are the
+newest evidence and the "cancelled" note is history.
 
 ## Google Play
 
@@ -97,7 +105,7 @@ permittee.
 | R4 | Coverage is UZURV's TNC-4 certificate, and it has not been checked for whether it covers trips booked through Kerb | Me | Copy of UZURV's certificate in hand, covering Kerb-booked trips at §32-7C-2(b)/(c) limits; then the coverage paragraph (Gate A) publishes |
 | R5 | No safety page, no 911 guidance, no report route, no zero-tolerance notice | cto.new | `/safety` live from `safety-and-licensing.md` §4 word for word, footer **Safety** link, and `/help` changed off "automated background checks are a later release" — all three in one deploy |
 | R6 | No live trip sharing | cto.new | `live-trip-sharing.md` checks 1–9 pass on a real trip; then `/safety` gains the sharing sentence |
-| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed | cto.new | Both pages name Kerb's operating entity, and that rides are provided by UZURV Holdings, Inc. under TNC-4 |
+| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed. The clause is drafted in `safety-and-licensing.md` §9 (20 Nov 2026); it waits on the registered name, state of formation and a publishable address | Me + cto.new | Both pages carry the §9 text word for word: Kerb's operating entity named, and rides provided by UZURV Holdings, Inc. under TNC-4 |
 | R8 | Site claims service across "the entire United States" with 51 service states and a $25 per-state-line fee; TNC permits are per-state (UZURV holds AL, MA and others, not all) | Me | Claim narrowed to permitted states, or permits obtained. Not a store blocker, but the same exposure as R1 |
 
 `/safety` ships **with** the §2b licensing paragraph — structure B is settled — and

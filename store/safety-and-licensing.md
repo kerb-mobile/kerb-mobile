@@ -341,7 +341,7 @@ gap a compliance audit finds first.
 |---|---|---|
 | Obtain UZURV's TNC-4 insurance certificate and a written confirmation that its screening covers Kerb's drivers | Me | Both documents in hand, certificate naming Kerb-booked trips; then Gate A copy publishes and R2/R4 close |
 | Decide what "the entire United States" means against per-state permits | Me | Service-area claim narrowed to permitted states, or permits obtained for the rest (§2c, R8) |
-| Legal entity named in `/terms` and `/privacy` | Me + cto.new | Both pages say who the counterparty is — the permittee — with its state of formation and address |
+| Legal entity named in `/terms` and `/privacy` | Me + cto.new | Both pages say who the counterparty is — the operator, and UZURV as TNC of record — with its state of formation and address; the text is drafted in §9 and waits only on the registered name |
 | Zero-tolerance corrective-measure wording confirmed | Me | The "removed from Kerb" line approved as written, or replaced with what will actually be applied |
 | `support@kerbgo.com` mailbox | Me | Receives mail (B10) — otherwise the page ships with the APSC route only |
 | `/safety` page, `/help` fix, footer link | cto.new | Live and reachable signed out, from §4 |
@@ -349,4 +349,91 @@ gap a compliance audit finds first.
 | TNC insurance bound, certificate filed | Me | Gate A copy publishable |
 | Live trip sharing | cto.new | `live-trip-sharing.md` acceptance checks pass |
 
-Tracked as R1–R6 in `status.md`.
+Tracked as R1–R8 in `status.md`.
+
+---
+
+## 9. The entity clause for `/terms` and `/privacy`
+
+**Drafted 20 Nov 2026.** R7 has one missing input: Kerb's registered name. Until it
+arrives, every `[BRACKET]` below stays a bracket — a placeholder on a live legal page
+is worse than today's silence, because App Review and a plaintiff both read it as proof
+nobody checked.
+
+### 9a. What the live pages say now
+
+`/terms`, section 1, word for word (fetched 20 Nov 2026, 21:02 UTC):
+
+> Kerb operates a local marketplace for rides and grocery delivery, in the entire
+> United States. In these terms, "we" and "us" mean Kerb; "you" means the person using
+> the service.
+
+`/privacy` opens "This policy describes what Kerb does with your information from that
+date." — and "Kerb" is never defined as a legal person. Neither page carries a company
+name, a state or an address, and both say **Last updated 16 November 2026**.
+
+### 9b. The clause for `/terms`
+
+Replace section 1 with this. It keeps the existing first sentence verbatim, so the only
+changes are who "we" is and who provides a ride:
+
+> **1. Who we are**
+>
+> Kerb is operated by [REGISTERED LEGAL NAME], a [STATE] [corporation / limited
+> liability company], [PUBLISHABLE ADDRESS]. Kerb operates a local marketplace for rides
+> and grocery delivery, in the entire United States. In these terms, "we" and "us" mean
+> [REGISTERED LEGAL NAME]; "you" means the person using the service.
+>
+> Rides booked through Kerb are provided by UZURV Holdings, Inc., an Alabama Public
+> Service Commission permitted transportation network company (permit TNC-4). UZURV is
+> the transportation network company of record for those rides: it is the party the
+> Commission licenses, it screens the drivers who carry them, and it provides the
+> insurance that covers them. The Alabama Public Service Commission regulates those
+> rides; Kerb does not hold a transportation network company permit. Grocery delivery is
+> provided by Kerb directly.
+
+Two things it does on purpose: it gives "we" a legal person, and it lets the UZURV
+sentence carry the licensing, so no reader has to infer that Kerb is the permittee.
+
+Do **not** add "UZURV is our parent company" or "Kerb is a division of UZURV". Common
+ownership establishes neither, and either sentence turns a true structure B disclosure
+into a false claim about structure A.
+
+Nationwide service (R8) is quoted here, not endorsed — the first sentence is on the
+live page today. Narrowing it is a separate edit with its own evidence.
+
+### 9c. The clause for `/privacy`
+
+Insert after the opening line, before "What we collect":
+
+> **Who we are.** Kerb is operated by [REGISTERED LEGAL NAME], a [STATE] [corporation /
+> limited liability company], [PUBLISHABLE ADDRESS]. Rides booked through Kerb are
+> provided by UZURV Holdings, Inc., an Alabama Public Service Commission permitted
+> transportation network company (permit TNC-4), which is the transportation network
+> company of record for those rides. This policy covers the Kerb app and the kerbgo.com
+> website. Where UZURV acts as the TNC of record for a ride, it handles that ride's
+> information for the purposes Alabama requires of a permitted TNC — driver screening,
+> insurance, and the trip records §32-7C-33 requires it to keep — under its own privacy
+> notice.
+
+Every other "we" in the policy then means [REGISTERED LEGAL NAME], so the definition
+has to land before the first use, which is why it goes above "What we collect".
+
+**Confirm before publishing:** that UZURV actually receives driver screening records and
+trip data today, and that it has a privacy notice to link. If that flow is not in place,
+cut the last sentence rather than describe a transfer that does not happen — it would be
+the only false statement on the page.
+
+### 9d. What is needed to finish it
+
+| Input | Why | Who |
+|---|---|---|
+| Registered legal name of Kerb's operating entity, exactly as filed | The clause turns on it | You |
+| State of formation and entity type | Picks "a Delaware corporation" vs "an Alabama limited liability company" | You |
+| A publishable address | Terms need somewhere to serve notice; a registered-agent address is enough, a home address is not | You |
+| UZURV's privacy notice URL, or a decision to cut that sentence | Only if driver and trip data actually reach UZURV | You |
+| The new "Last updated" date | Both pages say 16 November 2026 and this change is material | cto.new |
+
+With those five the clause is paste-ready and R7 closes on the deploy. Until then the
+pages stay as they are: silent on the counterparty, which is the exposure R7 records,
+not a fix for it.
