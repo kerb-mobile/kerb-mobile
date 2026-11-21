@@ -1,6 +1,6 @@
 # Store submission — open blockers
 
-**Status page, 20 Nov 2026, 21:10 UTC.** Every blocker still open, who owns it,
+**Status page, 21 Nov 2026, 16:20 UTC.** Every blocker still open, who owns it,
 and what "done" looks like. Evidence for anything dated lives in
 `site-changes.md`; this page is only the index. When an item closes, update the
 row here rather than adding a new section.
@@ -57,6 +57,20 @@ level with the remote again.
 11.6 min (finished 21:00:06). No dispatch was needed — the push did it. The run it
 replaces is *#13* on `e2017e4`, which failed on 19 Nov, so the two green runs are the
 newest evidence and the "cancelled" note is history.
+
+**Checked again 21 Nov 2026, 16:20 UTC.** The `ebeb74b` push produced *iOS build* #15,
+`success`, 05:04:20 → 05:06:26 (126 s). Its *iOS simulator run* did not start: the
+trigger is path-filtered to `ios/**`, `www/**` and its own file, and `ebeb74b` touched
+only `store/**` — the earlier push ran it because path filters cover the whole pushed
+range, which included `www/**` changes from commits that were still local. So the
+simulator was dispatched by hand on `ebeb74b`: *iOS simulator run* #4,
+`workflow_dispatch`, **`success`**, 16:11:03 → 16:19:50 (8.8 min), artifact
+`ios-simulator-run` (90 KB).
+
+Both workflows are now green on the same newest commit — build #15 and simulator #4 on
+`ebeb74b` — so A5's condition holds on one SHA rather than across two. The artifact is
+the screenshot set that run captured; I have not opened it, so it is not evidence for A4
+until someone checks the sizes and content against `screenshot-checklist.md`.
 
 ## Google Play
 
