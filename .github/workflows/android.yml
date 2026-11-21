@@ -17,6 +17,8 @@ jobs:
     name: Build debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v7
 
@@ -31,20 +33,23 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - uses: android-actions/setup-android@v3
+      # The runner image ships the SDK and cmdline-tools; only the platform and
+      # build tools for compileSdk 36 are added. This uses sdkmanager directly
+      # rather than a setup action, because those actions try to accept licences
+      # with no stdin and fail at the first prompt.
+      - name: Install Android platform 36
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
       - run: npm ci
 
       # Regenerates android/app/src/main/assets/public from www/, which the APK
       # packages, so the build tests the shell as it will actually ship.
       - run: npx cap sync android
-
-      # compileSdk 36 is newer than the platform the runner image ships with.
-      - name: Install Android platform 36
-        run: |
-          set -euo pipefail
-          printf 'y\n%.0s' {1..40} | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build debug APK
         run: |
