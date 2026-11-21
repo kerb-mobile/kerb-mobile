@@ -81,10 +81,12 @@ Both workflows are now green on the same newest commit — build #15 and simulat
 opened afterwards and does not help A4: both frames photograph the live 404 (B15), not
 the app. See the A4 note below.
 
-**21 Nov 2026, 17:35 UTC — run #7.** After the shell change landed, *iOS simulator run*
-#7 (`6ba89ee`) went green and both frames show the branded card. The two runs between
-were the failures in `site-changes.md` §7: #5 green but still the raw page, #6 did not
-compile. A5 stays closed; #7 is the current evidence.
+**21 Nov 2026, 17:47 UTC — run #8 is the current evidence.** After the shell change
+landed, *iOS simulator run* #7 (`6ba89ee`) went green and both frames show the branded
+card; **#8 (`6654194`) repeated it on the simplified single-`HEAD` check that is on
+`main` now**, so that run — not #7 — is the evidence for the shipped code. The two runs
+between were the failures in `site-changes.md` §7: #5 green but still the raw page, #6
+did not compile. A5 stays closed.
 
 **A4 checked 21 Nov 2026, 16:20 UTC.** Downloaded artifact `ios-simulator-run` from
 simulator run #4 (90 KB, three files) and inspected both PNGs:

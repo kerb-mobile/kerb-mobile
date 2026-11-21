@@ -213,9 +213,13 @@ class KerbBridgeViewController: CAPBridgeViewController {
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             DispatchQueue.main.async {
                 self?.healthCheckStartedAt = nil
-                // 405 means the server does not implement HEAD, which says nothing
-                // about whether the page itself would have served.
-                if status != 405 && (400...499).contains(status) {
+                // Only a 4xx that means "this document is not here" is the outage this
+                // screen covers. 401 and 403 say the site answered and withheld the
+                // document — a session or bot-protection matter, not a missing
+                // deployment — and 405 means HEAD is not implemented, which says
+                // nothing about the page either.
+                let withheld = status == 401 || status == 403
+                if (400...499).contains(status) && !withheld && status != 405 {
                     self?.showHttpErrorScreen()
                 }
             }

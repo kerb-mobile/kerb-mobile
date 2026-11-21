@@ -553,8 +553,10 @@ Two bugs were found by running it, not by reading it, and both are worth remembe
   attempt failed to compile (`extra trailing closure passed in call`).
 
 The final iOS code avoids both: no JavaScript in the detection path at all, just one
-native `HEAD` of the document URL. `405` is ignored because it means the server does
-not implement `HEAD`, which says nothing about the page.
+native `HEAD` of the document URL. Three statuses are deliberately not treated as the
+outage: `405`, because it means the server does not implement `HEAD`; and `401` and
+`403`, because those mean the site answered and withheld the document — a session or
+bot-protection matter that a Retry card would misreport as downtime.
 
 ### Evidence
 
