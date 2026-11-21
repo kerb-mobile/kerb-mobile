@@ -208,8 +208,8 @@ what R2 and R4 are for.
   native `HEAD` and re-checks on foreground; Android uses Capacitor's `errorPath` swap,
   with a `WebViewClient` subclass that skips it for those two statuses, and only polls
   for recovery. Verified on iOS in simulator run #9; Android compiles, and
-  `.github/workflows/android.yml` now builds the debug APK on every push, but the app
-  has still never been run.
+  `.github/workflows/android.yml` now builds the debug APK on every push (green in
+  *Android build* #2, `cc7da4f`), but the app has still never been run.
 - **Support address on the site**: `support@kerbgo.com` on `/help` and in every
   footer, with no `ctomail.io` left. The mailbox behind it is B10.
 - **Android upload asset**: signed AAB at

@@ -613,3 +613,60 @@ build. It needs no signing key or secret.
    and loads the site on its own within ~5 s.
 5. Background and foreground the app while the site is failing: the card is still
    there, and the check runs once per foreground rather than on a timer.
+
+---
+
+## 8. Android CI — what the workflow proves, and what it does not
+
+**Added 21 Nov 2026.** `.github/workflows/android.yml` builds the debug APK on every
+push and pull request. Android had no automation before this: the only check was a local
+`./gradlew :app:compileDebugJavaWithJavac`, which compiles Java and nothing else, and
+only runs if someone remembers.
+
+| Run | Commit | Result |
+|---|---|---|
+| Android build #1 | `f667cfa` | **failure** — inside `android-actions/setup-android@v3`, before `npm ci`, so no build was attempted |
+| Android build #2 | `cc7da4f` | **success** — ten steps, `app-debug.apk` 4,397,519 bytes, about 100 s |
+
+### The failure, because the action looks like the obvious thing to add back
+
+The first run died on the licence prompt:
+
+```
+Run android-actions/setup-android@v3
+Found preinstalled sdkmanager in /usr/local/lib/android/sdk/cmdline-tools/latest
+Wrong version in preinstalled sdkmanager
+Downloading commandline tools from .../commandlinetools-linux-12266719_latest.zip
+7 of 8 SDK package licenses not accepted.
+Review licenses that have not been accepted (y/N)?
+```
+
+Nothing fed stdin, so the prompt aborted the action and every later step was skipped.
+The fix is not to force the action: the runner image already carries the SDK and
+cmdline-tools, so the workflow calls
+`$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager` directly, with
+`yes | … --licenses > /dev/null 2>&1 || true` as a fallback for a fresh image, then
+installs `platforms;android-36` and `build-tools;36.0.0` — the same pair the local SDK
+has, so CI and the development machine build against one toolchain.
+
+### What green means, and what it does not
+
+Covered on every push: `npm ci`, `npx cap sync android` (so the APK packages the
+current `www/` shell rather than a stale copy), the resource and manifest merge, Java
+compilation, dexing, packaging, and an assertion that `app-debug.apk` exists — then it
+is uploaded as an artifact. A Java error, a bad asset copy or a plugin-graph break now
+fails the push.
+
+Not covered: the app is never launched. There is no emulator and no device, here or in
+CI, so the 401/403 client swap, the recovery poll, the `onResume` re-check and the
+Navigate hand-off are still unproven by execution. Green on this workflow means "it
+builds", not "it works".
+
+### iOS on the same commits
+
+The six commits from `6654194` to `cc7da4f` also ran *iOS build* #22–#27: #22, #23, #24,
+#25 and #27 are green. #26 (`f667cfa`) is **cancelled**, not failed — `ios.yml` cancels
+superseded runs on the same ref and `cc7da4f` landed 78 s later, so the run that
+effectively covers that code is #27. Simulator runs #8 and #9 are green on `6654194` and
+`242b324`; the later commits touch only `android/`, `store/` and the new workflow, none
+of which `ios-simulator.yml` watches.
