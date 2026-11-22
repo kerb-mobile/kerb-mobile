@@ -13,7 +13,7 @@ Send the block below to cto.new as-is. Re-verified before sending: still 404 at
 | `/signin`, `/app`, `/terms`, `/privacy`, `/help`, apex `kerbgo.com` | same 404, same 32-byte body |
 | Headers | `server: cloudflare`, `cf-ray a5e12af2bdd05598-ATL`, `date 21 Nov 2026 16:45:57Z` |
 | DNS | `www.kerbgo.com` CNAME `sites.cto-new.app` → `104.21.42.107` / `172.67.205.64`; apex on the same pair — correct, no change needed |
-| Re-check | 22 Nov 2026, 17:20 UTC — unchanged a day on: `/`, `/signin`, `/app`, `/terms`, `/privacy`, `/help` on `www` **and** the apex `/` and `/privacy` all still 404 with the same 32-byte body, `cf-ray a5e99adaaff16779-ATL`; `sites.cto-new.app/` too. DNS unchanged, TLS valid. B15 still open — see the follow-up below |
+| Re-check | 22 Nov 2026, 17:38 UTC — unchanged a day on: `/`, `/signin`, `/app`, `/terms`, `/privacy`, `/help` on `www` **and** the apex `/` and `/privacy` all still 404 with the same 32-byte body and `cache-control: no-store`; `sites.cto-new.app/` too (checked 17:16Z). DNS unchanged, TLS valid. Per-request `cf-ray` values are in `status.md` — one ray per request, not one for the set. B15 still open; see the follow-up below |
 | Platform | `https://cto.new/` → 200, so the platform is up |
 | First seen | 21 Nov 16:18Z, in the iOS simulator run #4 screenshot (A4) |
 | Last seen failing | 21 Nov 16:45:54Z |

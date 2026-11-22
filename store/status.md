@@ -11,7 +11,7 @@ row here rather than adding a new section.
 | **cto.new** | The site/build team. Was out of weekly quota until about 06:47 UTC on 21 Nov, so the reset has passed — but its deployment is not serving at all right now (B15), which comes before any of its other rows. |
 | **Unstarted** | Required, and nobody has begun it. |
 
-> **The live site is down since 21 Nov 2026, 16:32 UTC — still down at 22 Nov 17:20
+> **The live site is down since 21 Nov 2026, 16:32 UTC — still down at 22 Nov 17:38
 > UTC.** `https://www.kerbgo.com/` returns
 > Cloudflare's 32-byte `There is no site at this address` with HTTP 404 and
 > `text/plain`, on every route checked — `/`, `/terms`, `/privacy`, `/help`, `/signin`,
@@ -46,26 +46,83 @@ depend on sits on the same deployment.
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (21 Nov, 16:32 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy` and `/help` answer as they did on 20 Nov |
 
-**B15 re-checked 22 Nov 2026, 17:20 UTC — still down, nothing to record but the
-check.** Every route B15 names fails the same way: `/`, `/signin`, `/app`, `/terms`,
-`/privacy` and `/help` on `www.kerbgo.com`, and the apex `https://kerbgo.com/` and
-`/privacy` too. Each answers HTTP 404, `text/plain;charset=utf-8`, 32 bytes, `There is
-no site at this address`, with `server: cloudflare`, `cache-control: no-store` and
-`cf-ray a5e99adaaff16779-ATL` at 17:20:27Z. `sites.cto-new.app/` returns the identical
-response, which settles the diagnosis: the project has no deployment behind it, so this
-is not a detached custom domain and not DNS. DNS is unchanged and fine —
-`www.kerbgo.com` CNAME `sites.cto-new.app` → `172.67.205.64` / `104.21.42.107`, the apex
-on the same pair, TLS valid on both hostnames.
+**B15 re-checked 22 Nov 2026, 17:38 UTC — still down, nothing to record but the
+check.** Every route B15 names, plus the apex, answers the same way: HTTP 404,
+`text/plain;charset=utf-8`, 32 bytes, body `There is no site at this address`, with
+`server: cloudflare` and `cache-control: no-store`. One `cf-ray` per request, in the
+order they were made — each ray is the evidence for that request alone, not for the set:
 
-That is **25 h 2 m** since the error was first photographed (21 Nov, 16:18 UTC) and
-24 h 48 m since it was reported. There is no restore time to record, so B15 stays open
+| Request | Status | `cf-ray` | `date` |
+|---|---|---|---|
+| `https://www.kerbgo.com/` | 404 | `a5e9b5543987b04a-ATL` | 17:38:32Z |
+| `https://www.kerbgo.com/signin` | 404 | `a5e9b5570a10bd3e-ATL` | 17:38:32Z |
+| `https://www.kerbgo.com/app` | 404 | `a5e9b55a2dc54519-ATL` | 17:38:32Z |
+| `https://www.kerbgo.com/terms` | 404 | `a5e9b55c9adda694-ATL` | 17:38:33Z |
+| `https://www.kerbgo.com/privacy` | 404 | `a5e9b55eff086125-ATL` | 17:38:33Z |
+| `https://www.kerbgo.com/help` | 404 | `a5e9b56199536762-ATL` | 17:38:33Z |
+| `https://kerbgo.com/` (apex) | 404 | `a5e9b5645d143670-ATL` | 17:38:34Z |
+| `https://kerbgo.com/privacy` (apex) | 404 | `a5e9b566f99953e1-ATL` | 17:38:34Z |
+
+An earlier pass at 17:16–17:20 UTC covered the same routes and reached the same result,
+but captured headers on only three of them — `a5e99adaaff16779-ATL` for the apex `/`,
+`a5e99add4998bcdf-ATL` for the apex `/privacy`, `a5e99adfdfe5b048-ATL` for
+`www /privacy`. Treat the table above as the citable record; the earlier rays belong to
+their own requests and to nothing else.
+
+`sites.cto-new.app/` returned the identical response in that earlier pass, which settles
+the diagnosis: the project has no deployment behind it, so this is not a detached custom
+domain and not DNS. DNS is unchanged and fine — `www.kerbgo.com` CNAME
+`sites.cto-new.app` → `172.67.205.64` / `104.21.42.107`, the apex on the same pair, TLS
+valid on both hostnames.
+
+That is **25 h 20 m** since the error was first photographed (21 Nov, 16:18 UTC) and
+25 h 6 m since it was reported. There is no restore time to record, so B15 stays open
 and everything that needs a serving site — the A4 captures, the item 4 recovery check in
 `site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who now have a
-follow-up drafted for them in `cto-new-outage.md`.
+follow-up drafted for them in `cto-new-outage.md`. What does not need the site is listed
+in the next section, because a day of waiting should not be a day without progress.
 
 **B9 closed 20 Nov 2026, 20:48 UTC.** `main` went to `origin/main` as `777157e`
 (`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is
 level with the remote again.
+
+## While B15 is open — store work that does not need the site
+
+**Added 22 Nov 2026, 25 hours into the outage.** None of this replaces A1: the Apple
+enrolment still has the longest lead time on the page and is still the first thing to do.
+The rest can be finished now and pasted into a console later, instead of waiting on the
+deployment.
+
+| Work | Why the site is not needed | Owner | Start with |
+|---|---|---|---|
+| A1 Apple Developer enrolment | Enrolment is an Apple account and payment flow | Me | Enrol today — it gates A2, A3 and every signed build |
+| A2 six repository secrets, plus *iOS release* with upload unticked | Signing runs in CI; it needs a Team ID, not a serving site | Me | After A1: set all six, then the dry run |
+| A3 App Store Connect app record | Record creation and every metadata field except screenshots | Me | Under the new Team ID: free, US only, 4+ |
+| A8 App Privacy answers | Nine data types from `compliance.md`; the only outside input is the Stripe confirmation | Me | Enter now; Usage Data and Diagnostics stay "No" |
+| G1 Play Console app record | Console only | Me | Create the app, free, US only |
+| G5 Data safety, content rating, target audience | Answers come from `compliance.md`; the two `[confirm]` items are owner decisions, not site facts | Me | Enter them, and settle the payment-processor and interaction answers |
+| G6 Play Data deletion URL | The field accepts the URL now | Me | Type `https://www.kerbgo.com/delete-account`, and re-check it returns 200 before submitting |
+| G3 AAB upload | The signed AAB already exists: `android/app/build/outputs/bundle/release/app-release.aab` | Me | Upload once G1 exists |
+| G2 tester recruitment | Twelve addresses are an email-and-spreadsheet task; opting in needs the track, but the 14-day clock only starts then | Unstarted | Collect the twelve now |
+| B10 `support@kerbgo.com` mailbox | Google Workspace, not Cloudflare; it also unblocks A7 | Me | Create it and send a test message |
+| A7 review contact details | Needs B10's mailbox and a decision on the phone number | Me | Name and phone now, email after B10 |
+| B8 the quota decision | The reset passed and the site is still gone, so paying the `$30.52` reset no longer addresses it | Me | Decide what the plan needs for a republish — the follow-up asks cto.new the same question |
+| R2, R4 paperwork | UZURV's written screening confirmation and the TNC-4 certificate travel by email as PDFs | Me | Request both; they are also two of the §9d inputs cto.new is missing |
+| R7 inputs | Kerb's registered legal name, state of formation and a publishable address are owner records | Me | Send them with the R2/R4 request |
+| `listing.md` copy | Store copy and keywords are text; nothing is served | Me | Finalise so it can be pasted in one pass later |
+
+Blocked until the deployment serves: **A4** (the screenshots need the real site — the
+shells render the 404 instead), **B1, B2, B3, B12, G4** (every demo-login and walkthrough
+step happens on the live site), **B4–B7, B13, B14, R1, R3, R5, R6** (deployment or admin
+view changes, or checks that need one), `site-changes.md` §7's five acceptance checks
+including the recovery test, and every "as served" check such as `/delete-account`
+returning 200. **B11** is blocked too, and it is easy to miss: rotating the demo password
+happens in the admin view the outage took down.
+
+Two ordering notes. A1 and B10 are the only items with other work queued behind them, so
+they go first; the rest can be interleaved. And do not type the URL into G6 and call it
+done — an entered field that 404s is worse than an empty one, so re-check it after B15
+closes.
 
 ## Apple App Store
 
