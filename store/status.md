@@ -11,7 +11,7 @@ row here rather than adding a new section.
 | **cto.new** | The site/build team. Was out of weekly quota until about 06:47 UTC on 21 Nov, so the reset has passed — but its deployment is not serving at all right now (B15), which comes before any of its other rows. |
 | **Unstarted** | Required, and nobody has begun it. |
 
-> **The live site is down since 21 Nov 2026, 16:32 UTC — still down at 22 Nov 17:16
+> **The live site is down since 21 Nov 2026, 16:32 UTC — still down at 22 Nov 17:20
 > UTC.** `https://www.kerbgo.com/` returns
 > Cloudflare's 32-byte `There is no site at this address` with HTTP 404 and
 > `text/plain`, on every route checked — `/`, `/terms`, `/privacy`, `/help`, `/signin`,
@@ -46,14 +46,22 @@ depend on sits on the same deployment.
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (21 Nov, 16:32 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy` and `/help` answer as they did on 20 Nov |
 
-**B15 re-checked 22 Nov 2026, 17:16 UTC — still down, nothing to record but the
-check.** `https://www.kerbgo.com/`, `/signin`, `/app`, `/terms` and `/help` all still
-answer HTTP 404, `text/plain;charset=utf-8`, 32 bytes, `There is no site at this
-address`; `sites.cto-new.app/` answers the same, and `www.kerbgo.com` still CNAMEs to
-it (`172.67.205.64`, `104.21.42.107`). That is 24 h 44 m of downtime with no restore
-time to date, so B15 stays open and everything that needs a serving site — the A4
-captures, the item 4 recovery check in `site-changes.md` §7, the reviewer walkthrough —
-still waits on cto.new.
+**B15 re-checked 22 Nov 2026, 17:20 UTC — still down, nothing to record but the
+check.** Every route B15 names fails the same way: `/`, `/signin`, `/app`, `/terms`,
+`/privacy` and `/help` on `www.kerbgo.com`, and the apex `https://kerbgo.com/` and
+`/privacy` too. Each answers HTTP 404, `text/plain;charset=utf-8`, 32 bytes, `There is
+no site at this address`, with `server: cloudflare`, `cache-control: no-store` and
+`cf-ray a5e99adaaff16779-ATL` at 17:20:27Z. `sites.cto-new.app/` returns the identical
+response, which settles the diagnosis: the project has no deployment behind it, so this
+is not a detached custom domain and not DNS. DNS is unchanged and fine —
+`www.kerbgo.com` CNAME `sites.cto-new.app` → `172.67.205.64` / `104.21.42.107`, the apex
+on the same pair, TLS valid on both hostnames.
+
+That is **25 h 2 m** since the error was first photographed (21 Nov, 16:18 UTC) and
+24 h 48 m since it was reported. There is no restore time to record, so B15 stays open
+and everything that needs a serving site — the A4 captures, the item 4 recovery check in
+`site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who now have a
+follow-up drafted for them in `cto-new-outage.md`.
 
 **B9 closed 20 Nov 2026, 20:48 UTC.** `main` went to `origin/main` as `777157e`
 (`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is

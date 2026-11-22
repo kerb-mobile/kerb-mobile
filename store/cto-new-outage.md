@@ -13,7 +13,7 @@ Send the block below to cto.new as-is. Re-verified before sending: still 404 at
 | `/signin`, `/app`, `/terms`, `/privacy`, `/help`, apex `kerbgo.com` | same 404, same 32-byte body |
 | Headers | `server: cloudflare`, `cf-ray a5e12af2bdd05598-ATL`, `date 21 Nov 2026 16:45:57Z` |
 | DNS | `www.kerbgo.com` CNAME `sites.cto-new.app` → `104.21.42.107` / `172.67.205.64`; apex on the same pair — correct, no change needed |
-| Re-check | 22 Nov 2026, 17:16 UTC — unchanged a day on: all routes and `sites.cto-new.app/` still 404 with the same 32-byte body, DNS unchanged, so B15 is still open |
+| Re-check | 22 Nov 2026, 17:20 UTC — unchanged a day on: `/`, `/signin`, `/app`, `/terms`, `/privacy`, `/help` on `www` **and** the apex `/` and `/privacy` all still 404 with the same 32-byte body, `cf-ray a5e99adaaff16779-ATL`; `sites.cto-new.app/` too. DNS unchanged, TLS valid. B15 still open — see the follow-up below |
 | Platform | `https://cto.new/` → 200, so the platform is up |
 | First seen | 21 Nov 16:18Z, in the iOS simulator run #4 screenshot (A4) |
 | Last seen failing | 21 Nov 16:45:54Z |
@@ -88,13 +88,74 @@ in store/site-changes.md: B4, the offer countdown printing raw seconds
 ("604798s"), and B5, "NEXT TURN — TO PICKUP" still showing after Start trip.
 ```
 
+## The follow-up (drafted 22 Nov 2026, 17:20 UTC — send if it is still 404)
+
+Send this only if a check just before sending still shows the 404. It supersedes the
+message above rather than repeating it, and it leads with the one diagnostic the first
+report could not make: `sites.cto-new.app` itself 404s, so the deployment does not exist
+and re-attaching domains cannot help.
+
+```
+Subject: kerbgo.com has now been down over 24 hours — the deployment is missing, not
+          the domain
+
+Following up on yesterday's report (sent 21 Nov 16:45Z). It is still down: first seen
+21 Nov 16:18Z, still failing 22 Nov 17:20Z. Both store apps load this URL, so App
+Review is blocked on it for the second day.
+
+EVIDENCE (checked from outside, Sun 22 Nov 2026, 17:20Z)
+
+- https://www.kerbgo.com/  -> HTTP 404, content-type: text/plain;charset=utf-8,
+  32-byte body: "There is no site at this address"
+- Same on /signin, /app, /terms, /privacy and /help
+- Apex https://kerbgo.com/ and https://kerbgo.com/privacy -> same 404, same body
+- Headers: server: cloudflare, cache-control: no-store,
+  cf-ray a5e99adaaff16779-ATL, date Sun, 22 Nov 2026 17:20:27 GMT
+- https://sites.cto-new.app/ -> the SAME 404 and the same body
+- DNS is unchanged and correct: www.kerbgo.com is a CNAME to sites.cto-new.app,
+  resolving to 104.21.42.107 / 172.67.205.64; the apex is on the same pair. TLS
+  completes on both hostnames.
+
+WHAT THE sites.cto-new.app RESULT SETTLES
+
+That hostname is the project's own. If the custom domains had merely come loose, it
+would still serve the site. It does not, so there is no production deployment behind
+the project at all — nothing is being routed to anything. That means re-attaching
+www.kerbgo.com and kerbgo.com as custom domains will not fix this, and DNS is still not
+the problem. Only a publish creates the deployment, so everything else is downstream of
+that one action.
+
+PLEASE
+
+1. Publish the project (Site tab -> publish) and tell me the timestamp; I will verify
+   from outside within minutes.
+2. Tell me whether the deployment disappeared or was never live. If the Site tab shows
+   no deployment, or publishing is refused, say which refusal (quota, suspended
+   project, billing) — that is the part I cannot see, and it decides whether this is a
+   button or a plan/support escalation.
+3. If the project is no longer in the dashboard at all, say so plainly today. Rebuilding
+   the deployment from the repository is a different, larger job and I need to know
+   before I promise either store a review date.
+4. Do not change DNS. The CNAME is correct; re-pointing it while the project serves
+   nothing turns this 404 into a 522, which is harder to diagnose.
+
+HOW I WILL VERIFY
+
+/, /signin, /app, /terms, /privacy, /help and the apex / each returning 200 with real
+HTML rather than a 32-byte text body — then the apps come back on their own with no
+rebuild, and I re-take the screenshots the outage has been blocking.
+```
+
 ## Two cautions before you send
 
 - The quota explanation is labelled as a read, not a fact. Only the symptom is
   observable from here; if cto.new knows otherwise, they should say so rather than
   chase that cause.
 - The DNS warning is deliberate. The record looks like the obvious thing to fix, and
-  touching it converts a 404 into a 522.
+  touching it converts a 404 into a 522. The follow-up keeps it for the same reason, and
+  adds the `sites.cto-new.app` check precisely so "fix the DNS" is not the reply.
+- The follow-up asks for a refusal reason. If cto.new answers only "still looking", that
+  is the answer: nothing has been published, and the ask in step 1 stands.
 
 ## After it is back
 
