@@ -590,16 +590,13 @@ screenshots (A4) — they are evidence for this fix, not listings.
 ### Not verified
 
 Android compiles (`:app:compileDebugJavaWithJavac`, exit 0) but **has never been run**:
-no device or emulator here, and the new workflow builds an APK rather than launching
-one. Its detection is Capacitor's own, so the untested parts are the recovery poll, the
+no device or emulator here, and §8's workflow builds an APK rather than launching one.
+Its detection is Capacitor's own, so the untested parts are the recovery poll, the
 `onResume` re-check and the 401/403 client swap — the last of which can only be
 confirmed by pointing the app at a page that returns 401 or 403.
 
-What `.github/workflows/android.yml` does cover, on every push and pull request, is
-regression: it runs `npm ci`, `npx cap sync android` and
-`./gradlew :app:assembleDebug`, then uploads `app-debug.apk` as an artifact. A Java or
-manifest break, or a bad `www/` copy, fails the push instead of waiting for a local
-build. It needs no signing key or secret.
+The workflow that builds the APK on every push is §8, which also records its runs and
+what green there does and does not cover.
 
 ### Acceptance checks, when the site is back
 
