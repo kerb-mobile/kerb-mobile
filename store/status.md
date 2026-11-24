@@ -44,6 +44,7 @@ follows. The order for the day itself is `submit-day.md`.
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (first photographed 21 Nov, 16:18 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` answer as they did on 20 Nov |
+| B16 | **The Apple Account password for the paid membership was posted in the chat** on 24 Nov 2026 | Me | Rotated, two-factor authentication confirmed on, and the new value in a password manager only — in no transcript, browser note, file or commit |
 
 **B15 re-checked 24 Nov 2026, 16:18 UTC — still down on the third day, nothing to record
 but the check.** Every route B15 names, plus the apex, `/delete-account` and
@@ -152,6 +153,17 @@ field that 404s is worse than an empty one.
 | A6 | Review notes still carry placeholders — the deletion path sentence and both demo logins | Me | Pasted from `review-notes.md` once B1 works |
 | A7 | Review contact details not chosen | Me | Name, monitored email and a phone that answers during US business hours |
 | A8 | App Privacy answers not entered in App Store Connect | Me | All nine data types entered as in `compliance.md` — collected, linked to identity, not tracked, purpose App Functionality — and the payment processor confirmed as Stripe so the Payment Info row is right. Usage Data and Diagnostics stay "No" |
+
+**B16 opened 24 Nov 2026.** The password for the Apple Account that holds the membership was
+pasted into the chat that drafts these documents. It is deliberately **not** recorded here:
+this repository is public, and a transcript is the same thing as a leak. Rotate it now,
+confirm two-factor authentication is on (the enrolment requires it, and the account holder
+controls the certificate, the API key and the app record), and keep the new value in a
+password manager. This is B11's failure mode a second time, in a more valuable account.
+
+The CI never needs that password. What it needs is a 10-character **Team ID** — not a
+secret, safe to paste anywhere — and a **Team API key**, both of which belong in GitHub
+repository secrets and nowhere else. See `a1b-individual-enrolment.md`.
 
 **A1 closed 24 Nov 2026 — the membership is paid, as an individual.** The owner confirmed a
 sole proprietorship trading as Kerb under a personal name, so this is the route Apple
