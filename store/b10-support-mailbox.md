@@ -6,7 +6,7 @@ at it, and `safety-and-licensing.md` §9 will publish it as the complaint route.
 (the review contact) and every support link a reviewer follows. None of it needs the site
 to be serving.
 
-## What is already in place — checked 24 Nov 2026, 16:35 UTC
+## What is already in place — checked 24 Nov 2026, 16:35 UTC, DKIM at 16:59 UTC
 
 | Record | Value | What it means |
 |---|---|---|
@@ -14,7 +14,7 @@ to be serving.
 | SPF | `v=spf1 include:_spf.google.com ~all` | Google is authorised to send as the domain |
 | Other TXT | `google-site-verification=XMQetYcW…` | Someone already verified the domain in a Google account |
 | DMARC | none — `_dmarc.kerbgo.com` returns nothing | The gap this note closes last |
-| DKIM | **not checked** — `google._domainkey.kerbgo.com` was not queried | Confirm before generating a key, or you will overwrite one |
+| DKIM | `google._domainkey` TXT: `v=DKIM1;k=rsa;p=MIIBIjAN…` (TTL 300); no `default`, `selector1`, `s1` or `k1` selector exists | Google already signs outbound mail as `kerbgo.com`. Do **not** generate a new key |
 
 So this is creating a user in a tenant that already exists, not setting up mail. Nothing in
 the MX or SPF records needs to change, and they should not: they are correct, and the
@@ -79,10 +79,17 @@ Keep the two `Authentication-Results` header lines and the date; they are the ev
 the B10 row in `status.md`, whose done-when is "created and receiving mail". Paste the
 headers into `status.md` (or a run log) rather than describing them.
 
-## 3. DKIM — check before you generate
+## 3. DKIM — already published, so do not regenerate
 
-If `google._domainkey.kerbgo.com` already has a TXT record, DKIM is set up and outbound
-mail from the domain is already signed: skip this. If it is empty:
+`google._domainkey.kerbgo.com` answers with a `v=DKIM1;k=rsa` TXT record, so DKIM is already
+signing outbound mail for the domain and there is nothing to do here. Generating a new key
+would replace the selector: until the new record is live and authentication has started,
+mail is signed with a key receivers cannot verify, which is worse than sending with none.
+
+The one thing still worth checking is that **Authenticate email** in the admin console shows
+authentication as started — a published record that was never switched on signs nothing.
+
+If the record ever has to be recreated:
 
 1. `admin.google.com` → **Apps → Google Workspace → Gmail → Authenticate email**.
 2. Generate a **2048-bit** key for `kerbgo.com`.
