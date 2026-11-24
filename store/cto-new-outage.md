@@ -2,8 +2,9 @@
 
 **Raised 21 Nov 2026, 16:45 UTC.** The live site stopped serving; every route answers
 Cloudflare's 32-byte `There is no site at this address`. Tracked as B15 in `status.md`.
-Send the block below to cto.new as-is. Re-verified before sending: still 404 at
-16:45:54Z, while `cto.new` itself answers 200.
+The block below is the report as sent on 21 Nov, re-verified before sending: still 404
+at 16:45:54Z, while `cto.new` itself answers 200. The follow-up further down carries the
+24 Nov re-check and is what to send now.
 
 ## What the evidence shows
 
@@ -13,10 +14,10 @@ Send the block below to cto.new as-is. Re-verified before sending: still 404 at
 | `/signin`, `/app`, `/terms`, `/privacy`, `/help`, apex `kerbgo.com` | same 404, same 32-byte body |
 | Headers | `server: cloudflare`, `cf-ray a5e12af2bdd05598-ATL`, `date 21 Nov 2026 16:45:57Z` |
 | DNS | `www.kerbgo.com` CNAME `sites.cto-new.app` → `104.21.42.107` / `172.67.205.64`; apex on the same pair — correct, no change needed |
-| Re-check | 22 Nov 2026, 17:38 UTC — unchanged a day on: `/`, `/signin`, `/app`, `/terms`, `/privacy`, `/help` on `www` **and** the apex `/` and `/privacy` all still 404 with the same 32-byte body and `cache-control: no-store`; `sites.cto-new.app/` too (checked 17:16Z). DNS unchanged, TLS valid. Per-request `cf-ray` values are in `status.md` — one ray per request, not one for the set. B15 still open; see the follow-up below |
+| Re-check | 24 Nov 2026, 16:18 UTC — unchanged on the third day: `/`, `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` on `www` **and** the apex `/` and `/privacy`, plus `sites.cto-new.app/`, all still 404 with the same 32-byte body and `cache-control: no-store`. The 22 Nov 17:38 UTC pass reached the same result. DNS unchanged (`sites.cto-new.app`, `104.21.42.107` / `172.67.205.64`), TLS valid. One `cf-ray` per request, not one for the set — the rays are listed in `status.md` and in the follow-up below |
 | Platform | `https://cto.new/` → 200, so the platform is up |
 | First seen | 21 Nov 16:18Z, in the iOS simulator run #4 screenshot (A4) |
-| Last seen failing | 21 Nov 16:45:54Z |
+| Last seen failing | 24 Nov 2026, 16:18:28Z |
 
 The response is what Cloudflare returns when a hostname points at a Pages/Workers
 project with no active production deployment, or one that no longer claims the
@@ -88,30 +89,36 @@ in store/site-changes.md: B4, the offer countdown printing raw seconds
 ("604798s"), and B5, "NEXT TURN — TO PICKUP" still showing after Start trip.
 ```
 
-## The follow-up (drafted 22 Nov 2026, 17:20 UTC — send if it is still 404)
+## The follow-up (drafted 22 Nov, refreshed 24 Nov 2026, 16:18 UTC — send if it is still 404)
 
 Send this only if a check just before sending still shows the 404. It supersedes the
 message above rather than repeating it, and it leads with the one diagnostic the first
 report could not make: `sites.cto-new.app` itself 404s, so the deployment does not exist
-and re-attaching domains cannot help.
+and re-attaching domains cannot help. The 24 Nov pass replaced the 22 Nov evidence — the
+same ten URLs, the same 32-byte body, a ray for each request, and exactly 72 hours since
+the error was first photographed.
 
 ```
-Subject: kerbgo.com has now been down over 24 hours — the deployment is missing, not
+Subject: kerbgo.com has now been down 72 hours — the deployment is still missing, not
           the domain
 
-Following up on yesterday's report (sent 21 Nov 16:45Z). It is still down: first seen
-21 Nov 16:18Z, still failing 22 Nov 17:20Z. Both store apps load this URL, so App
-Review is blocked on it for the second day.
+This follows my report of 21 Nov 16:45Z. Nothing has changed: first seen down
+21 Nov 16:18Z, still failing 24 Nov 16:18Z — 72 hours exactly, the third day. Both store
+apps load this URL, so App Review is blocked on it for the third day, and I need to know
+today whether a production deployment exists behind the project at all.
 
-EVIDENCE (checked from outside, Sun 22 Nov 2026, 17:20Z)
+EVIDENCE (checked from outside, Tue 24 Nov 2026, 16:18Z — one cf-ray per request)
 
 - https://www.kerbgo.com/  -> HTTP 404, content-type: text/plain;charset=utf-8,
-  32-byte body: "There is no site at this address"
-- Same on /signin, /app, /terms, /privacy and /help
-- Apex https://kerbgo.com/ and https://kerbgo.com/privacy -> same 404, same body
-- Headers: server: cloudflare, cache-control: no-store,
-  cf-ray a5e99adaaff16779-ATL, date Sun, 22 Nov 2026 17:20:27 GMT
-- https://sites.cto-new.app/ -> the SAME 404 and the same body
+  32-byte body: "There is no site at this address", cache-control: no-store,
+  cf-ray a5f9bab76a3dc36f-ATL, date Tue, 24 Nov 2026 16:18:24 GMT
+- Same 404, same body, same no-store on /signin a5f9baba1b29b577-ATL,
+  /app a5f9babc9973dec9-ATL, /terms a5f9babf5b68d7da-ATL,
+  /privacy a5f9bac0db45b0ac-ATL, /help a5f9bac35efd1eff-ATL and
+  /delete-account a5f9bac4da1bb4be-ATL
+- Apex https://kerbgo.com/ a5f9bac81bb1eb0c-ATL and https://kerbgo.com/privacy
+  a5f9bacb8bc34724-ATL -> same 404, same body
+- https://sites.cto-new.app/ a5f9bace380bc102-ATL -> the SAME 404 and the same body
 - DNS is unchanged and correct: www.kerbgo.com is a CNAME to sites.cto-new.app,
   resolving to 104.21.42.107 / 172.67.205.64; the apex is on the same pair. TLS
   completes on both hostnames.
@@ -141,12 +148,12 @@ PLEASE
 
 HOW I WILL VERIFY
 
-/, /signin, /app, /terms, /privacy, /help and the apex / each returning 200 with real
-HTML rather than a 32-byte text body — then the apps come back on their own with no
-rebuild, and I re-take the screenshots the outage has been blocking.
+/, /signin, /app, /terms, /privacy, /help, /delete-account and the apex / each returning
+200 with real HTML rather than a 32-byte text body — then the apps come back on their own
+with no rebuild, and I re-take the screenshots the outage has been blocking.
 ```
 
-## Two cautions before you send
+## Cautions before you send
 
 - The quota explanation is labelled as a read, not a fact. Only the symptom is
   observable from here; if cto.new knows otherwise, they should say so rather than
@@ -156,9 +163,16 @@ rebuild, and I re-take the screenshots the outage has been blocking.
   adds the `sites.cto-new.app` check precisely so "fix the DNS" is not the reply.
 - The follow-up asks for a refusal reason. If cto.new answers only "still looking", that
   is the answer: nothing has been published, and the ask in step 1 stands.
+- The hour count is anchored to the first photograph, 21 Nov 16:18Z, not to the 16:45Z
+  report, so 24 Nov 16:18Z is exactly 72 hours. A later send changes the number in the
+  subject and the opening line only — the evidence block is the 16:18Z pass and should
+  not be re-dated to match the send.
+- If any route answers before you send this, do not send it. Probe first and record the
+  restore time against B15 instead; the follow-up exists only for a still-404 check.
 
 ## After it is back
 
-Re-run the six routes plus `/` and record the restore time against B15 in `status.md`,
-then re-take the A4 captures — the simulator artifact from run #4 is a photograph of
-this outage.
+Re-run the ten URLs in the follow-up's evidence block and record the restore time against
+B15 in `status.md`; `/delete-account` answering 200 again is also what unblocks G6. Then
+re-take the A4 captures — the simulator artifact from run #4 is a photograph of this
+outage.
