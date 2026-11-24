@@ -48,9 +48,14 @@ review is complete.
 - **Approved**, not pending: the approval step a person performs has been done,
   and licence, registration and insurance are uploaded **and approved**.
   Documents must be synthetic images — no real licence, plate or address.
-- **Vehicle**: `2019 Toyota Camry`, silver, plate `DEMO123`, four doors, four
-  seats. Present on the vehicle record so the dashboard's own vehicle line is not
-  blank.
+- **Vehicle**: whatever the demo driver's own record holds. On 19 Nov 2026 that
+  was a **`Kia K4`** (`site-changes.md`, signed in as the demo driver); these notes
+  used to name a `2019 Toyota Camry`, silver, plate `DEMO123`, which production
+  never had. Do not paste a model from memory: fill the year, colour and plate
+  from the record at submission time, and confirm the plate is obviously
+  synthetic (`DEMO…`) — if it is not, change it on the record before review
+  rather than describing it here. The record must exist so the dashboard's own
+  vehicle line is not blank.
 - **One completed trip** in earnings history so the Earnings tab has a week and
   an all-time figure rather than zeros. Use the 75% split that the product
   actually applies.
@@ -245,6 +250,8 @@ Do this yourself the day before submitting, on a clean install, signed out:
 - The rider still has the saved place and the past trip.
 - The driver is still approved, still has the vehicle, and still has an offer
   waiting on `/driver` — a standing offer that quietly expired is the most likely
-  thing to break between setup and review.
+  thing to break between setup and review. Read the vehicle line while you are
+  there and paste its year, colour and plate into the notes, so the two cannot
+  drift apart again.
 - `KERBREVIEW` still zeroes the total and still bypasses the card requirement.
 - Neither account has a real card, real licence or real phone number attached.

@@ -42,7 +42,6 @@ follows.
 | B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail — MX and SPF already route `kerbgo.com` mail to Workspace (checked 24 Nov 2026), so the mailbox is the only missing part |
 | B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
-| B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (first photographed 21 Nov, 16:18 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` answer as they did on 20 Nov |
 
@@ -98,6 +97,14 @@ follow-up in `cto-new-outage.md` asks for a publish, not a payment.
 (`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is
 level with the remote again.
 
+**B13 closed 24 Nov 2026.** The review notes no longer name a vehicle production never had.
+The `2019 Toyota Camry`, silver, `DEMO123` line is gone, replaced by the demo driver's own
+record — a `Kia K4` when it was measured on 19 Nov 2026 — with year, colour and plate now
+copied from the record at submission instead of remembered. Nothing here needed the site,
+which is why it was the one open blocker that could be settled in the docs; the same edit
+adds a plate check, so a record whose plate is not obviously synthetic gets changed rather
+than described.
+
 ## While B15 is open — store work that does not need the site
 
 **Added 22 Nov 2026, 25 hours into the outage; checked row by row against the blockers
@@ -124,7 +131,7 @@ deployment.
 
 Blocked until the deployment serves: **A4** (the screenshots need the real site — the
 shells render the 404 instead), **B1, B2, B3, B12, G4** (every demo-login and walkthrough
-step happens on the live site), **B4–B7, B13, B14, R1, R3, R5, R6** (deployment or admin
+step happens on the live site), **B4–B7, B14, R1, R3, R5, R6** (deployment or admin
 view changes, or checks that need one), **A6** (the deletion sentence and both demo
 logins are pasted from `review-notes.md` once B1 works), **G6** (the field is only worth
 filling when `/delete-account` answers 200 again), `site-changes.md` §7's five acceptance
