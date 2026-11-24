@@ -96,7 +96,9 @@ message above rather than repeating it, and it leads with the one diagnostic the
 report could not make: `sites.cto-new.app` itself 404s, so the deployment does not exist
 and re-attaching domains cannot help. The 24 Nov pass replaced the 22 Nov evidence — the
 same ten URLs, the same 32-byte body, a ray for each request, and exactly 72 hours since
-the error was first photographed.
+the error was first photographed. It also carries an escalation ask — source, database
+export, account holder and a publish deadline — because three days of a publish-only
+request have produced no deployment.
 
 ```
 Subject: kerbgo.com has now been down 72 hours — the deployment is still missing, not
@@ -146,6 +148,28 @@ PLEASE
 4. Do not change DNS. The CNAME is correct; re-pointing it while the project serves
    nothing turns this 404 into a 522, which is harder to diagnose.
 
+WHAT I AM ASKING FOR, AND BY WHEN
+
+Publish, or tell me plainly that you cannot, by Wed 25 Nov 2026, 16:18Z — 96 hours after
+I first saw this. I am not asking for 96 hours of work. I am asking for one of two
+answers by then, because a recovery plan that does not depend on you takes weeks, and I
+cannot run it and wait at the same time.
+
+5. If you can publish, do it and send me the timestamp; I will confirm from outside
+   within minutes.
+6. If you cannot, or do not know when, send me these three things today:
+   a. the site's source — a repository URL I can clone, or an archive;
+   b. an export of the project's database, including the demo accounts, the standing
+      offer and the trip history;
+   c. the name of whoever holds the Cloudflare account this project deploys under, and
+      what it would take for me to be let into it, or for them to press publish.
+
+Those are the project's own assets, not a favour, so I am asking where they are rather
+than for anything unusual. If any of them are held personally rather than by the project,
+say that plainly instead of leaving it out — I would rather know this week than in two
+weeks. Nothing in this message is a complaint about the outage; it is me planning around
+it.
+
 HOW I WILL VERIFY
 
 /, /signin, /app, /terms, /privacy, /help, /delete-account and the apex / each returning
@@ -169,6 +193,17 @@ with no rebuild, and I re-take the screenshots the outage has been blocking.
   not be re-dated to match the send.
 - If any route answers before you send this, do not send it. Probe first and record the
   restore time against B15 instead; the follow-up exists only for a still-404 check.
+- The deadline is anchored to the same observation as the rest of the evidence: 24 Nov
+  16:18Z plus 96 hours, so Wed 25 Nov 16:18Z. If you move it, change the date but keep it
+  inside the message — a deadline quoted in chat and not in the request is not a deadline.
+- If cto.new replies with their own date, their date wins. Record it against B15 in
+  `status.md` and hold them to that instead of this one; the point is a date that exists,
+  not a date that is mine.
+- The source and database ask is not a negotiating position. This repository holds only
+  the iOS and Android shells (`capacitor.config.ts` loads the live site in the WebView),
+  so if cto.new cannot publish and cannot hand those over, nobody can restore the
+  deployment from here. Ask for them in the same message as the publish request, not
+  after the deadline passes.
 
 ## After it is back
 
