@@ -163,6 +163,11 @@ cannot run it and wait at the same time.
       offer and the trip history;
    c. the name of whoever holds the Cloudflare account this project deploys under, and
       what it would take for me to be let into it, or for them to press publish.
+7. Answer this one even if you answer nothing else: is the app on Blaxel still running,
+   and is its database still there? That is where the site was running from when I
+   checked it on 19 Nov — behind CloudFront, in front of Cloudflare — so that console is
+   the shortest route to both the data and a working deployment, and it is the one route
+   that does not depend on the publish button.
 
 Those are the project's own assets, not a favour, so I am asking where they are rather
 than for anything unusual. If any of them are held personally rather than by the project,

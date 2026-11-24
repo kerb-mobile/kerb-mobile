@@ -83,9 +83,11 @@ That is **72 h 0 m** since the error was first photographed (21 Nov, 16:18 UTC) 
 71 h 33 m since it was reported. There is no restore time to record, so B15 stays open
 and everything that needs a serving site — the A4 captures, the item 4 recovery check in
 `site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who have a
-follow-up refreshed with this same pass in `cto-new-outage.md`. What does not need the
-site is listed in the next section, because three days of waiting should not be three
-days without progress.
+follow-up refreshed with this same pass in `cto-new-outage.md`. If no publish arrives by
+the deadline that follow-up sets, `plan-b-recovery.md` is the recovery note: who holds the
+domain, the source, the data and the serving, and what each of them needs. What does not
+need the site is listed in the next section, because three days of waiting should not be
+three days without progress.
 
 **B8 closed 21 Nov 2026, 06:47 UTC.** The weekly quota reset on schedule, so the choice
 between waiting and paying the `$30.52` reset never needed making. The site was still
