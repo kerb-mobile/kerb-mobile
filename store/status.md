@@ -109,7 +109,7 @@ deployment.
 
 | Work | Why the site is not needed | Owner | Start with |
 |---|---|---|---|
-| A1 Apple Developer enrolment | Enrolment is an Apple account and payment flow | Me | Enrol today — it gates A2, A3 and every signed build |
+| A1 Apple Developer enrolment | Enrolment is an Apple account and payment flow, and the D‑U‑N‑S half waits on D&B's clock rather than on the site | Me | Start the lookup today — it gates A2, A3 and every signed build; order in `a1-apple-enrolment.md` |
 | A2 six repository secrets, plus *iOS release* with upload unticked | Signing runs in CI; it needs a Team ID, not a serving site | Me | After A1: set all six, then the dry run |
 | A3 App Store Connect app record | Record creation and every metadata field except screenshots | Me | Under the new Team ID: free, US only, 4+ |
 | A8 App Privacy answers | Nine data types from `compliance.md`; the only outside input is the Stripe confirmation | Me | Enter now; Usage Data and Diagnostics stay "No" |
@@ -120,7 +120,7 @@ deployment.
 | B10 `support@kerbgo.com` mailbox | Google Workspace, not Cloudflare — and the zone already delivers mail there: MX `1 smtp.google.com`, SPF `include:_spf.google.com` and a `google-site-verification` TXT, checked 24 Nov 2026. So this is creating a mailbox, not setting up mail. It also unblocks A7 | Me | Create it, send a test message, and add a DMARC record — `_dmarc.kerbgo.com` is empty today |
 | A7 review contact details | Needs B10's mailbox and a decision on the phone number | Me | Name and phone now, email after B10 |
 | R2, R4 paperwork | UZURV's written screening confirmation and the TNC-4 certificate travel by email as PDFs | Me | Request both; they are also two of the §9d inputs cto.new is missing |
-| R7 inputs | Kerb's registered legal name, state of formation and a publishable address are owner records | Me | Send them with the R2/R4 request |
+| R7 inputs | Kerb's registered legal name, state of formation and a publishable address are owner records — and the name is what A1's D‑U‑N‑S must match exactly | Me | Settle them first, they gate the D&B lookup; then send them with the R2/R4 request |
 
 Blocked until the deployment serves: **A4** (the screenshots need the real site — the
 shells render the 404 instead), **B1, B2, B3, B12, G4** (every demo-login and walkthrough
@@ -141,7 +141,7 @@ field that 404s is worse than an empty one.
 
 | # | Blocker | Owner | Done when |
 |---|---|---|---|
-| A1 | Apple Developer Program not enrolled | Me | Membership active and a Team ID exists |
+| A1 | Apple Developer Program not enrolled | Me | Membership active and a Team ID exists — requirements, prep and order in `a1-apple-enrolment.md` |
 | A2 | All six repository secrets absent | Me | `APPLE_TEAM_ID`, `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD` set, and a dry run of *iOS release* with upload unticked produces a signed `.ipa` |
 | A3 | App Store Connect app record not created | Me | App record for `com.kerbgo.app`, free, US only, age rating 4+ |
 | A4 | No usable screenshots — the simulator artifact has the right size but photographs the live outage, and carries an alpha channel | cto.new | Six scenes captured at `1206 × 2622`, opaque, showing the real app on a working site; the Play set at `1080 × 2160` cannot be reused |
@@ -249,7 +249,7 @@ permittee.
 | R4 | Coverage is UZURV's TNC-4 certificate, and it has not been checked for whether it covers trips booked through Kerb | Me | Copy of UZURV's certificate in hand, covering Kerb-booked trips at §32-7C-2(b)/(c) limits; then the coverage paragraph (Gate A) publishes |
 | R5 | No safety page, no 911 guidance, no report route, no zero-tolerance notice | cto.new | `/safety` live from `safety-and-licensing.md` §4 word for word, footer **Safety** link, and `/help` changed off "automated background checks are a later release" — all three in one deploy |
 | R6 | No live trip sharing | cto.new | `live-trip-sharing.md` checks 1–9 pass on a real trip; then `/safety` gains the sharing sentence |
-| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed. The clause is drafted in `safety-and-licensing.md` §9 (20 Nov 2026); it waits on the registered name, state of formation and a publishable address | Me + cto.new | Both pages carry the §9 text word for word: Kerb's operating entity named, and rides provided by UZURV Holdings, Inc. under TNC-4 |
+| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed. The clause is drafted in `safety-and-licensing.md` §9 (20 Nov 2026); it waits on the registered name, state of formation and a publishable address | Me + cto.new | Both pages carry the §9 text word for word: Kerb's operating entity named, and rides provided by UZURV Holdings, Inc. under TNC-4. The same registered name is what A1's D‑U‑N‑S has to match — see `a1-apple-enrolment.md` |
 | R8 | Site claims service across "the entire United States" with 51 service states and a $25 per-state-line fee; TNC permits are per-state (UZURV holds AL, MA and others, not all) | Me | Claim narrowed to permitted states, or permits obtained. Not a store blocker, but the same exposure as R1 |
 
 `/safety` ships **with** the §2b licensing paragraph — structure B is settled — and
