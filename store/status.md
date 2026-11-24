@@ -21,10 +21,10 @@ row here rather than adding a new section.
 > too** (B15). Fix this before anything else on this page, including the Apple
 > enrolment.
 
-**If you only do three things today:** get the site back (B15), enrol in the Apple
-Developer Program (longest lead time, gates every iOS step), and create the
-`support@kerbgo.com` mailbox (B10) — it gates A7 and every support link a reviewer
-follows.
+**If you only do three things today:** get the site back (B15), set the six Apple secrets
+and confirm the Team ID (A2 — the membership itself is paid as of 24 Nov 2026), and create
+the `support@kerbgo.com` mailbox (B10) — it gates A7 and every support link a reviewer
+follows. The order for the day itself is `submit-day.md`.
 
 ---
 
@@ -109,14 +109,12 @@ than described.
 
 **Added 22 Nov 2026, 25 hours into the outage; checked row by row against the blockers
 on 23 Nov 2026.** Only items with an open blocker row are here — B8 is closed, and
-`listing.md`'s copy is not a blocker of its own. None of this replaces A1: the Apple
-enrolment still has the longest lead time on the page and is still the first thing to do.
-The rest can be finished now and pasted into a console later, instead of waiting on the
-deployment.
+`listing.md`'s copy is not a blocker of its own. A1 is closed as of 24 Nov 2026, so what is
+left behind it is only A2 (the six secrets) and A3 (the app record). The rest can be
+finished now and pasted into a console later, instead of waiting on the deployment.
 
 | Work | Why the site is not needed | Owner | Start with |
 |---|---|---|---|
-| A1 Apple Developer enrolment | Enrolment is an Apple account and payment flow, and the D‑U‑N‑S half waits on D&B's clock rather than on the site | Me | Start the lookup today — it gates A2, A3 and every signed build; order in `a1-apple-enrolment.md` |
 | A2 six repository secrets, plus *iOS release* with upload unticked | Signing runs in CI; it needs a Team ID, not a serving site | Me | After A1: set all six, then the dry run |
 | A3 App Store Connect app record | Record creation and every metadata field except screenshots | Me | Under the new Team ID: free, US only, 4+ |
 | A8 App Privacy answers | Nine data types from `compliance.md`; the only outside input is the Stripe confirmation | Me | Enter now; Usage Data and Diagnostics stay "No" |
@@ -139,8 +137,8 @@ checks including the recovery test, and every other "as served" 200 check. **B11
 blocked too, and it is easy to miss: rotating the demo password happens in the admin view
 the outage took down.
 
-Two ordering notes. A1 and B10 are the only items with other work queued behind them, so
-they go first, and G1 has G3 behind it. And G6 is deliberately not in this table: the URL
+Two ordering notes. A2 and B10 are the only items with other work queued behind them, so
+they go first (A1 closed 24 Nov 2026), and G1 has G3 behind it. And G6 is deliberately not in this table: the URL
 field is only worth filling when `/delete-account` answers 200 again, because an entered
 field that 404s is worse than an empty one.
 
@@ -148,13 +146,21 @@ field that 404s is worse than an empty one.
 
 | # | Blocker | Owner | Done when |
 |---|---|---|---|
-| A1 | Apple Developer Program not enrolled | Me | Membership active and a Team ID exists — requirements, prep and order in `a1-apple-enrolment.md` |
 | A2 | All six repository secrets absent | Me | `APPLE_TEAM_ID`, `APPSTORE_KEY_ID`, `APPSTORE_ISSUER_ID`, `APPSTORE_PRIVATE_KEY`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD` set, and a dry run of *iOS release* with upload unticked produces a signed `.ipa` |
 | A3 | App Store Connect app record not created | Me | App record for `com.kerbgo.app`, free, US only, age rating 4+ |
 | A4 | No usable screenshots — the simulator artifact has the right size but photographs the live outage, and carries an alpha channel | cto.new | Six scenes captured at `1206 × 2622`, opaque, showing the real app on a working site; the Play set at `1080 × 2160` cannot be reused |
 | A6 | Review notes still carry placeholders — the deletion path sentence and both demo logins | Me | Pasted from `review-notes.md` once B1 works |
 | A7 | Review contact details not chosen | Me | Name, monitored email and a phone that answers during US business hours |
 | A8 | App Privacy answers not entered in App Store Connect | Me | All nine data types entered as in `compliance.md` — collected, linked to identity, not tracked, purpose App Functionality — and the payment processor confirmed as Stripe so the Payment Info row is right. Usage Data and Diagnostics stay "No" |
+
+**A1 closed 24 Nov 2026 — the membership is paid, as an individual.** The owner confirmed a
+sole proprietorship trading as Kerb under a personal name, so this is the route Apple
+requires: an individual enrolment needs no D‑U‑N‑S number and no public website, and the
+personal legal name becomes the seller on the App Store. What remains is not enrolment but
+console work — confirm **Program status Active** and copy the **Team ID** in *Membership
+details*, then A2's six secrets and A3's app record. The trade and the four checks are in
+`a1b-individual-enrolment.md`; `a1-apple-enrolment.md` is now the reference for the
+organisation route only.
 
 **A5 closed 20 Nov 2026, 21:00 UTC.** The B9 push at 20:48:31 ran both workflows on
 `777157e`: *iOS build* #14 `success` in 110 s, and *iOS simulator run* #3 `success` in
@@ -256,7 +262,7 @@ permittee.
 | R4 | Coverage is UZURV's TNC-4 certificate, and it has not been checked for whether it covers trips booked through Kerb | Me | Copy of UZURV's certificate in hand, covering Kerb-booked trips at §32-7C-2(b)/(c) limits; then the coverage paragraph (Gate A) publishes |
 | R5 | No safety page, no 911 guidance, no report route, no zero-tolerance notice | cto.new | `/safety` live from `safety-and-licensing.md` §4 word for word, footer **Safety** link, and `/help` changed off "automated background checks are a later release" — all three in one deploy |
 | R6 | No live trip sharing | cto.new | `live-trip-sharing.md` checks 1–9 pass on a real trip; then `/safety` gains the sharing sentence |
-| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed. The clause is drafted in `safety-and-licensing.md` §9 (20 Nov 2026); it waits on the registered name, state of formation and a publishable address | Me + cto.new | Both pages carry the §9 text word for word: Kerb's operating entity named, and rides provided by UZURV Holdings, Inc. under TNC-4. The same registered name is what A1's D‑U‑N‑S has to match — see `a1-apple-enrolment.md` |
+| R7 | `/terms` and `/privacy` identify no company, address or jurisdiction — the counterparty a rider is contracting with is unnamed. The clause is drafted in `safety-and-licensing.md` §9 (20 Nov 2026); it waits on the registered name, state of formation and a publishable address | Me + cto.new | Both pages carry the §9 text word for word: Kerb's operating entity named, and rides provided by UZURV Holdings, Inc. under TNC-4. A1 no longer waits on it — the enrolment is individual (`a1b-individual-enrolment.md`) — but the site itself still names no counterparty |
 | R8 | Site claims service across "the entire United States" with 51 service states and a $25 per-state-line fee; TNC permits are per-state (UZURV holds AL, MA and others, not all) | Me | Claim narrowed to permitted states, or permits obtained. Not a store blocker, but the same exposure as R1 |
 
 `/safety` ships **with** the §2b licensing paragraph — structure B is settled — and

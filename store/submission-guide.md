@@ -6,9 +6,10 @@ the review questions. Written to be followed top to bottom on submission day.
 **Status 20 Nov 2026:** the Android upload exists and is signed —
 `android/app/build/outputs/bundle/release/app-release.aab`, signed with the
 upload key created on 19 Nov. The iOS archive and upload run from GitHub Actions
-(`.github/workflows/ios-release.yml`), so no Mac with Xcode is needed — but the
-Apple Developer Program membership, the six repository secrets and the portal
-steps below are still outstanding.
+(`.github/workflows/ios-release.yml`), so no Mac with Xcode is needed. The Apple Developer
+Program membership is paid as an individual (24 Nov 2026 — `a1b-individual-enrolment.md`);
+the six repository secrets and the portal steps below are the work left on the Apple side,
+and `submit-day.md` is the order to do them in.
 
 The five site-side prerequisites have all landed on kerbgo.com and were verified
 live on 20 Nov 2026 — in-app account deletion, the driver dropoff attribute, the
@@ -31,7 +32,9 @@ is the move itself, and no store needs it:
 | `store/site-handover.md` | One page for whoever holds the cto.new access: the five site changes and the support-email field, each with the check that proves it landed, then the payments phase that follows review |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 | `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |
-| `store/a1-apple-enrolment.md` | Not needed on submission day, but it gates it: what Apple's organisation enrolment asks for, the order to do it in, the two decisions only the owner can make, and the D‑U‑N‑S lookup and request wording. Start it before anything else here |
+| `store/a1b-individual-enrolment.md` | The route actually taken: the membership is paid as an **individual** (sole proprietor, no D‑U‑N‑S), what that unblocks, what it gives up, and the four membership checks to confirm. Read before the Apple steps below |
+| `store/a1-apple-enrolment.md` | Kept for reference, not for this submission: what Apple's *organisation* enrolment asks for, the two decisions, and the D‑U‑N‑S wording — relevant only if Kerb incorporates and the account is converted |
+| `store/submit-day.md` | The click order for both consoles on the day: the go/no-go gate, Apple then Play, the rejection answers, and the rule that Play's 14-day closed test starts first |
 | `store/b10-support-mailbox.md` | B10's steps: creating `support@kerbgo.com` in the Workspace tenant whose MX and SPF are already in place, proving it receives mail, and the DMARC record to add |
 | `store/plan-b-recovery.md` | Not needed for submission: what recovering the site needs if cto.new misses the 25 Nov deadline, and who holds the domain, source, data and serving. Read only if the outage outlasts it |
 
@@ -131,7 +134,7 @@ Until then driver work ships as the `/driver` route, which needs no app release.
 | App name | Kerb |
 | Bundle ID / application ID | `com.kerbgo.app` |
 | Version | 1.0 (build 1 / versionCode 1) |
-| Category | Apple: Travel (secondary Lifestyle). Play: Travel & Local |
+| Category | Apple: Travel (secondary Lifestyle). Play: Maps & Navigation |
 | Price | Free |
 | Coverage | United States only — restrict availability to the US in both consoles |
 

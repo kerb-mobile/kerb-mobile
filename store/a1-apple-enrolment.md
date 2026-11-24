@@ -1,5 +1,11 @@
 # A1 — Apple Developer Program enrolment: what it asks for, and the order to do it in
 
+> **Superseded in part, 24 Nov 2026.** The owner enrolled as an **individual** — the route
+> Apple requires for a sole proprietor — and the membership is paid. Do not follow the
+> organisation order below. `a1b-individual-enrolment.md` is the page for the route actually
+> taken; this one stays as the reference for what an organisation enrolment would want, if
+> Kerb ever incorporates and the account is converted.
+
 **Drafted 24 Nov 2026.** A1 is the longest lead time you own: it gates A2 (the six CI
 secrets), A3 (the app record) and every signed iOS build, and none of it waits on the site
 coming back — with one exception, recorded under *Where this collides with B15*. Apple's
