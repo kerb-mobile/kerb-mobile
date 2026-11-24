@@ -31,6 +31,9 @@ is the move itself, and no store needs it:
 | `store/site-handover.md` | One page for whoever holds the cto.new access: the five site changes and the support-email field, each with the check that proves it landed, then the payments phase that follows review |
 | `store/submission-guide.md` | This file: console fields, build commands, order of work |
 | `store/site-migration.md` | Not needed for submission: the plan for moving the site off cto.new, and what its payment, hashing, email and image code needs first. Do not start it during a review |
+| `store/a1-apple-enrolment.md` | Not needed on submission day, but it gates it: what Apple's organisation enrolment asks for, the order to do it in, the two decisions only the owner can make, and the D‑U‑N‑S lookup and request wording. Start it before anything else here |
+| `store/b10-support-mailbox.md` | B10's steps: creating `support@kerbgo.com` in the Workspace tenant whose MX and SPF are already in place, proving it receives mail, and the DMARC record to add |
+| `store/plan-b-recovery.md` | Not needed for submission: what recovering the site needs if cto.new misses the 25 Nov deadline, and who holds the domain, source, data and serving. Read only if the outage outlasts it |
 
 ## One app for riders and drivers — decided 19 Nov 2026
 
