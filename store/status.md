@@ -39,7 +39,7 @@ follows.
 | B5 | Turn label still `NEXT TURN — TO PICKUP` after *Start trip* | cto.new | Points at the drop-off once the trip has started |
 | B6 | `I've arrived` unusable without a position fix | cto.new | Fixed, or documented as a location requirement in the review notes |
 | B7 | Standing-offer seeder can create two identical offers 91 ms apart | cto.new | Exactly one pending offer per driver, every time |
-| B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail |
+| B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail — MX and SPF already route `kerbgo.com` mail to Workspace (checked 24 Nov 2026), so the mailbox is the only missing part |
 | B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
@@ -117,7 +117,7 @@ deployment.
 | G5 Data safety, content rating, target audience | Answers come from `compliance.md`; the two `[confirm]` items are owner decisions, not site facts | Me | Enter them, and settle the payment-processor and interaction answers |
 | G3 AAB upload | The signed AAB already exists: `android/app/build/outputs/bundle/release/app-release.aab` | Me | Upload once G1 exists |
 | G2 tester recruitment | Twelve addresses are an email-and-spreadsheet task; opting in needs the track, but the 14-day clock only starts then | Unstarted | Collect the twelve now |
-| B10 `support@kerbgo.com` mailbox | Google Workspace, not Cloudflare; it also unblocks A7 | Me | Create it and send a test message |
+| B10 `support@kerbgo.com` mailbox | Google Workspace, not Cloudflare — and the zone already delivers mail there: MX `1 smtp.google.com`, SPF `include:_spf.google.com` and a `google-site-verification` TXT, checked 24 Nov 2026. So this is creating a mailbox, not setting up mail. It also unblocks A7 | Me | Create it, send a test message, and add a DMARC record — `_dmarc.kerbgo.com` is empty today |
 | A7 review contact details | Needs B10's mailbox and a decision on the phone number | Me | Name and phone now, email after B10 |
 | R2, R4 paperwork | UZURV's written screening confirmation and the TNC-4 certificate travel by email as PDFs | Me | Request both; they are also two of the §9d inputs cto.new is missing |
 | R7 inputs | Kerb's registered legal name, state of formation and a publishable address are owner records | Me | Send them with the R2/R4 request |

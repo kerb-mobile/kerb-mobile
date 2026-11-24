@@ -100,16 +100,19 @@ a republish with a new excuse.
 
 - The source, database and account asks are already in the follow-up in
   `cto-new-outage.md`; nothing extra needs sending.
-- Add one question when you send it: **is the Blaxel app, and its database, still
-  running?** If it is, that console is the shortest route to both the data and a working
-  deployment, and it does not depend on cto.new's publish button.
+- The Blaxel question is already item 7 of the message, so nothing needs adding to it.
+  **Is the Blaxel app, and its database, still running?** If the answer is yes, ask for a
+  console login in the same thread rather than waiting for the deadline — that console is
+  the shortest route to both the data and a working deployment, and it does not depend on
+  cto.new's publish button.
 - Confirm you can log in to the Gandi account today, and that 2FA is set up on it. That is
   the one asset that can be verified without waiting, and it decides whether the cutover
   is a ten-minute DNS change or a registrar recovery case. `clientTransferProhibited` is
   normal and harmless; losing the account is not.
-- Set up DMARC before any transactional email moves: SPF and DKIM already point at Google
-  Workspace, and `_dmarc.kerbgo.com` is currently empty, which is exactly the gap that puts
-  password resets in spam after a provider change.
+- Add a DMARC record before any transactional email moves: MX and SPF already point at
+  Google Workspace (checked 24 Nov 2026; the DKIM selectors were not checked), and
+  `_dmarc.kerbgo.com` is empty — the gap that puts password resets in spam after a
+  provider change.
 
 ## Open questions this note cannot answer
 
