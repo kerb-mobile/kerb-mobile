@@ -1,6 +1,6 @@
 # Store submission — open blockers
 
-**Status page, 23 Nov 2026, 17:09 UTC.** Every blocker still open, who owns it,
+**Status page, 24 Nov 2026, 16:18 UTC.** Every blocker still open, who owns it,
 and what "done" looks like. Evidence for anything dated lives in
 `site-changes.md`; this page is only the index. When an item closes, update the
 row here rather than adding a new section.
@@ -12,7 +12,7 @@ row here rather than adding a new section.
 | **Unstarted** | Required, and nobody has begun it. |
 
 > **The live site has answered 404 since at least 21 Nov 2026, 16:18 UTC, and was
-> still 404 at 23 Nov 17:09 UTC.** `https://www.kerbgo.com/` returns
+> still 404 at 24 Nov 16:18 UTC.** `https://www.kerbgo.com/` returns
 > Cloudflare's 32-byte `There is no site at this address` with HTTP 404 and
 > `text/plain`, on every route checked — `/`, `/terms`, `/privacy`, `/help`, `/signin`,
 > `/app`, `/delete-account`. `www.kerbgo.com` is a CNAME to `sites.cto-new.app`, and
@@ -46,8 +46,8 @@ follows.
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (first photographed 21 Nov, 16:18 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` answer as they did on 20 Nov |
 
-**B15 re-checked 23 Nov 2026, 17:09 UTC — still down, nothing to record but the
-check.** Every route B15 names, plus the apex, `/delete-account` and
+**B15 re-checked 24 Nov 2026, 16:18 UTC — still down on the third day, nothing to record
+but the check.** Every route B15 names, plus the apex, `/delete-account` and
 `sites.cto-new.app/` itself, answers the same way: HTTP 404,
 `text/plain;charset=utf-8`, 32 bytes, body `There is no site at this address`, with
 `server: cloudflare` and `cache-control: no-store`. One `cf-ray` per request, in the
@@ -55,23 +55,23 @@ order they were made — each ray is the evidence for that request alone, not fo
 
 | Request | Status | `cf-ray` | `date` |
 |---|---|---|---|
-| `https://www.kerbgo.com/` | 404 | `a5f1c777685ba404-ATL` | 17:09:00Z |
-| `https://www.kerbgo.com/signin` | 404 | `a5f1c77a0a8d3498-ATL` | 17:09:01Z |
-| `https://www.kerbgo.com/app` | 404 | `a5f1c77c8b9ecea1-ATL` | 17:09:01Z |
-| `https://www.kerbgo.com/terms` | 404 | `a5f1c77f78737c24-ATL` | 17:09:02Z |
-| `https://www.kerbgo.com/privacy` | 404 | `a5f1c7828921f206-ATL` | 17:09:02Z |
-| `https://www.kerbgo.com/help` | 404 | `a5f1c7840e7e293e-ATL` | 17:09:02Z |
-| `https://www.kerbgo.com/delete-account` | 404 | `a5f1c785abdad96c-ATL` | 17:09:03Z |
-| `https://kerbgo.com/` (apex) | 404 | `a5f1c7889aa04be6-ATL` | 17:09:03Z |
-| `https://kerbgo.com/privacy` (apex) | 404 | `a5f1c78b3f8f0536-ATL` | 17:09:04Z |
-| `https://sites.cto-new.app/` | 404 | `a5f1c78decf75560-ATL` | 17:09:04Z |
+| `https://www.kerbgo.com/` | 404 | `a5f9bab76a3dc36f-ATL` | 16:18:24Z |
+| `https://www.kerbgo.com/signin` | 404 | `a5f9baba1b29b577-ATL` | 16:18:25Z |
+| `https://www.kerbgo.com/app` | 404 | `a5f9babc9973dec9-ATL` | 16:18:25Z |
+| `https://www.kerbgo.com/terms` | 404 | `a5f9babf5b68d7da-ATL` | 16:18:25Z |
+| `https://www.kerbgo.com/privacy` | 404 | `a5f9bac0db45b0ac-ATL` | 16:18:26Z |
+| `https://www.kerbgo.com/help` | 404 | `a5f9bac35efd1eff-ATL` | 16:18:26Z |
+| `https://www.kerbgo.com/delete-account` | 404 | `a5f9bac4da1bb4be-ATL` | 16:18:26Z |
+| `https://kerbgo.com/` (apex) | 404 | `a5f9bac81bb1eb0c-ATL` | 16:18:27Z |
+| `https://kerbgo.com/privacy` (apex) | 404 | `a5f9bacb8bc34724-ATL` | 16:18:28Z |
+| `https://sites.cto-new.app/` | 404 | `a5f9bace380bc102-ATL` | 16:18:28Z |
 
-The two earlier passes reached the same result and are not evidence for these requests.
-The 22 Nov 17:38 UTC pass covered the same eight routes; the 22 Nov 17:16–17:20 UTC pass
-captured headers on only three of them — `a5e99adaaff16779-ATL` for the apex `/`,
-`a5e99add4998bcdf-ATL` for the apex `/privacy`, `a5e99adfdfe5b048-ATL` for
-`www /privacy`. Each of those rays belongs to its own request; the table above is the
-citable record.
+The three earlier passes reached the same result and are not evidence for these requests:
+the 23 Nov 17:09 UTC pass covered these same ten routes, the 22 Nov 17:38 UTC pass covered
+eight, and the 22 Nov 17:16–17:20 UTC pass captured headers on only three —
+`a5e99adaaff16779-ATL` for the apex `/`, `a5e99add4998bcdf-ATL` for the apex `/privacy`,
+`a5e99adfdfe5b048-ATL` for `www /privacy`. Each of those rays belongs to its own request;
+the table above is the citable record.
 
 `sites.cto-new.app/` returning the identical response again settles the diagnosis: the
 project has no deployment behind it, so this is not a detached custom domain and not
@@ -79,13 +79,13 @@ DNS. DNS is unchanged — re-checked the same minute, `www.kerbgo.com` CNAME
 `sites.cto-new.app`, and both hostnames resolve to `172.67.205.64` and
 `104.21.42.107`; TLS is valid on both.
 
-That is **48 h 51 m** since the error was first photographed (21 Nov, 16:18 UTC) and
-48 h 37 m since it was reported. There is no restore time to record, so B15 stays open
+That is **72 h 0 m** since the error was first photographed (21 Nov, 16:18 UTC) and
+71 h 33 m since it was reported. There is no restore time to record, so B15 stays open
 and everything that needs a serving site — the A4 captures, the item 4 recovery check in
 `site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who have a
-follow-up drafted for them in `cto-new-outage.md`. What does not need the site is listed
-in the next section, because two days of waiting should not be two days without
-progress.
+follow-up refreshed with this same pass in `cto-new-outage.md`. What does not need the
+site is listed in the next section, because three days of waiting should not be three
+days without progress.
 
 **B8 closed 21 Nov 2026, 06:47 UTC.** The weekly quota reset on schedule, so the choice
 between waiting and paying the `$30.52` reset never needed making. The site was still
