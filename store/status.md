@@ -40,7 +40,7 @@ follows. The order for the day itself is `submit-day.md`.
 | B6 | `I've arrived` unusable without a position fix | cto.new | Fixed, or documented as a location requirement in the review notes |
 | B7 | Standing-offer seeder can create two identical offers 91 ms apart | cto.new | Exactly one pending offer per driver, every time |
 | B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail — MX and SPF already route `kerbgo.com` mail to Workspace (checked 24 Nov 2026), so the mailbox is the only missing part |
-| B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
+| B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Retired rather than rotated: the driver moves to `demo.driver@kerbgo.com` with a new password in the consoles only, and the old account is disabled (`demo-driver-migration.md`) |
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
 | B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (first photographed 21 Nov, 16:18 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` answer as they did on 20 Nov |
@@ -171,7 +171,9 @@ a public repository, and the one a reviewer will be handed. Two consequences: ro
 Apple Account password now rather than at the next renewal, and move the demo driver onto
 a dedicated mailbox from B10 (`demo.driver@kerbgo.com`) with its own password, then update
 that line. A reviewer should never hold a credential that unlocks the account controlling
-the certificate, the API key and the app record.
+the certificate, the API key and the app record. The migration is worked out in
+`demo-driver-migration.md`: what to create, in what order, which lines change and when, and
+what removing an address from a public repository does and does not achieve.
 
 **A1 closed 24 Nov 2026 — the membership is paid, as an individual.** The owner confirmed a
 sole proprietorship trading as Kerb under a personal name, so this is the route Apple

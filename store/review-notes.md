@@ -15,7 +15,7 @@ Two accounts, both active at review time, both pre-verified.
 | Account | Sign-in | Must be able to |
 |---|---|---|
 | Rider | **UNVERIFIED — this login does not work.** `demo.rider@kerbgo.com`, password held outside this repository. Sign-in refused at `/signin` on 20 Nov 2026 at 17:47 and 17:51 UTC | See a saved place and a past trip; book a ride to $0.00 without a card. **Not demonstrated** — and the account is new, so it has no saved place and no past trip yet |
-| Driver | `[paste driver email]` / `[paste password]` | Land on an approved dashboard, see a pending offer, accept it, read the dropoff with Navigate |
+| Driver | **[not created yet]** target `demo.driver@kerbgo.com` — paste the console credentials only once that account signs in, is approved with all three documents, and holds the standing offer (`demo-driver-migration.md`) | Land on an approved dashboard, see a pending offer, accept it, read the dropoff with Navigate |
 
 **Sign in with both rows before submitting.** On 20 Nov 2026 the rider address
 above refused its password at `/signin` — the row is filled in because that is
@@ -102,7 +102,7 @@ review depend on it — the standing offer above is the deterministic path.
 | Rider saved place | Rider app → `Account → Saved places → Add` |
 | Rider past trip | Complete one trip with the demo pair through the product, not by inserting rows — receipts, chips and earnings aggregates are derived, and seeded rows tend to disagree with them |
 | Driver approval + documents | The existing admin approval step |
-| Driver vehicle | The vehicle form in driver onboarding |
+| Driver vehicle | The vehicle form in driver onboarding — on the replacement driver account (`demo-driver-migration.md`), not the owner's personal one |
 | Standing offer | The demo flag or admin re-seed action described above |
 | `KERBREVIEW` | The promo table added in `site-changes.md` §6 — no promo surface exists on the site today |
 
@@ -146,6 +146,9 @@ Rider demo account:    UNVERIFIED — demo.rider@kerbgo.com was refused by /sign
                        20 Nov 2026 (17:47 and 17:51 UTC). Do not publish this line
                        as a working login. Password: [paste at submission time]
 Driver demo account:   [email] / [password]
+                       Not created yet. The demo driver moves to a dedicated
+                       address (demo-driver-migration.md); do not publish this
+                       line until that account signs in and is approved.
 
 Notes:
 - The app targets iPhone only (TARGETED_DEVICE_FAMILY = 1).

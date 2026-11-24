@@ -63,7 +63,7 @@ Questions? Support is at kerbgo.com/help.
 **App Review Information**
 
 - Demo rider account: **[you]** email / password
-- Demo driver account: **[you]** email / password (approved, with a vehicle, and a **pending offer already waiting** on the dashboard, so the offer, the trip card and the Navigate button are all reachable without booking anything first)
+- Demo driver account: **[you]** email / password — **not created yet**; the target is `demo.driver@kerbgo.com`, and the credentials are pasted into the consoles only once it signs in and is approved (`store/demo-driver-migration.md`) (approved, with a vehicle, and a **pending offer already waiting** on the dashboard, so the offer, the trip card and the Navigate button are all reachable without booking anything first)
 - Enter both accounts in App Store Connect and the Play Console only. Do not paste the passwords into this file or commit them to the repository.
 - Notes: `Kerb is a native iOS app that presents kerbgo.com with native location, camera and navigation integration. Sign in with the demo rider account to book a ride; sign in with the demo driver account and accept the offer already waiting on the dashboard to reach the trip and the driver view. The "Navigate" control appears only on driver routes and offers Apple Maps, Google Maps, Waze, or Kerb's own map. Payment is by card for a physical transport service, processed on the web backend.`
 - Contact: **[you]** name, phone, email

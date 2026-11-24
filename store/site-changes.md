@@ -101,9 +101,12 @@ and a fresh `$14.80` offer was waiting afterwards, with
 - **The build team is out of quota.** cto.new reports its weekly limit reached on
   20 Nov 2026 at 17:47 UTC, usage resuming in about 13 hours, so it cannot create
   or repair the account until then.
-- **The demo driver login works** — `brian.ritter37@icloud.com`, the only
-  approved driver in production, signs in, lands on `/driver` and takes the
-  standing offer end to end (checks 5, 8 and 9). Trip reference `8C359807`.
+- **The demo driver login works** — the only approved driver in production signs
+  in, lands on `/driver` and takes the standing offer end to end (checks 5, 8 and
+  9). Trip reference `8C359807`. **Edited 24 Nov 2026:** the address is removed
+  from this line. It was the owner's personal Apple Account, and this repository
+  is public; the observation above is unchanged, and the account is being replaced
+  with a dedicated one (`demo-driver-migration.md`) rather than kept in a document.
 - **The standing-offer seeder races.** The build team caught two identical demo
   rides created 91 ms apart, each with its own pending offer, and retired the
   duplicate by hand. Until the fix ships a reviewer can land on a board carrying

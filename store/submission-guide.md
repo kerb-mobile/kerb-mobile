@@ -36,6 +36,7 @@ is the move itself, and no store needs it:
 | `store/a1-apple-enrolment.md` | Kept for reference, not for this submission: what Apple's *organisation* enrolment asks for, the two decisions, and the D‑U‑N‑S wording — relevant only if Kerb incorporates and the account is converted |
 | `store/submit-day.md` | The click order for both consoles on the day: the go/no-go gate, Apple then Play, the rejection answers, and the rule that Play's 14-day closed test starts first |
 | `store/b10-support-mailbox.md` | B10's steps: creating `support@kerbgo.com` in the Workspace tenant whose MX and SPF are already in place, proving it receives mail, and the DMARC record to add |
+| `store/demo-driver-migration.md` | Moving the demo driver off the owner's personal Apple Account to `demo.driver@kerbgo.com`: the three phases, what has to be rebuilt on the new account, the gates, and which line in which file changes when |
 | `store/plan-b-recovery.md` | Not needed for submission: what recovering the site needs if cto.new misses the 25 Nov deadline, and who holds the domain, source, data and serving. Read only if the outage outlasts it |
 
 ## One app for riders and drivers — decided 19 Nov 2026
