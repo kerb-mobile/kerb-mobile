@@ -165,6 +165,14 @@ The CI never needs that password. What it needs is a 10-character **Team ID** �
 secret, safe to paste anywhere — and a **Team API key**, both of which belong in GitHub
 repository secrets and nowhere else. See `a1b-individual-enrolment.md`.
 
+That address is also the **demo driver login** recorded at `site-changes.md` line 104 —
+so the same personal Apple Account is both the membership holder and a login written into
+a public repository, and the one a reviewer will be handed. Two consequences: rotate the
+Apple Account password now rather than at the next renewal, and move the demo driver onto
+a dedicated mailbox from B10 (`demo.driver@kerbgo.com`) with its own password, then update
+that line. A reviewer should never hold a credential that unlocks the account controlling
+the certificate, the API key and the app record.
+
 **A1 closed 24 Nov 2026 — the membership is paid, as an individual.** The owner confirmed a
 sole proprietorship trading as Kerb under a personal name, so this is the route Apple
 requires: an individual enrolment needs no D‑U‑N‑S number and no public website, and the
