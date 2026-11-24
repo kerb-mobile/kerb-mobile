@@ -1,6 +1,6 @@
 # Store submission — open blockers
 
-**Status page, 21 Nov 2026, 16:35 UTC.** Every blocker still open, who owns it,
+**Status page, 23 Nov 2026, 17:09 UTC.** Every blocker still open, who owns it,
 and what "done" looks like. Evidence for anything dated lives in
 `site-changes.md`; this page is only the index. When an item closes, update the
 row here rather than adding a new section.
@@ -8,22 +8,23 @@ row here rather than adding a new section.
 | Owner | Means |
 |---|---|
 | **Me** | Only you can do it — accounts, payments, consoles, passwords, pushes. |
-| **cto.new** | The site/build team. Was out of weekly quota until about 06:47 UTC on 21 Nov, so the reset has passed — but its deployment is not serving at all right now (B15), which comes before any of its other rows. |
+| **cto.new** | The site/build team. Its weekly quota reset on 21 Nov (B8), and its deployment is still not serving at all (B15), which comes before any of its other rows. |
 | **Unstarted** | Required, and nobody has begun it. |
 
-> **The live site is down since 21 Nov 2026, 16:32 UTC — still down at 22 Nov 17:38
-> UTC.** `https://www.kerbgo.com/` returns
+> **The live site has answered 404 since at least 21 Nov 2026, 16:18 UTC, and was
+> still 404 at 23 Nov 17:09 UTC.** `https://www.kerbgo.com/` returns
 > Cloudflare's 32-byte `There is no site at this address` with HTTP 404 and
 > `text/plain`, on every route checked — `/`, `/terms`, `/privacy`, `/help`, `/signin`,
-> `/app`. `www.kerbgo.com` is a CNAME to `sites.cto-new.app`, and that host answers 404
-> too, so this is the cto.new deployment not serving rather than a DNS fault. The shell
-> apps load this URL, so **the apps currently show this error too** (B15). Fix this
-> before anything else on this page, including the Apple enrolment.
+> `/app`, `/delete-account`. `www.kerbgo.com` is a CNAME to `sites.cto-new.app`, and
+> that host answers 404 too, so this is the cto.new deployment not serving rather than
+> a DNS fault. The shell apps load this URL, so **the apps currently show this error
+> too** (B15). Fix this before anything else on this page, including the Apple
+> enrolment.
 
 **If you only do three things today:** get the site back (B15), enrol in the Apple
-Developer Program (longest lead time, gates every iOS step), and decide the cto.new
-quota — the outage makes that decision urgent, because the demo state both reviews
-depend on sits on the same deployment.
+Developer Program (longest lead time, gates every iOS step), and create the
+`support@kerbgo.com` mailbox (B10) — it gates A7 and every support link a reviewer
+follows.
 
 ---
 
@@ -38,49 +39,58 @@ depend on sits on the same deployment.
 | B5 | Turn label still `NEXT TURN — TO PICKUP` after *Start trip* | cto.new | Points at the drop-off once the trip has started |
 | B6 | `I've arrived` unusable without a position fix | cto.new | Fixed, or documented as a location requirement in the review notes |
 | B7 | Standing-offer seeder can create two identical offers 91 ms apart | cto.new | Exactly one pending offer per driver, every time |
-| B8 | cto.new is out of weekly quota | Me | Decide: wait for ~06:47 UTC 21 Nov, or pay the `$30.52` reset |
 | B10 | `support@kerbgo.com` mailbox does not exist | Me | Created in Google Workspace and receiving mail |
 | B11 | Demo driver password was posted in the team chat and sits in that transcript | Me | Rotated, and the new value in both consoles instead of the old one |
 | B12 | Reviewer walkthrough never run end to end on a clean install | Unstarted | The twelve steps in `review-notes.md` walked on a fresh install, signed out, with no console errors |
 | B13 | Notes promise a `2019 Toyota Camry`, silver, `DEMO123`; production shows `Kia K4` | Me | Either the notes or the vehicle record changed so both say the same thing |
 | B14 | Demo driver's documents not confirmed approved | cto.new | Licence, registration and insurance approved in the admin view, not merely uploaded |
-| B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (21 Nov, 16:32 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy` and `/help` answer as they did on 20 Nov |
+| B15 | **Live site down** — every route returns Cloudflare 404 `There is no site at this address` (first photographed 21 Nov, 16:18 UTC) | cto.new | `https://www.kerbgo.com/` serves the real home page, and `/signin`, `/app`, `/terms`, `/privacy`, `/help` and `/delete-account` answer as they did on 20 Nov |
 
-**B15 re-checked 22 Nov 2026, 17:38 UTC — still down, nothing to record but the
-check.** Every route B15 names, plus the apex, answers the same way: HTTP 404,
+**B15 re-checked 23 Nov 2026, 17:09 UTC — still down, nothing to record but the
+check.** Every route B15 names, plus the apex, `/delete-account` and
+`sites.cto-new.app/` itself, answers the same way: HTTP 404,
 `text/plain;charset=utf-8`, 32 bytes, body `There is no site at this address`, with
 `server: cloudflare` and `cache-control: no-store`. One `cf-ray` per request, in the
 order they were made — each ray is the evidence for that request alone, not for the set:
 
 | Request | Status | `cf-ray` | `date` |
 |---|---|---|---|
-| `https://www.kerbgo.com/` | 404 | `a5e9b5543987b04a-ATL` | 17:38:32Z |
-| `https://www.kerbgo.com/signin` | 404 | `a5e9b5570a10bd3e-ATL` | 17:38:32Z |
-| `https://www.kerbgo.com/app` | 404 | `a5e9b55a2dc54519-ATL` | 17:38:32Z |
-| `https://www.kerbgo.com/terms` | 404 | `a5e9b55c9adda694-ATL` | 17:38:33Z |
-| `https://www.kerbgo.com/privacy` | 404 | `a5e9b55eff086125-ATL` | 17:38:33Z |
-| `https://www.kerbgo.com/help` | 404 | `a5e9b56199536762-ATL` | 17:38:33Z |
-| `https://kerbgo.com/` (apex) | 404 | `a5e9b5645d143670-ATL` | 17:38:34Z |
-| `https://kerbgo.com/privacy` (apex) | 404 | `a5e9b566f99953e1-ATL` | 17:38:34Z |
+| `https://www.kerbgo.com/` | 404 | `a5f1c777685ba404-ATL` | 17:09:00Z |
+| `https://www.kerbgo.com/signin` | 404 | `a5f1c77a0a8d3498-ATL` | 17:09:01Z |
+| `https://www.kerbgo.com/app` | 404 | `a5f1c77c8b9ecea1-ATL` | 17:09:01Z |
+| `https://www.kerbgo.com/terms` | 404 | `a5f1c77f78737c24-ATL` | 17:09:02Z |
+| `https://www.kerbgo.com/privacy` | 404 | `a5f1c7828921f206-ATL` | 17:09:02Z |
+| `https://www.kerbgo.com/help` | 404 | `a5f1c7840e7e293e-ATL` | 17:09:02Z |
+| `https://www.kerbgo.com/delete-account` | 404 | `a5f1c785abdad96c-ATL` | 17:09:03Z |
+| `https://kerbgo.com/` (apex) | 404 | `a5f1c7889aa04be6-ATL` | 17:09:03Z |
+| `https://kerbgo.com/privacy` (apex) | 404 | `a5f1c78b3f8f0536-ATL` | 17:09:04Z |
+| `https://sites.cto-new.app/` | 404 | `a5f1c78decf75560-ATL` | 17:09:04Z |
 
-An earlier pass at 17:16–17:20 UTC covered the same routes and reached the same result,
-but captured headers on only three of them — `a5e99adaaff16779-ATL` for the apex `/`,
+The two earlier passes reached the same result and are not evidence for these requests.
+The 22 Nov 17:38 UTC pass covered the same eight routes; the 22 Nov 17:16–17:20 UTC pass
+captured headers on only three of them — `a5e99adaaff16779-ATL` for the apex `/`,
 `a5e99add4998bcdf-ATL` for the apex `/privacy`, `a5e99adfdfe5b048-ATL` for
-`www /privacy`. Treat the table above as the citable record; the earlier rays belong to
-their own requests and to nothing else.
+`www /privacy`. Each of those rays belongs to its own request; the table above is the
+citable record.
 
-`sites.cto-new.app/` returned the identical response in that earlier pass, which settles
-the diagnosis: the project has no deployment behind it, so this is not a detached custom
-domain and not DNS. DNS is unchanged and fine — `www.kerbgo.com` CNAME
-`sites.cto-new.app` → `172.67.205.64` / `104.21.42.107`, the apex on the same pair, TLS
-valid on both hostnames.
+`sites.cto-new.app/` returning the identical response again settles the diagnosis: the
+project has no deployment behind it, so this is not a detached custom domain and not
+DNS. DNS is unchanged — re-checked the same minute, `www.kerbgo.com` CNAME
+`sites.cto-new.app`, and both hostnames resolve to `172.67.205.64` and
+`104.21.42.107`; TLS is valid on both.
 
-That is **25 h 20 m** since the error was first photographed (21 Nov, 16:18 UTC) and
-25 h 6 m since it was reported. There is no restore time to record, so B15 stays open
+That is **48 h 51 m** since the error was first photographed (21 Nov, 16:18 UTC) and
+48 h 37 m since it was reported. There is no restore time to record, so B15 stays open
 and everything that needs a serving site — the A4 captures, the item 4 recovery check in
-`site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who now have a
+`site-changes.md` §7, the reviewer walkthrough — still waits on cto.new, who have a
 follow-up drafted for them in `cto-new-outage.md`. What does not need the site is listed
-in the next section, because a day of waiting should not be a day without progress.
+in the next section, because two days of waiting should not be two days without
+progress.
+
+**B8 closed 21 Nov 2026, 06:47 UTC.** The weekly quota reset on schedule, so the choice
+between waiting and paying the `$30.52` reset never needed making. The site was still
+404 more than two days later, so quota is not what keeps the deployment offline — the
+follow-up in `cto-new-outage.md` asks for a publish, not a payment.
 
 **B9 closed 20 Nov 2026, 20:48 UTC.** `main` went to `origin/main` as `777157e`
 (`e2017e4..777157e`, 44 commits), with the store docs in it, and the repository is
@@ -88,7 +98,9 @@ level with the remote again.
 
 ## While B15 is open — store work that does not need the site
 
-**Added 22 Nov 2026, 25 hours into the outage.** None of this replaces A1: the Apple
+**Added 22 Nov 2026, 25 hours into the outage; checked row by row against the blockers
+on 23 Nov 2026.** Only items with an open blocker row are here — B8 is closed, and
+`listing.md`'s copy is not a blocker of its own. None of this replaces A1: the Apple
 enrolment still has the longest lead time on the page and is still the first thing to do.
 The rest can be finished now and pasted into a console later, instead of waiting on the
 deployment.
@@ -101,28 +113,27 @@ deployment.
 | A8 App Privacy answers | Nine data types from `compliance.md`; the only outside input is the Stripe confirmation | Me | Enter now; Usage Data and Diagnostics stay "No" |
 | G1 Play Console app record | Console only | Me | Create the app, free, US only |
 | G5 Data safety, content rating, target audience | Answers come from `compliance.md`; the two `[confirm]` items are owner decisions, not site facts | Me | Enter them, and settle the payment-processor and interaction answers |
-| G6 Play Data deletion URL | The field accepts the URL now | Me | Type `https://www.kerbgo.com/delete-account`, and re-check it returns 200 before submitting |
 | G3 AAB upload | The signed AAB already exists: `android/app/build/outputs/bundle/release/app-release.aab` | Me | Upload once G1 exists |
 | G2 tester recruitment | Twelve addresses are an email-and-spreadsheet task; opting in needs the track, but the 14-day clock only starts then | Unstarted | Collect the twelve now |
 | B10 `support@kerbgo.com` mailbox | Google Workspace, not Cloudflare; it also unblocks A7 | Me | Create it and send a test message |
 | A7 review contact details | Needs B10's mailbox and a decision on the phone number | Me | Name and phone now, email after B10 |
-| B8 the quota decision | The reset passed and the site is still gone, so paying the `$30.52` reset no longer addresses it | Me | Decide what the plan needs for a republish — the follow-up asks cto.new the same question |
 | R2, R4 paperwork | UZURV's written screening confirmation and the TNC-4 certificate travel by email as PDFs | Me | Request both; they are also two of the §9d inputs cto.new is missing |
 | R7 inputs | Kerb's registered legal name, state of formation and a publishable address are owner records | Me | Send them with the R2/R4 request |
-| `listing.md` copy | Store copy and keywords are text; nothing is served | Me | Finalise so it can be pasted in one pass later |
 
 Blocked until the deployment serves: **A4** (the screenshots need the real site — the
 shells render the 404 instead), **B1, B2, B3, B12, G4** (every demo-login and walkthrough
 step happens on the live site), **B4–B7, B13, B14, R1, R3, R5, R6** (deployment or admin
-view changes, or checks that need one), `site-changes.md` §7's five acceptance checks
-including the recovery test, and every "as served" check such as `/delete-account`
-returning 200. **B11** is blocked too, and it is easy to miss: rotating the demo password
-happens in the admin view the outage took down.
+view changes, or checks that need one), **A6** (the deletion sentence and both demo
+logins are pasted from `review-notes.md` once B1 works), **G6** (the field is only worth
+filling when `/delete-account` answers 200 again), `site-changes.md` §7's five acceptance
+checks including the recovery test, and every other "as served" 200 check. **B11** is
+blocked too, and it is easy to miss: rotating the demo password happens in the admin view
+the outage took down.
 
 Two ordering notes. A1 and B10 are the only items with other work queued behind them, so
-they go first; the rest can be interleaved. And do not type the URL into G6 and call it
-done — an entered field that 404s is worse than an empty one, so re-check it after B15
-closes.
+they go first, and G1 has G3 behind it. And G6 is deliberately not in this table: the URL
+field is only worth filling when `/delete-account` answers 200 again, because an entered
+field that 404s is worse than an empty one.
 
 ## Apple App Store
 
@@ -198,7 +209,7 @@ like this.
 | G3 | AAB not uploaded | Me | Signed AAB uploaded to a testing track (the asset already exists — see below) |
 | G4 | App access instructions not written into the console | Me | Both demo logins pasted, blocked on B1 and the driver password |
 | G5 | Data safety, content rating and target audience answers not submitted | Me | Answers from `compliance.md` entered, including its two `[confirm]` items: the payment processor, and whether riders and drivers can call or message each other (the IARC interaction question) |
-| G6 | Play Data deletion URL not entered | Me | `https://www.kerbgo.com/delete-account` in the field — it answers `200` now, so the older "leave it empty until it stops 404ing" advice no longer applies |
+| G6 | Play Data deletion URL not entered | Me | `https://www.kerbgo.com/delete-account` in the field once it answers `200` again — it did on 20 Nov 2026, but every route has 404'd since B15, so re-check before submitting |
 
 ---
 
@@ -257,8 +268,9 @@ what R2 and R4 are for.
 
 - **Play 9:16 promo set** (optional): the six `1080 × 2160` shots are legal but miss Play's
   recommendation layouts; a re-capture at `1080 × 1920` would qualify. Not needed to publish.
-- **Incoming-offer screenshot** (recommended, unblocked): the standing offer is live, so the
-  card can be photographed in one session — it is the strongest driver-side image.
+- **Incoming-offer screenshot** (recommended, waits on B15 like A4): the standing offer
+  was live on 20 Nov 2026, so the card can be photographed in one session once the site
+  serves again — it is the strongest driver-side image.
 - **Live-trip screenshot** (optional): needs a real booking accepted by a driver.
 - **Keystore backup**: `android/kerb-upload.jks` and its password exist in this working copy
   only; confirm the backup lives outside the repo before you rely on it.
@@ -268,9 +280,14 @@ what R2 and R4 are for.
 
 ## Already done — do not redo
 
-- **In-app account deletion, end to end** (§1): `/delete-account` returns `200` with
-  `cache-control: no-store`, the flow demands `DELETE` typed in, then clears the
-  session, redirects `/app` to sign-in and refuses the old credentials.
+Everything below was verified against the serving site before 21 Nov 2026. While B15
+is open the site answers 404 on every route, so none of it can be re-observed until
+the deployment is published again.
+
+- **In-app account deletion, end to end** (§1): as served on 20 Nov 2026,
+  `/delete-account` returned `200` with `cache-control: no-store`, the flow demanded
+  `DELETE` typed in, then cleared the session, redirected `/app` to sign-in and refused
+  the old credentials. The route is 404 with the rest of the site while B15 is open.
 - **`data-kerb-destination`** (§2): `1` from accept through arrive and start,
   carrying `334 W Magnolia Ave, Auburn, AL 36830`, and `0` after completion.
 - **Standing demo offer** (§4): waiting on `/driver` with nothing else acting,
@@ -292,7 +309,8 @@ what R2 and R4 are for.
   19 Nov (its backup is the one open question in *Open but not blocking*).
 - **Play creative**: 512 icon with alpha, 1024×500 feature graphic, six 1080×2160
   screenshots (legal, though not the 9:16 recommendation).
-- **Legal pages**: privacy policy (16 Nov 2026), support URL and marketing URL all live.
+- **Legal pages**: privacy policy (16 Nov 2026), support URL and marketing URL all live
+  on 20 Nov 2026.
 - **iOS build settings**: `ITSAppUsesNonExemptEncryption = false`, iPhone-only so
   no iPad screenshots are needed.
 
